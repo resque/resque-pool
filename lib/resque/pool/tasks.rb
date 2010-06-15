@@ -9,6 +9,7 @@ namespace :resque do
 
   desc "Launch a pool of resque workers (set RESQUE_POOL_CONFIG)"
   task :pool => :setup do
+    GC.respond_to?(:copy_on_write_friendly=) && GC.copy_on_write_friendly = true
     require 'resque/pool'
     Resque::Pool.new(RESQUE_POOL_CONFIG).start.join
   end
