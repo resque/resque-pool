@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 # require 'resque/pool/tasks'
 # and configure "resque:setup" task to start up the environment, initialize
 # RESQUE_POOL_CONFIG, and setup other resque hooks
