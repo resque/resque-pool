@@ -18,6 +18,27 @@ module Resque
       procline "(initialized)"
     end
 
+
+    # The `after_prefork` hook will be run in workers if you are using the
+    # preforking master worker to save memory. Use this hook to reload
+    # database connections and so forth to ensure that they're not shared
+    # among workers.
+    #
+    # Call with a block to set the hook.
+    # Call with no arguments to return the hook.
+    def self.after_prefork(&block)
+      block ? (@after_prefork = block) : @after_prefork
+    end
+
+    # Set the after_prefork proc.
+    def self.after_prefork=(after_prefork)
+      @after_prefork = after_prefork
+    end
+
+    def call_after_prefork!
+      self.class.after_prefork && self.class.after_prefork.call
+    end
+
     # Given a string, sets the procline ($0)
     # Procline is always in the format of:
     #   resque-pool-master: STRING
@@ -162,6 +183,7 @@ module Resque
       worker = create_worker(queues)
       pid = fork do
         log "*** Starting worker #{worker}"
+        call_after_prefork!
         worker.work(ENV['INTERVAL'] || 5) # interval, will block
       end
       workers[queues][pid] = worker
