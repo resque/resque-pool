@@ -15,6 +15,19 @@ module Resque
     def initialize(config)
       @pool_config = config.dup
       @workers = pool_config.keys.inject({}) {|h,k| h[k] = {}; h}
+      procline "(initialized)"
+    end
+
+    # Given a string, sets the procline ($0)
+    # Procline is always in the format of:
+    #   resque-pool-master: STRING
+    def procline(string)
+      $0 = "resque-pool-master: #{string}"
+    end
+
+    # TODO: make this use an actual logger
+    def log(message)
+      puts message
     end
 
     def init_self_pipe!
@@ -35,17 +48,19 @@ module Resque
           SIG_QUEUE << signal
           awaken_master
         else
-          puts "ignoring SIG#{signal}, queue=#{SIG_QUEUE.inspect}"
+          log "ignoring SIG#{signal}, queue=#{SIG_QUEUE.inspect}"
         end
       end
     end
 
     def start
+      procline("(starting)")
       init_self_pipe!
       init_sig_handlers!
       maintain_worker_count
-      puts "**** done in pool master #initialize"
-      puts "**** Pool contains PIDs: #{all_pids.inspect}"
+      procline("(started)")
+      log "**** done in pool master #initialize"
+      log "**** Pool contains PIDs: #{all_pids.inspect}"
       self
     end
 
@@ -54,9 +69,10 @@ module Resque
         reap_all_workers
         break if handle_sig_queue! == :break
         maintain_worker_count if SIG_QUEUE.empty?
+        procline("managing #{all_pids.inspect}")
       end
+      procline("(shutting down)")
       #stop # gracefully shutdown all workers on our way out
-      puts "master complete"
       #unlink_pid_safe(pid) if pid
     end
 
@@ -78,13 +94,13 @@ module Resque
           wpid, status = Process.waitpid2(-1, Process::WNOHANG)
           wpid or break
           #if reexec_pid == wpid
-            #puts "reaped #{status.inspect} exec()-ed"
+            #log "reaped #{status.inspect} exec()-ed"
             #self.reexec_pid = 0
             #self.pid = pid.chomp('.oldbin') if pid
             #proc_name 'master'
           #else
             worker = delete_worker(wpid) #and worker.tmp.close rescue nil
-            puts "reaped #{status.inspect} " \
+            log "reaped #{status.inspect} " \
                         "worker=#{worker.nr rescue 'unknown'}"
           #end
         end
@@ -145,7 +161,7 @@ module Resque
     def spawn_worker!(queues)
       worker = create_worker(queues)
       pid = fork do
-        puts "*** Starting worker #{worker}"
+        log "*** Starting worker #{worker}"
         worker.work(ENV['INTERVAL'] || 5) # interval, will block
       end
       workers[queues][pid] = worker
