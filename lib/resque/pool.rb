@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
 require 'fcntl'
+require 'yaml'
 
 module Resque
   class Pool
@@ -13,7 +14,14 @@ module Resque
     CHUNK_SIZE=(16 * 1024)
 
     def initialize(config)
-      @pool_config = config.dup
+      if config.respond_to? :keys
+        @pool_config = config.dup
+      else
+        @pool_config_file = config.to_s
+        log "**** loading config from #{@pool_config_file}"
+        @pool_config = YAML.load_file(@pool_config_file)
+      end
+      log "**** config: #{@pool_config.inspect}"
       @workers = pool_config.keys.inject({}) {|h,k| h[k] = {}; h}
       procline "(initialized)"
     end
@@ -59,7 +67,7 @@ module Resque
 
     def init_sig_handlers!
       QUEUE_SIGS.each { |sig| trap_deferred(sig) }
-      trap(:CHLD) { |_| awaken_master }
+      trap(:CHLD)     { |_| awaken_master }
     end
 
     # defer a signal for later processing in #join (master process)
@@ -94,6 +102,7 @@ module Resque
       end
       procline("(shutting down)")
       #stop # gracefully shutdown all workers on our way out
+      log "**** master complete"
       #unlink_pid_safe(pid) if pid
     end
 
@@ -106,6 +115,10 @@ module Resque
       when :TERM, :INT # immediate shutdown
         #stop(false)
         :break
+      when :HUP
+        log "**** reloading config"
+        @pool_config = YAML.load_file(@pool_config_file)
+        maintain_worker_count
       end
     end
 
@@ -121,7 +134,7 @@ module Resque
             #proc_name 'master'
           #else
             worker = delete_worker(wpid) #and worker.tmp.close rescue nil
-            log "reaped #{status.inspect} " \
+            log "**** reaped #{status.inspect} " +
                         "worker=#{worker.nr rescue 'unknown'}"
           #end
         end
@@ -155,9 +168,14 @@ module Resque
 
     def maintain_worker_count
       pool_config.each do |queues, count|
-        next if (delta = worker_delta_for(queues)) == 0
-        spawn_missing_workers_for(queues) if delta > 0
-        #TODO: quit_excess_workers_for(queues)
+        if worker_delta_for(queues) > 0
+          spawn_missing_workers_for(queues)
+        end
+      end
+      workers.each do |queues, workers|
+        if worker_delta_for(queues) < 0
+          quit_excess_workers_for(queues)
+        end
       end
     end
 
@@ -175,8 +193,14 @@ module Resque
       end
     end
 
+    def quit_excess_workers_for(queues)
+      workers[queues].each do |pid, worker|
+        Process.kill("HUP", pid)
+      end
+    end
+
     def worker_delta_for(queues)
-      pool_config[queues] - workers[queues].size
+      pool_config.fetch(queues, 0) - workers.fetch(queues, []).size
     end
 
     def spawn_worker!(queues)
@@ -184,8 +208,11 @@ module Resque
       pid = fork do
         log "*** Starting worker #{worker}"
         call_after_prefork!
+        QUEUE_SIGS.each {|sig| trap(sig, "DEFAULT") }
+        #SELF_PIPE.each {|io| io.close }
         worker.work(ENV['INTERVAL'] || 5) # interval, will block
       end
+      workers[queues] ||= {}
       workers[queues][pid] = worker
     end
 

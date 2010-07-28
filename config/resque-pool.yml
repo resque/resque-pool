@@ -1,0 +1,7 @@
+foo: 1
+bar: 1
+baz: 1
+"foo,bar": 2
+"foo,bar,baz": 4
+
+

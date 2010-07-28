@@ -11,7 +11,16 @@ namespace :resque do
   task :pool => :setup do
     GC.respond_to?(:copy_on_write_friendly=) && GC.copy_on_write_friendly = true
     require 'resque/pool'
-    Resque::Pool.new(RESQUE_POOL_CONFIG).start.join
+    config = if defined?(RESQUE_POOL_CONFIG)
+               RESQUE_POOL_CONFIG
+             elsif File.exist?("resque-pool.yml")
+               "resque-pool.yml"
+             elsif File.exist?("config/resque-pool.yml")
+               "config/resque-pool.yml"
+             else
+               raise "No configuration found. Please setup config/resque-pool.yml"
+             end
+    Resque::Pool.new(config).start.join
   end
 
 end
