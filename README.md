@@ -31,7 +31,7 @@ For example, to use resque-pool with rails, in `config/resque-pool.yml`:
 
     foo: 1
     bar: 2
-    foo,bar,baz: 4
+    "foo,bar,baz": 4
 
 and in `lib/tasks/resque.rake`:
 
@@ -121,11 +121,12 @@ process dies (for whatever reason) before them.
 TODO
 -----
 
-* figure out a good way to test this (preferably via cucumber or rspec)
-* clean up the code (I stole most of it from unicorn, and it's still a bit
-  bastardized)
 * do appropriate logging (e.g. all to one logfile, each queue to its own
   logfile, or each worker to its own logfile).  Logfile location must be
   configurable.
 * (optionally) daemonize, setting a PID file somewhere
+* recover gracefully from a malformed config file (on startup and HUP)
+* figure out a good way to test this (preferably via cucumber or rspec)
+* clean up the code (I stole most of it from unicorn, and it's still a bit
+  bastardized)
 * web interface for adding and removing workers (etc)
