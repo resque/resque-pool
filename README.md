@@ -112,14 +112,18 @@ The pool master responds to the following signals:
 So you should probably use a config file.  After a `HUP`, workers that are no
 longer needed will be gracefully shutdown via `QUIT`.
 
+Other Features
+--------------
+
+Workers will watch the pool master, and gracefully shutdown if the master
+process dies (for whatever reason) before them.
+
 TODO
 -----
 
 * figure out a good way to test this (preferably via cucumber or rspec)
 * clean up the code (I stole most of it from unicorn, and it's still a bit
   bastardized)
-* workers should watch for the pool master, and gracefully die if pool master
-  disapears (normally parent will send QUIT on exit)
 * do appropriate logging (e.g. all to one logfile, each queue to its own
   logfile, or each worker to its own logfile).  Logfile location must be
   configurable.

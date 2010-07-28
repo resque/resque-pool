@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
 require 'resque/pool/logging'
+require 'resque/pool/pooled_worker'
 require 'fcntl'
 require 'yaml'
 
@@ -288,12 +289,10 @@ module Resque
 
     def create_worker(queues)
       queues = queues.to_s.split(',')
-      worker = Resque::Worker.new(*queues)
+      worker = PooledWorker.new(*queues)
       worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
       worker.very_verbose = ENV['VVERBOSE']
       worker
-    rescue Resque::NoQueueError
-      abort "set QUEUE env var, e.g. $ QUEUE=critical,high rake resque:work"
     end
 
     # }}}
