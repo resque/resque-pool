@@ -12,7 +12,7 @@ class Resque::Pool
     end
 
     # this allows us to shutdown
-    def shutdown
+    def shutdown?
       @shutdown || pool_master_has_gone_away?
     end
 
@@ -29,7 +29,7 @@ class Resque::Pool
 
       loop do
         #### THIS IS THE ONLY LINE THAT IS CHANGED
-        break if shutdown
+        break if shutdown?
         #### THAT WAS THE ONLY LINE THAT WAS CHANGED
 
         if not @paused and job = reserve
