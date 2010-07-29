@@ -23,9 +23,9 @@ How to use
 -----------
 
 To configure resque-pool, you can either set `Resque::Pool.config` to a hash in
-your `resque:setup` or you can set the same config in either `resque-pool.yml`
-or `config/resque-pool.yml`.  To use resque-pool, require its rake tasks in
-your rake file, and call the resque:pool task.
+your `resque:pool:setup` or you can set the same config in either
+`resque-pool.yml` or `config/resque-pool.yml`.  To use resque-pool, require its
+rake tasks in your rake file, and call the resque:pool task.
 
 For example, to use resque-pool with rails, in `config/resque-pool.yml`:
 
@@ -36,43 +36,47 @@ For example, to use resque-pool with rails, in `config/resque-pool.yml`:
 and in `lib/tasks/resque.rake`:
 
     require 'resque/pool/tasks'
-    namespace :resque do
 
-      # preload the rails environment in the pool master
-      task :setup => :environment
-        # it's better to use a config file, but you can also config here:
-        # Resque::Pool.config = {"foo" => 1, "bar" => 1}
+    # this task will get called before resque:pool:setup
+    # preload the rails environment in the pool master
+    task "resque:setup" => :environment do
+      # generic worker setup, e.g. Hoptoad for failed jobs
+    end
 
-        # close any sockets or files in pool master
-        ActiveRecord::Base.connection.disconnect!
+    # preload the rails environment in the pool master
+    task "resque:pool:setup" do
+      # it's better to use a config file, but you can also config here:
+      # Resque::Pool.config = {"foo" => 1, "bar" => 1}
 
-        # and re-open them in the resque worker parent
-        Resque::Pool.after_prefork do |job|
-          ActiveRecord::Base.establish_connection
-        end
+      # close any sockets or files in pool master
+      ActiveRecord::Base.connection.disconnect!
 
-        # you could also re-open them in the resque worker child, using
-        # Resque.after_fork, but that probably isn't necessary, and
-        # Resque::Pool.after_prefork should be faster, since it won't run
-        # for every single job.
+      # and re-open them in the resque worker parent
+      Resque::Pool.after_prefork do |job|
+        ActiveRecord::Base.establish_connection
       end
+
+      # you could also re-open them in the resque worker child, using
+      # Resque.after_fork, but that probably isn't necessary, and
+      # Resque::Pool.after_prefork should be faster, since it won't run
+      # for every single job.
     end
 
 Then you can start the queues via:
 
-    rake resque:pool RAILS_ENV=production
+    rake resque:pool RAILS_ENV=production VERBOSE=1
 
 This will start up seven worker processes, one each looking exclusively at each
 of the foo, bar, and baz queues, and four workers looking at all queues in
 priority.  This is similar to if you ran the following:
 
-    rake resque:worker RAILS_ENV=production QUEUES=foo
-    rake resque:worker RAILS_ENV=production QUEUES=bar
-    rake resque:worker RAILS_ENV=production QUEUES=bar
-    rake resque:worker RAILS_ENV=production QUEUES=foo,bar,baz
-    rake resque:worker RAILS_ENV=production QUEUES=foo,bar,baz
-    rake resque:worker RAILS_ENV=production QUEUES=foo,bar,baz
-    rake resque:worker RAILS_ENV=production QUEUES=foo,bar,baz
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
 
 Resque already forks for its own child processes, giving two levels.  The pool
 master will stay around monitoring the resque worker parents, giving three
