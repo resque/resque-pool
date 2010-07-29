@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = "resque-pool"
-  s.version     = '0.0.4'
+  s.version     = '0.0.5-dev'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["nicholas a. evans", "Unicorn hackers"]
   s.email       = ["nick@ekenosen.net"]
