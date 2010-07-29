@@ -2,22 +2,22 @@ Resque Pool
 ===========
 
 Resque pool is a simple library for managing a pool of resque workers.  Given a
-configuration hash or a config file (resque-pool.yml or
-config/resque-pool.yml), it will manage your workers for you, starting up the
-appropriate number of workers for each.
+a config file (`resque-pool.yml` or `config/resque-pool.yml`) or a simple
+config hash, it will manage your workers for you, starting up the appropriate
+number of workers for each.
 
 Benefits
 ---------
 
 * Less memory consumption - If you are using Ruby Enterprise Edition, or any
-  ruby with copy-on-write safe garbage collection, this will save you a lot of
-  memory when you managing many workers.
-* Simpler (less) config - If you are using monit or god or an init script to
-  start up your workers, you can simply start up one pool, and it will manage
-  your workers for you.
+  ruby with copy-on-write safe garbage collection, this could save you a lot of
+  memory when you are managing many workers.
+* Simpler (less) config - If you are using monit or an init script to start up
+  your workers, you can simply start up one pool, and it will manage your
+  workers for you.
 * Faster startup - if you are starting many workers at once, you would normally
   have them competing for CPU as they load their environments.  Resque-pool can
-  load the environment once, and almost immediately fork all of your workers.
+  load the environment once and almost instantaneously fork all of the workers.
 
 How to use
 -----------
@@ -127,10 +127,16 @@ TODO
 
 * do appropriate logging (e.g. all to one logfile, each queue to its own
   logfile, or each worker to its own logfile).  Logfile location must be
-  configurable.
-* (optionally) daemonize, setting a PID file somewhere
+  configurable, but default to `log/resque-pool.log`.  Of course, since resque
+  "logs" by writing to $stdout, this is really no more than redirecting stdout
+  to the appropriate logfile.
+* (optionally) daemonize, setting a PID file somewhere.  configurable, of
+  course, but default to `tmp/pids/resque-pool.pid`.
 * recover gracefully from a malformed config file (on startup and HUP)
-* figure out a good way to test this (preferably via cucumber or rspec)
+* procline for malformed config file, graceful shutdown... and other states?
+* figure out a good automated way to test this (cucumber or rspec?)
 * clean up the code (I stole most of it from unicorn, and it's still a bit
-  bastardized)
-* web interface for adding and removing workers (etc)
+  bastardized); excessive use of vim foldmarkers are a code smell.
+* rdoc
+* incorporate resque-batchworker features? (v2.0)
+* web interface for adding and removing workers (etc) (v2.0)
