@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = "resque-pool"
-  s.version     = '0.0.3-dev'
+  s.version     = '0.0.4'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["nicholas a. evans", "Unicorn hackers"]
   s.email       = ["nick@ekenosen.net"]
@@ -18,6 +18,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec"
   s.add_dependency "resque", "=1.9.9"
 
-  s.files        = Dir.glob("lib/**/*")
+  s.files        = Dir.glob("lib/**/*") +%w[README.md]
   s.require_path = 'lib'
 end
