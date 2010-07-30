@@ -1,0 +1,8 @@
+# If you have redis running on the standard port on localhost, then you can
+# test out resque-pool in the examples directory by running:
+#
+#    rake --trace resque:pool
+#
+# And then you can poke and prod the various processes with signals and edit
+# the config file, etc.
+require 'resque/pool/tasks'

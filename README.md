@@ -2,9 +2,9 @@ Resque Pool
 ===========
 
 Resque pool is a simple library for managing a pool of resque workers.  Given a
-a config file (`resque-pool.yml` or `config/resque-pool.yml`) or a simple
-config hash, it will manage your workers for you, starting up the appropriate
-number of workers for each.
+a config file (`resque-pool.yml` or `config/resque-pool.yml`) or a config hash,
+it will manage your workers for you, starting up the appropriate number of
+workers for each.
 
 Benefits
 ---------
@@ -13,8 +13,8 @@ Benefits
   ruby with copy-on-write safe garbage collection, this could save you a lot of
   memory when you are managing many workers.
 * Simpler (less) config - If you are using monit or an init script to start up
-  your workers, you can simply start up one pool, and it will manage your
-  workers for you.
+  your workers, you can start up one pool, and it will manage your workers for
+  you.
 * Faster startup - if you are starting many workers at once, you would normally
   have them competing for CPU as they load their environments.  Resque-pool can
   load the environment once and almost instantaneously fork all of the workers.
