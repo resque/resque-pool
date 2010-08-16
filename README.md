@@ -22,18 +22,18 @@ Benefits
 How to use
 -----------
 
-To configure resque-pool, you can either set `Resque::Pool.config` to a hash in
-your `resque:pool:setup` or you can set the same config in either
-`resque-pool.yml` or `config/resque-pool.yml`.  To use resque-pool, require its
-rake tasks in your rake file, and call the resque:pool task.
+To configure resque-pool, you can use either `resque-pool.yml` or
+`config/resque-pool.yml`.  To use resque-pool, require its rake tasks in your
+rake file, and call the resque:pool task.
 
-The YAML file supports both using root level defaults as well as environment specific overrides.
-For example, to use resque-pool with rails, in `config/resque-pool.yml`:
+The YAML file supports both using root level defaults as well as environment
+specific overrides.  For example, to use resque-pool with rails, in
+`config/resque-pool.yml`:
 
     foo: 1
     bar: 2
     "foo,bar,baz": 4
-    
+
     production:
       "foo,bar,baz": 10
 
@@ -49,9 +49,6 @@ and in `lib/tasks/resque.rake`:
 
     # preload the rails environment in the pool master
     task "resque:pool:setup" do
-      # it's better to use a config file, but you can also config here:
-      # Resque::Pool.config = {"foo" => 1, "bar" => 1}
-
       # close any sockets or files in pool master
       ActiveRecord::Base.connection.disconnect!
 
@@ -144,3 +141,8 @@ TODO
 * rdoc
 * incorporate resque-batchworker features? (v2.0)
 * web interface for adding and removing workers (etc) (v2.0)
+
+Contributors
+-------------
+
+* John Schult (config file can be split by environment)

@@ -50,13 +50,9 @@ module Resque
     # Config: class methods to start up the pool using the default config {{{
 
     @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
-    class << self; attr_accessor :config, :config_files; end
+    class << self; attr_accessor :config_files; end
     def self.load_default_config
-      if @config
-        @config
-      else
-        @config_files.detect { |f| File.exist?(f) }
-      end
+      @config_files.detect { |f| File.exist?(f) }
     end
 
     def self.run
@@ -69,23 +65,34 @@ module Resque
     # }}}
     # Config: load config and config file {{{
 
-    def load_config_from_file
-      return unless @pool_config_file
-      @config = YAML.load_file(@pool_config_file)
-      @config.merge!(YAML.load_file(@pool_config_file)[RAILS_ENV]).delete_if {|key, value| value.is_a? Hash } if defined? RAILS_ENV
-    end
-
     def init_config(config)
       unless config
         raise ArgumentError,
           "No configuration found. Please setup config/resque-pool.yml"
       end
       if config.kind_of? String
-        @pool_config_file = config.to_s
-        load_config_from_file
+        @config_file = config.to_s
       else
         @config = config.dup
-        @config.merge!(@config[RAILS_ENV]).delete_if {|key, value| value.is_a? Hash } if defined? RAILS_ENV
+      end
+      load_config
+    end
+
+    def load_config
+      if @config_file
+        @config = YAML.load_file(@config_file)
+      end
+      if config_environment
+        config.merge!(@config[config_environment])
+      end
+      config.delete_if {|key, value| value.is_a? Hash }
+    end
+
+    def config_environment
+      if defined? RAILS_ENV
+        RAILS_ENV
+      else
+        ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
       end
     end
 
@@ -139,7 +146,7 @@ module Resque
         signal_all_workers(signal)
       when :HUP
         log "HUP: reload config file"
-        load_config_from_file
+        load_config
         maintain_worker_count
       when :WINCH
         log "WINCH: gracefully stopping all workers"
