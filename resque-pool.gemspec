@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = ">= 1.3.6"
 
   s.add_development_dependency "rspec"
-  s.add_dependency "resque", "=1.9.9"
+  s.add_dependency "resque", "=1.9.10"
 
   s.files        = Dir.glob("lib/**/*") +%w[README.md]
   s.require_path = 'lib'
