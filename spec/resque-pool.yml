@@ -1,0 +1,13 @@
+foo: 1
+
+production:
+  "foo,bar": 10
+
+development:
+  "foo,bar": 4
+  "baz": 23
+  
+test:
+  "bar": 5
+  "foo,bar": 3
+

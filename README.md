@@ -27,11 +27,15 @@ your `resque:pool:setup` or you can set the same config in either
 `resque-pool.yml` or `config/resque-pool.yml`.  To use resque-pool, require its
 rake tasks in your rake file, and call the resque:pool task.
 
+The YAML file supports both using root level defaults as well as environment specific overrides.
 For example, to use resque-pool with rails, in `config/resque-pool.yml`:
 
     foo: 1
     bar: 2
     "foo,bar,baz": 4
+    
+    production:
+      "foo,bar,baz": 10
 
 and in `lib/tasks/resque.rake`:
 

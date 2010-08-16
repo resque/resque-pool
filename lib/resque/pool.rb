@@ -71,8 +71,8 @@ module Resque
 
     def load_config_from_file
       return unless @pool_config_file
-      log "**** loading config from #{@pool_config_file}"
       @config = YAML.load_file(@pool_config_file)
+      @config.merge!(YAML.load_file(@pool_config_file)[RAILS_ENV]).delete_if {|key, value| value.is_a? Hash } if defined? RAILS_ENV
     end
 
     def init_config(config)
@@ -85,8 +85,8 @@ module Resque
         load_config_from_file
       else
         @config = config.dup
+        @config.merge!(@config[RAILS_ENV]).delete_if {|key, value| value.is_a? Hash } if defined? RAILS_ENV
       end
-      log "**** config: #{@config.inspect}"
     end
 
     # }}}
