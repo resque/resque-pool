@@ -2,9 +2,8 @@ Resque Pool
 ===========
 
 Resque pool is a simple library for managing a pool of resque workers.  Given a
-a config file (`resque-pool.yml` or `config/resque-pool.yml`) or a config hash,
-it will manage your workers for you, starting up the appropriate number of
-workers for each.
+a config file (`resque-pool.yml` or `config/resque-pool.yml`), it will manage
+your workers for you, starting up the appropriate number of workers for each.
 
 Benefits
 ---------
@@ -113,9 +112,8 @@ The pool master responds to the following signals:
 * `WINCH` - send `QUIT` to each worker, but keep master running (send `HUP` to reload config and restart workers)
 * `USR1`/`USR2`/`CONT` - send the signal on to all worker parents (see Resque docs).
 
-`HUP` will no-op if you use a hash for configuration instead of a config file.
-So you should probably use a config file.  After a `HUP`, workers that are no
-longer needed will be gracefully shutdown via `QUIT`.
+After a `HUP`, workers that are no longer needed will be gracefully shutdown
+via `QUIT`.
 
 Other Features
 --------------
