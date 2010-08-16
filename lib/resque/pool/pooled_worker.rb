@@ -17,7 +17,7 @@ class Resque::Pool
     end
 
     # this entire method (except for one line) is copied and pasted from
-    # resque-1.9.9.  If shutdown were used as a method (attr_reader) rather
+    # resque-1.9.10.  If shutdown were used as a method (attr_reader) rather
     # than an instance variable, I wouldn't need to reduplicate this. :-(
     #
     # hopefully I can get defunkt to accept my patch for this.
@@ -34,7 +34,7 @@ class Resque::Pool
 
         if not @paused and job = reserve
           log "got: #{job.inspect}"
-          run_hook :before_fork
+          run_hook :before_fork, job
           working_on job
 
           if @child = fork
