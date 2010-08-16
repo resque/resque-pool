@@ -22,8 +22,8 @@ How to use
 -----------
 
 To configure resque-pool, you can use either `resque-pool.yml` or
-`config/resque-pool.yml`.  To use resque-pool, require its rake tasks in your
-rake file, and call the resque:pool task.
+`config/resque-pool.yml`.  To use resque-pool, require its rake tasks
+(`resque/pool/tasks`) in your rake file, and call the `resque:pool` task.
 
 The YAML file supports both using root level defaults as well as environment
 specific overrides.  For example, to use resque-pool with rails, in
