@@ -6,11 +6,7 @@ task "resque:setup" => :environment do
   # generic worker setup, e.g. Hoptoad for failed jobs
 end
 
-# preload the rails environment in the pool master
 task "resque:pool:setup" do
-  # it's better to use a config file, but you can also config here:
-  # Resque::Pool.config = {"foo" => 1, "bar" => 1}
-
   # close any sockets or files in pool master
   ActiveRecord::Base.connection.disconnect!
 

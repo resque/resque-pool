@@ -31,63 +31,49 @@ specific overrides.  For example, to use resque-pool with rails, in
 
     foo: 1
     bar: 2
-    "foo,bar,baz": 4
+    "foo,bar,baz": 1
 
     production:
-      "foo,bar,baz": 10
+      "foo,bar,baz": 4
 
 and in `lib/tasks/resque.rake`:
 
     require 'resque/pool/tasks'
-
     # this task will get called before resque:pool:setup
     # preload the rails environment in the pool master
     task "resque:setup" => :environment do
       # generic worker setup, e.g. Hoptoad for failed jobs
     end
-
-    # preload the rails environment in the pool master
     task "resque:pool:setup" do
       # close any sockets or files in pool master
       ActiveRecord::Base.connection.disconnect!
-
       # and re-open them in the resque worker parent
       Resque::Pool.after_prefork do |job|
         ActiveRecord::Base.establish_connection
       end
-
-      # you could also re-open them in the resque worker child, using
-      # Resque.after_fork, but that probably isn't necessary, and
-      # Resque::Pool.after_prefork should be faster, since it won't run
-      # for every single job.
     end
 
 Then you can start the queues via:
 
     rake resque:pool RAILS_ENV=production VERBOSE=1
 
-This will start up seven worker processes, one each looking exclusively at each
-of the foo, bar, and baz queues, and four workers looking at all queues in
+This will start up seven worker processes, one exclusively for the foo queue,
+two exclusively for the bar queue, and four workers looking at all queues in
 priority.  This is similar to if you ran the following:
 
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
-    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=bar &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz &
+    rake resque:work RAILS_ENV=production VERBOSE=1 QUEUES=foo,bar,baz &
 
-Resque already forks for its own child processes, giving two levels.  The pool
-master will stay around monitoring the resque worker parents, giving three
-levels:
-
-* a single pool master
-* many worker parents
-* a worker child per worker (when the actual job is being processed)
-
-For example, `ps -ef f | grep [r]esque` might return something like the
-following:
+Resque already forks for its own child processes.  The pool master will stay
+around monitoring the resque worker parents, giving three levels: a single pool
+master, many worker parents, and a worker child per worker (when the actual job
+is being processed).  For example, `ps -ef f | grep [r]esque` (in Linux) might
+return something like the following:
 
     rails    13858     1  0 13:44 ?        S      0:02 resque-pool-master: managing [13867, 13875, 13871, 13872, 13868, 13870, 13876]
     rails    13867 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo
@@ -99,6 +85,9 @@ following:
     rails    13875 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
     rails    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
     rails     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
+
+An example startup script, which redirects STDOUT and STDERR and creates a pid
+file, is given in the examples directory.
 
 SIGNALS
 -------
