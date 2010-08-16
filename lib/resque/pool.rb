@@ -79,12 +79,8 @@ module Resque
     end
 
     def load_config
-      if @config_file
-        @config = YAML.load_file(@config_file)
-      end
-      if config_environment
-        config.merge!(@config[config_environment])
-      end
+      @config_file       and @config = YAML.load_file(@config_file)
+      config_environment and config.merge!(@config[config_environment])
       config.delete_if {|key, value| value.is_a? Hash }
     end
 
