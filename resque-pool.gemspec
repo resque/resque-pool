@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name        = "resque-pool"
   s.version     = '0.0.7'
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["nicholas a. evans", "Unicorn hackers"]
+  s.authors     = ["nicholas a. evans",]
   s.email       = ["nick@ekenosen.net"]
   s.homepage    = "http://github.com/nevans/resque-pool"
   s.summary     = "quickly and easily fork a pool of resque workers"
