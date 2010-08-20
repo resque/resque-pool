@@ -9,6 +9,25 @@ Spec::Runner.configure do |config|
   }
 end
 
+describe Resque::Pool, "when loading a simple pool configuration" do
+  let(:config) do
+    { 'foo' => 1, 'bar' => 2, 'foo,bar' => 3, 'bar,foo' => 4, }
+  end
+  subject { Resque::Pool.new(config) }
+
+  context "when ENV['RACK_ENV'] is set" do
+    before { ENV['RACK_ENV'] = 'development' }
+
+    it "should load the values from the Hash" do
+      subject.config["foo"].should == 1
+      subject.config["bar"].should == 2
+      subject.config["foo,bar"].should == 3
+      subject.config["bar,foo"].should == 4
+    end
+  end
+
+end
+
 describe Resque::Pool, "when loading the pool configuration from a Hash" do
 
   let(:config) do

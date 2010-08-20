@@ -79,12 +79,12 @@ module Resque
     end
 
     def load_config
-      @config_file       and @config = YAML.load_file(@config_file)
-      config_environment and config.merge!(@config[config_environment])
+      @config_file         and @config = YAML.load_file(@config_file)
+      @config[environment] and config.merge!(@config[environment])
       config.delete_if {|key, value| value.is_a? Hash }
     end
 
-    def config_environment
+    def environment
       if defined? RAILS_ENV
         RAILS_ENV
       else
