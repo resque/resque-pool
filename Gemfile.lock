@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    resque-pool (0.0.8.dev)
+    resque-pool (0.0.9.dev)
       resque (= 1.9.10)
 
 GEM
@@ -9,6 +9,7 @@ GEM
   specs:
     json_pure (1.4.6)
     rack (1.2.1)
+    rake (0.8.7)
     redis (2.0.5)
     redis-namespace (0.8.0)
       redis (< 3.0.0)
@@ -27,6 +28,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  rake
   resque (= 1.9.10)
   resque-pool!
   rspec
