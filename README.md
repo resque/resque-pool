@@ -26,8 +26,9 @@ To configure resque-pool, you can use either `resque-pool.yml` or
 (`resque/pool/tasks`) in your rake file, and call the `resque:pool` task.
 
 The YAML file supports both using root level defaults as well as environment
-specific overrides.  For example, to use resque-pool with rails, in
-`config/resque-pool.yml`:
+specific overrides (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV` environment
+variables will be used to determine environment).  For example, to use
+resque-pool with rails, in `config/resque-pool.yml`:
 
     foo: 1
     bar: 2
@@ -109,6 +110,11 @@ Other Features
 
 Workers will watch the pool master, and gracefully shutdown if the master
 process dies (for whatever reason) before them.
+
+You can specify an alternate config file by setting the `RESQUE_POOL_CONFIG`
+environment variable like so:
+
+    rake resque:pool RESQUE_ENV=production RESQUE_POOL_CONFIG=/path/to/my/config.yml
 
 TODO
 -----

@@ -51,15 +51,19 @@ module Resque
 
     @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
     class << self; attr_accessor :config_files; end
-    def self.load_default_config
-      @config_files.detect { |f| File.exist?(f) }
+    def self.choose_config_file
+      if ENV["RESQUE_POOL_CONFIG"]
+        ENV["RESQUE_POOL_CONFIG"]
+      else
+        @config_files.detect { |f| File.exist?(f) }
+      end
     end
 
     def self.run
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
-      Resque::Pool.new(load_default_config).start.join
+      Resque::Pool.new(choose_config_file).start.join
     end
 
     # }}}
@@ -79,8 +83,8 @@ module Resque
     end
 
     def load_config
-      @config_file         and @config = YAML.load_file(@config_file)
-      @config[environment] and config.merge!(@config[environment])
+      @config_file and @config = YAML.load_file(@config_file)
+      environment and @config[environment] and config.merge!(@config[environment])
       config.delete_if {|key, value| value.is_a? Hash }
     end
 
