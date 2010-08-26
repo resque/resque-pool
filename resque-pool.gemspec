@@ -17,11 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rspec"
 
-  # NOTE: we must depend on an explicit version of resque until the patch at
-  # http://github.com/nevans/resque (or something similar) is accepted.
-  # Until then, make sure that lib/resque/pool/pooled_worker.rb stays up to
-  # date with Resque::Worker#work.
-  s.add_dependency "resque", "=1.9.10"
+  s.add_dependency "resque", "~> 1.10"
 
   s.files        = Dir.glob("lib/**/*") +%w[README.md]
   s.require_path = 'lib'
