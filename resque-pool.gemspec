@@ -13,11 +13,9 @@ Gem::Specification.new do |s|
     saving memory (w/REE) and monitoring their uptime
   EOF
 
-  s.required_rubygems_version = ">= 1.3.6"
-
-  s.add_development_dependency "rspec"
-
   s.add_dependency "resque", "~> 1.10"
+  s.add_development_dependency "rspec"
+  s.add_development_dependency "bundler", "~> 1.0"
 
   s.files        = Dir.glob("lib/**/*") +%w[README.md]
   s.require_path = 'lib'
