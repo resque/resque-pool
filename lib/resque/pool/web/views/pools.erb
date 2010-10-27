@@ -1,0 +1,52 @@
+<h1 class='wi'><%= @pools.size %> Pools</h1>
+<p class='intro'>The pools listed below are all registered as active on your system.</p>
+
+<% @pools.each do |pool| %>
+  <h2>Pool: <%= pool.name %></h2>
+
+  <%= reset_link pool %>
+
+  <table class='workers'>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Queues</th>
+      <th>Default</th>
+      <th>Current</th>
+      <th>Override</th>
+    </tr>
+
+    <% pool.queue_lists.sort_by { |l| l.to_s }.each do |queue_list| %>
+      <tr class="<%=state = pool.state(queue_list) %>">
+        <td class='icon'><img src="<%=u state %>.png" alt="<%= state %>" title="<%= state %>"></td>
+        <td class='queues'>
+          <% queue_list.split(",").each do |q| %>
+            <a class="queue-tag" href="<%= u("/queues/#{q}") %>">
+              <%= q %>
+            </a>
+          <% end %>
+        </td>
+        <td class='default'>
+          <%= pool.default_count(queue_list) %>
+        </td>
+        <td class='current'>
+          <%= pool.current_count(queue_list) %>
+        </td>
+        <td class='override'>
+          <%= pool.override_count(queue_list) %>
+          <%= incr_link(pool, queue_list) %>
+          <%= decr_link(pool, queue_list) %>
+        </td>
+      </tr>
+    <% end %>
+
+    <% if pool.queue_lists.empty? %>
+      <tr>
+        <td colspan='5' class='no-data'>There are no registered pools</td>
+      </tr>
+    <% end %>
+
+  </table>
+
+<% end %>
+
+<%=poll%>

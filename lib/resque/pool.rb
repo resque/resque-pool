@@ -24,6 +24,61 @@ module Resque
       procline "(initialized)"
     end
 
+    def self.pools
+      %w[
+        serv1.example.com:1234
+        serv2.example.com:1234
+        serv3.example.com:1234
+        serv3.example.com:5678
+      ].map do |fake|
+        Status.new(fake)
+      end
+    end
+
+    class Status
+      attr_reader :name
+      def initialize(name)
+        @name = name
+      end
+
+      def queue_lists
+        %w[
+          foo,bar
+          foo
+          bar
+        ]
+      end
+
+      def state(queue_list)
+        "working"
+      end
+
+      def current_count(queue_list)
+        3
+      end
+
+      def default_count(queue_list)
+        3
+      end
+
+      def override_count(queue_list)
+        4
+      end
+
+      def incr!
+        false
+      end
+
+      def decr!
+        false
+      end
+
+      def reset!
+        false
+      end
+
+    end
+
     # Config: after_prefork {{{
 
     # The `after_prefork` hook will be run in workers if you are using the

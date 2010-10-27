@@ -1,0 +1,6 @@
+<form action="/pools/<%= pool.name %>/<%= action %>" method="post">
+  <% unless queue_list.nil? %>
+    <input type="hidden" name="queue_list" value="<%= queue_list %>" />
+  <% end %>
+  <input type="submit" value="<%= action %>" />
+</form>
