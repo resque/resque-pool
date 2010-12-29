@@ -17,19 +17,19 @@ module Resque
         end
 
         app.post("/pools/:id/incr") do
-          pool = Resque::Pool::Status.new(params[:id])
-          pool.incr!
+          queue_list = Resque::Pool::QueueListStatus.new(params[:id], params[:queue_list])
+          queue_list.incr!
           redirect url(:pools)
         end
 
         app.post("/pools/:id/decr") do
-          pool = Resque::Pool::Status.new(params[:id])
-          pool.decr!
+          queue_list = Resque::Pool::QueueListStatus.new(params[:id], params[:queue_list])
+          queue_list.decr!
           redirect url(:pools)
         end
 
         app.post("/pools/:id/reset") do
-          pool = Resque::Pool::Status.new(params[:id])
+          pool = Resque::Pool::PoolStatus.new(params[:id])
           pool.reset!
           redirect url(:pools)
         end

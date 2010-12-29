@@ -16,23 +16,23 @@
     </tr>
 
     <% pool.queue_lists.sort_by { |l| l.to_s }.each do |queue_list| %>
-      <tr class="<%=state = pool.state(queue_list) %>">
+      <tr class="<%=state = queue_list.state %>">
         <td class='icon'><img src="<%=u state %>.png" alt="<%= state %>" title="<%= state %>"></td>
         <td class='queues'>
-          <% queue_list.split(",").each do |q| %>
+          <% queue_list.to_s.split(",").each do |q| %>
             <a class="queue-tag" href="<%= u("/queues/#{q}") %>">
               <%= q %>
             </a>
           <% end %>
         </td>
         <td class='default'>
-          <%= pool.default_count(queue_list) %>
+          <%= queue_list.default_count %>
         </td>
         <td class='current'>
-          <%= pool.current_count(queue_list) %>
+          <%= queue_list.current_count %>
         </td>
         <td class='override'>
-          <%= pool.override_count(queue_list) %>
+          <%= queue_list.override_count %>
           <%= incr_link(pool, queue_list) %>
           <%= decr_link(pool, queue_list) %>
         </td>
