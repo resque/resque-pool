@@ -8,7 +8,7 @@ module Resque
       def run
         opts = optparse
         p opts
-        daemonize if opts[:daemonize]
+        daemonize if opts[:daemon]
         redirect opts
         pidfile opts[:pidfile]
         start_pool
@@ -42,8 +42,8 @@ where [options] are:
         $stderr.reopen opts[:stderr], "a" if opts[:stderr] && !opts[:stderr].empty?
       end
 
-      def daemonize(opts)
-        puts "daemonizing not implemented yet"
+      def daemonize
+        raise "daemonizing not implemented yet"
       end
 
       def pidfile(pidfile)
@@ -52,10 +52,10 @@ where [options] are:
           File.open pidfile, "w" do |f|
             f.write pid
           end
-        end
-        at_exit do
-          if Process.pid == pid
-            File.delete pidfile
+          at_exit do
+            if Process.pid == pid
+              File.delete pidfile
+            end
           end
         end
       end
