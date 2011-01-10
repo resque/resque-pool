@@ -27,6 +27,7 @@ where [options] are:
           opt :daemon, "Daemonize", :default => false
           opt :stdout, "Redirect stdout to logfile", :type => String, :short => '-o'
           opt :stderr, "Redirect stderr to logfile", :type => String, :short => '-e'
+          opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String
         end
         if opts[:daemon]
@@ -41,6 +42,7 @@ where [options] are:
         $stdin.reopen  '/dev/null'        if opts[:daemon]
         $stdout.reopen opts[:stdout], "a" if opts[:stdout] && !opts[:stdout].empty?
         $stderr.reopen opts[:stderr], "a" if opts[:stderr] && !opts[:stderr].empty?
+        $stdout.sync = $stderr.sync = true unless opts[:nosync]
       end
 
       def daemonize
