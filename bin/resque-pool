@@ -1,6 +1,22 @@
 #!/usr/bin/env ruby
 # -*- encoding: utf-8 -*-
+
+require 'trollop'
+opts = Trollop::options do
+  version "resque-pool #{Resque::Pool::VERSION} (c) nicholas a. evans"
+  banner <<-EOS
+resque-pool is the best way to manage a group (pool) of resque workers
+
+Usage:
+   resque-pool [options]
+where [options] are:
+EOS
+  opt :daemon, "Daemonize", :default => true
+  opt :stdout, "Redirect stdout to logfile", :type => String
+  opt :stderr, "Redirect stderr to logfile", :type => String
+  opt :pidfile, "PID file location",         :type => String
+end
+
 require 'rake'
 require 'resque/pool/tasks'
-
 Rake.application["resque:pool"].invoke

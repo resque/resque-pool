@@ -4,6 +4,7 @@ PATH
     resque-pool (0.0.11.dev)
       rake
       resque (~> 1.10)
+      trollop (~> 1.16)
 
 GEM
   remote: http://rubygems.org/
@@ -32,6 +33,7 @@ GEM
       rack (~> 1.1)
       tilt (~> 1.2)
     tilt (1.2.1)
+    trollop (1.16.2)
     vegas (0.1.8)
       rack (>= 1.0.0)
 
@@ -44,3 +46,4 @@ DEPENDENCIES
   resque (~> 1.10)
   resque-pool!
   rspec
+  trollop (~> 1.16)
