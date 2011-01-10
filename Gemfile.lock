@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     resque-pool (0.0.11.dev)
+      rake
       resque (~> 1.10)
 
 GEM

@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   EOF
 
   s.add_dependency "resque", "~> 1.10"
-  s.add_development_dependency "rake"
+  s.add_dependency "rake"
   s.add_development_dependency "rspec"
   s.add_development_dependency "bundler", "~> 1.0"
 
