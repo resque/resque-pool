@@ -38,12 +38,17 @@ where [options] are:
       end
 
       def redirect(opts)
+        $stdin.reopen  '/dev/null'        if opts[:daemon]
         $stdout.reopen opts[:stdout], "a" if opts[:stdout] && !opts[:stdout].empty?
         $stderr.reopen opts[:stderr], "a" if opts[:stderr] && !opts[:stderr].empty?
       end
 
       def daemonize
-        raise "daemonizing not implemented yet"
+        raise 'First fork failed' if (pid = fork) == -1
+        exit unless pid.nil?
+        Process.setsid
+        raise 'Second fork failed' if (pid = fork) == -1
+        exit unless pid.nil?
       end
 
       def pidfile(pidfile)
