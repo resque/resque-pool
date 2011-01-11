@@ -87,9 +87,6 @@ return something like the following:
     rails    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
     rails     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
 
-An example startup script, which redirects STDOUT and STDERR and creates a pid
-file, is given in the examples directory.
-
 SIGNALS
 -------
 
@@ -109,14 +106,21 @@ Other Features
 --------------
 
 You can run resque-pool as a daemon via `--daemon`.  It will default to placing
-the pidfile and logfiles in the rails default locations, so you may want to
-configure that.  See `resque-pool --help` for more options.  An example init.d
-script and monitrc are included, as erb templates.
+the pidfile and logfiles in the rails default locations, and you may want to
+configure that.  See `resque-pool --help` for more options.
 
-You can also run `resque-pool` via the `resque:pool` rake task.
+An example init.d script and monitrc are provided in
+`examples/chef_cookbook/templates/default`, as erb templates.  Just copy them
+into place, filling in the erb variables as necessary.  An example chef recipe
+is also provided (it should work at Engine Yard as is; just provide a
+`/data/#{app_name}/shared/config/resque-pool.yml` on your utility servers).
 
-Workers will watch the pool master, and gracefully shutdown if the master
-process dies (for whatever reason) before them.
+You can also run `resque-pool` via the `resque:pool` rake task or from a plain
+old ruby script by calling `Resque::Pool.run`.
+
+Workers will watch the pool master, and gracefully shutdown (after completing
+their current job) if the master process dies (for whatever reason) before
+them.
 
 You can specify an alternate config file by setting the `RESQUE_POOL_CONFIG`
 environment variable like so:
@@ -128,14 +132,14 @@ TODO
 
 * cmd line option for non-rake loading
 * cmd line option for preload ruby file
-* perhaps provide Unix style log formatter
+* provide Unix style log formatter
+* web interface for adding and removing workers (etc)
 * recover gracefully from a malformed config file (on startup and HUP)
 * procline for malformed config file, graceful shutdown... and other states?
-* web interface for adding and removing workers (etc)
 * figure out a good automated way to test this (cucumber or rspec?)
-* rename to `resque-squad`?
 * clean up the code (I stole most of it from unicorn, and it's still a bit
   bastardized); excessive use of vim foldmarkers are a code smell.
+* rename to `resque-squad`?
 * rdoc
 * incorporate resque-batchworker features? (v2.0)
 
@@ -143,3 +147,4 @@ Contributors
 -------------
 
 * John Schult (config file can be split by environment)
+* Stephen Celis (increased gemspec sanity)
