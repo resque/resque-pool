@@ -142,6 +142,7 @@ TODO
 * rename to `resque-squad`?
 * rdoc
 * incorporate resque-batchworker features? (v2.0)
+* integrate with resque-scheduler? (v2.0)
 
 Contributors
 -------------
