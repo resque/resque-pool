@@ -21,9 +21,9 @@ Benefits
 How to use
 -----------
 
-To configure resque-pool, you can use either `resque-pool.yml` or
-`config/resque-pool.yml`.  To use resque-pool, require its rake tasks
-(`resque/pool/tasks`) in your rake file, and call the `resque:pool` task.
+To configure resque-pool, create a `config/resque-pool.yml` with your worker
+counts.  To use resque-pool, require its rake tasks (`resque/pool/tasks`) in
+your rake file, and run `resque-pool`
 
 The YAML file supports both using root level defaults as well as environment
 specific overrides (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV` environment
@@ -56,7 +56,7 @@ and in `lib/tasks/resque.rake`:
 
 Then you can start the queues via:
 
-    rake resque:pool RAILS_ENV=production VERBOSE=1
+    resque-pool --environment production
 
 This will start up seven worker processes, one exclusively for the foo queue,
 two exclusively for the bar queue, and four workers looking at all queues in
@@ -108,32 +108,36 @@ via `QUIT`.
 Other Features
 --------------
 
+You can run resque-pool as a daemon via `--daemon`.  It will default to placing
+the pidfile and logfiles in the rails default locations, so you may want to
+configure that.  See `resque-pool --help` for more options.  An example init.d
+script and monitrc are included, as erb templates.
+
+You can also run `resque-pool` via the `resque:pool` rake task.
+
 Workers will watch the pool master, and gracefully shutdown if the master
 process dies (for whatever reason) before them.
 
 You can specify an alternate config file by setting the `RESQUE_POOL_CONFIG`
 environment variable like so:
 
-    rake resque:pool RESQUE_ENV=production RESQUE_POOL_CONFIG=/path/to/my/config.yml
+    resque-pool -c /path/to/my/config.yml
 
 TODO
 -----
 
-* do appropriate logging (e.g. all to one logfile, each queue to its own
-  logfile, or each worker to its own logfile).  Logfile location must be
-  configurable, but default to `log/resque-pool.log`.  Of course, since resque
-  "logs" by writing to $stdout, this is really no more than redirecting stdout
-  to the appropriate logfile.
-* (optionally) daemonize, setting a PID file somewhere.  configurable, of
-  course, but default to `tmp/pids/resque-pool.pid`.
+* cmd line option for non-rake loading
+* cmd line option for preload ruby file
+* perhaps provide Unix style log formatter
 * recover gracefully from a malformed config file (on startup and HUP)
 * procline for malformed config file, graceful shutdown... and other states?
+* web interface for adding and removing workers (etc)
 * figure out a good automated way to test this (cucumber or rspec?)
+* rename to `resque-squad`?
 * clean up the code (I stole most of it from unicorn, and it's still a bit
   bastardized); excessive use of vim foldmarkers are a code smell.
 * rdoc
 * incorporate resque-batchworker features? (v2.0)
-* web interface for adding and removing workers (etc) (v2.0)
 
 Contributors
 -------------
