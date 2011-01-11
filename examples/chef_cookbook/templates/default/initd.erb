@@ -1,0 +1,61 @@
+#!/bin/sh -e
+# Copyright (C) nicholas a. evans <nick@ekenosen.net>
+# See LICENSE.txt
+
+### BEGIN INIT INFO
+# Provides:          resque-pool-<%= @app_name %>
+# Required-Start:    $local_fs $remote_fs $network
+# Required-Stop:     $local_fs $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: resque-pool init script for <%= @app_name %>
+# Description:       resque-pool manages the resque workers
+### END INIT INFO
+
+# configure these values here or in /etc/default/resque-pool
+app_name="<%= @app_name %>"
+app_dir="/data/${app_name}/current"
+run_as_user="deploy"
+pidfile="/var/run/resque-pool-${app_name}.pid"
+sleep_time_during_restart=5
+bundler="bundle"
+environment="production"
+stdout_log="${app_dir}/log/resque-pool-${app_name}.stdout.log"
+stderr_log="${app_dir}/log/resque-pool-${app_name}.stderr.log"
+
+# override above values, and set any other env variables you need
+if [ -f /etc/default/resque-pool ] ; then
+  . /etc/default/resque-pool
+fi
+
+case "$1" in
+  start)
+    # I'm assuming that you are using bundler.  If you are using rip or
+    # something else, you'll need to change this.  Remember to
+    # keep the double-dash; e.g.: --startas CMD -- ARGS
+    start-stop-daemon --start --pidfile ${pidfile} \
+      --chuid ${run_as_user} --chdir ${app_dir} \
+      --startas ${bundler} -- exec \
+      resque-pool -d -p ${pidfile} -E ${environment} -o ${stdout_log} -e ${stderr_log}
+    ;;
+  graceful-stop)
+    start-stop-daemon --stop --pidfile ${pidfile} --signal QUIT
+    ;;
+  quick-stop)
+    start-stop-daemon --stop --pidfile ${pidfile} --signal INT
+    ;;
+  stop)
+    start-stop-daemon --stop --pidfile ${pidfile} --signal QUIT/30/INT/10/KILL/5
+    ;;
+  restart)
+    $0 stop
+    sleep ${sleep_time_during_restart}
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|graceful-stop|quick-stop|restart}"
+    exit 1
+    ;;
+esac
+
+# vim:ft=sh
