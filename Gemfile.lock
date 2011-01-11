@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    resque-pool (0.0.11.dev)
+    resque-pool (0.0.12.0.alpha)
       rake
       resque (~> 1.10)
       trollop (~> 1.16)
@@ -9,6 +9,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+    SystemTimer (1.2.1)
     diff-lcs (1.1.2)
     json (1.4.6)
     rack (1.2.1)
@@ -41,6 +42,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  SystemTimer
   bundler (~> 1.0)
   rake
   resque (~> 1.10)

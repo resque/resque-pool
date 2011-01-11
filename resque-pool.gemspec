@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency "trollop", "~> 1.16"
   s.add_dependency "rake"
   s.add_development_dependency "rspec"
+  s.add_development_dependency "SystemTimer" # to silence redis gem's warning
   s.add_development_dependency "bundler", "~> 1.0"
 
   s.files         = `git ls-files`.split("\n")
