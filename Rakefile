@@ -1,2 +1,3 @@
-$LOAD_PATH << File.expand_path("lib", File.dirname(__FILE__))
+require 'bundler'
+Bundler::GemHelper.install_tasks
 require 'resque/pool/tasks'

@@ -1,4 +1,4 @@
-source :rubygems
+source "http://rubygems.org"
 
-gem "rake"
+# Specify your gem's dependencies in resque-pool.gemspec
 gemspec
