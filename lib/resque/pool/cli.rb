@@ -1,4 +1,5 @@
 require 'trollop'
+require 'resque/pool'
 
 module Resque
   class Pool
@@ -16,7 +17,7 @@ module Resque
 
       def parse_options
         opts = Trollop::options do
-          version "resque-pool #{Resque::Pool::VERSION} (c) nicholas a. evans"
+          version "resque-pool #{VERSION} (c) nicholas a. evans"
           banner <<-EOS
 resque-pool is the best way to manage a group (pool) of resque workers
 
@@ -33,13 +34,12 @@ where [options] are:
           opt :stderr, "Redirect stderr to logfile", :type => String,   :short => '-e'
           opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String,   :short => "-p"
-          opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV",
-            :default => "development", :short => "-E"
+          opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
         end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
           opts[:stderr]  ||= "log/resque-pool.stderr.log"
-          opts[:pidfile] ||= "resque-pool.pid"
+          opts[:pidfile] ||= "tmp/pids/resque-pool.pid"
         end
         opts
       end
@@ -77,14 +77,16 @@ where [options] are:
       end
 
       def setup_environment(opts)
-        ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment]
-        puts "Running in #{opts[:environment]} environment."
+        ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
+        puts "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment."
         ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
       end
 
       def start_pool
         require 'rake'
         require 'resque/pool/tasks'
+        Rake.application.init
+        Rake.application.load_rakefile
         Rake.application["resque:pool"].invoke
       end
 
