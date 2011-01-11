@@ -13,13 +13,14 @@
 ### END INIT INFO
 
 # configure these values here or in /etc/default/resque-pool
+# make sure your pidfile here matches your monitrc
 app_name="<%= @app_name %>"
 app_dir="/data/${app_name}/current"
 run_as_user="deploy"
-pidfile="/var/run/resque-pool-${app_name}.pid"
 sleep_time_during_restart=5
 bundler="bundle"
 environment="production"
+pidfile="/var/run/${app_name}_resque.pid"
 stdout_log="${app_dir}/log/resque-pool-${app_name}.stdout.log"
 stderr_log="${app_dir}/log/resque-pool-${app_name}.stderr.log"
 
