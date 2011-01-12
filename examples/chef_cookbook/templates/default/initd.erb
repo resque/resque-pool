@@ -18,7 +18,7 @@ app_name="<%= @app_name %>"
 app_dir="/data/${app_name}/current"
 run_as_user="deploy"
 sleep_time_during_restart=5
-bundler="bundle"
+bundler="/usr/bin/bundle"
 environment="production"
 pidfile="/var/run/${app_name}_resque.pid"
 stdout_log="${app_dir}/log/resque-pool-${app_name}.stdout.log"

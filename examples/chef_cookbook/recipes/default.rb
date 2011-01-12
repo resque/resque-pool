@@ -1,4 +1,5 @@
-if ['solo', 'util'].include?(node[:instance_role])
+roles = %w[solo util app_master]
+if roles.include?(node[:instance_role])
   node[:applications].each do |app, data|
 
     template "/etc/monit.d/#{app}_resque.monitrc" do
@@ -16,7 +17,7 @@ if ['solo', 'util'].include?(node[:instance_role])
       owner 'root'
       group 'root'
       mode 0744
-      source "initd.rb"
+      source "initd.erb"
       variables({
         :app_name => app,
       })
