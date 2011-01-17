@@ -31,6 +31,7 @@ if roles.include?(node[:instance_role])
 
     execute "start-resque" do
       command %Q{/etc/init.d/#{app}_resque start}
+      creates "/data/#{app}/shared/pids/#{app}_resque.pid"
     end
 
     execute "ensure-resque-is-setup-with-monit" do
