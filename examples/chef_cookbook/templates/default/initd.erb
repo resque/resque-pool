@@ -53,7 +53,7 @@ case "$1" in
     start-stop-daemon --stop --pidfile ${pidfile} --signal INT
     ;;
   stop)
-    start-stop-daemon --stop --pidfile ${pidfile} --signal ${stop_schedule}
+    start-stop-daemon --stop --pidfile ${pidfile} --retry=${stop_schedule}
     ;;
   restart)
     $0 stop
