@@ -1,6 +1,8 @@
-roles = %w[solo util app_master]
+roles = %w[solo util]
 if roles.include?(node[:instance_role])
   node[:applications].each do |app, data|
+
+    pidfile = "/data/#{app}/current/tmp/pids/#{app}_resque.pid"
 
     template "/etc/monit.d/#{app}_resque.monitrc" do
       owner 'root'
@@ -9,6 +11,7 @@ if roles.include?(node[:instance_role])
       source "monitrc.erb"
       variables({
         :app_name => app,
+        :pidfile  => pidfile,
         #:max_mem  => "400 MB",
       })
     end
@@ -20,6 +23,7 @@ if roles.include?(node[:instance_role])
       source "initd.erb"
       variables({
         :app_name => app,
+        :pidfile  => pidfile,
       })
     end
 
@@ -31,7 +35,7 @@ if roles.include?(node[:instance_role])
 
     execute "start-resque" do
       command %Q{/etc/init.d/#{app}_resque start}
-      creates "/data/#{app}/shared/pids/#{app}_resque.pid"
+      creates pidfile
     end
 
     execute "ensure-resque-is-setup-with-monit" do

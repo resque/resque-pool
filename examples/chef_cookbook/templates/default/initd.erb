@@ -15,18 +15,22 @@
 # configure these values here or in /etc/default/resque-pool
 # make sure your pidfile here matches your monitrc
 app_name="<%= @app_name %>"
+pidfile="<%= @pidfile %>"
 app_dir="/data/${app_name}/current"
 run_as_user="deploy"
 sleep_time_during_restart=5
+stop_schedule="QUIT/30/INT/10/KILL/5"
 bundler="/usr/bin/bundle"
 environment="production"
-pidfile="/var/run/${app_name}_resque.pid"
 stdout_log="${app_dir}/log/resque-pool-${app_name}.stdout.log"
 stderr_log="${app_dir}/log/resque-pool-${app_name}.stderr.log"
 
 # override above values, and set any other env variables you need
-if [ -f /etc/default/resque-pool ] ; then
-  . /etc/default/resque-pool
+if [ -f /etc/default/resque ] ; then
+  . /etc/default/resque
+fi
+if [ -f /etc/default/${app_name}_resque ] ; then
+  . /etc/default/${app_name}_resque
 fi
 
 case "$1" in
@@ -39,6 +43,9 @@ case "$1" in
       --startas ${bundler} -- exec \
       resque-pool -d -p ${pidfile} -E ${environment} -o ${stdout_log} -e ${stderr_log}
     ;;
+  reload)
+    start-stop-daemon --stop --pidfile ${pidfile} --signal HUP
+    ;;
   graceful-stop)
     start-stop-daemon --stop --pidfile ${pidfile} --signal QUIT
     ;;
@@ -46,7 +53,7 @@ case "$1" in
     start-stop-daemon --stop --pidfile ${pidfile} --signal INT
     ;;
   stop)
-    start-stop-daemon --stop --pidfile ${pidfile} --signal QUIT/30/INT/10/KILL/5
+    start-stop-daemon --stop --pidfile ${pidfile} --signal ${stop_schedule}
     ;;
   restart)
     $0 stop
@@ -54,7 +61,7 @@ case "$1" in
     $0 start
     ;;
   *)
-    echo "Usage: $0 {start|stop|graceful-stop|quick-stop|restart}"
+    echo "Usage: $0 {start|stop|graceful-stop|quick-stop|restart|reload}"
     exit 1
     ;;
 esac
