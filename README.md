@@ -16,17 +16,18 @@ Benefits
   when you are managing many workers.
 * Faster startup - when you start many workers at once, they would normally
   compete for CPU as they load their environments.  Resque-pool can load the
-  environment once and almost instantaneously fork all of the workers.
+  environment once and fork all of the workers almost instantly.
 
 How to use
 -----------
 
 ### YAML file config
 
-Create a `config/resque-pool.yml` with your worker counts.  The YAML file
-supports both using root level defaults as well as environment specific
-overrides (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV` environment variables can
-be used to determine environment).  For example in `config/resque-pool.yml`:
+Create a `config/resque-pool.yml` (or `resque-pool.yml`) with your worker
+counts.  The YAML file supports both using root level defaults as well as
+environment specific overrides (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV`
+environment variables can be used to determine environment).  For example in
+`config/resque-pool.yml`:
 
     foo: 1
     bar: 2
@@ -37,10 +38,11 @@ be used to determine environment).  For example in `config/resque-pool.yml`:
 
 ### Rake task config
 
-Require the rake tasks (`resque/pool/tasks`) in your rake file, configure
-Resque as necessary, and configure `Resque::Pool` to disconnect all open
-sockets in the pool manager and reconnect in the workers.  For example, with
-rails you should put the following into `lib/tasks/resque.rake`:
+Require the rake tasks (`resque/pool/tasks`) in your `Rakefile`, load your
+application environment, configure Resque as necessary, and configure
+`resque:pool:setup` to disconnect all open files and sockets in the pool
+manager and reconnect in the workers.  For example, with rails you should put
+the following into `lib/tasks/resque.rake`:
 
     require 'resque/pool/tasks'
     # this task will get called before resque:pool:setup
@@ -61,7 +63,7 @@ rails you should put the following into `lib/tasks/resque.rake`:
 
 Then you can start the queues via:
 
-    resque-pool --environment production
+    resque-pool --daemon --environment production
 
 This will start up seven worker processes, one exclusively for the foo queue,
 two exclusively for the bar queue, and four workers looking at all queues in
@@ -80,20 +82,19 @@ three levels: a single pool manager, many worker parents, and one worker child
 per worker (when the actual job is being processed).  For example, `ps -ef f |
 grep [r]esque` (in Linux) might return something like the following:
 
-    rails    13858     1  0 13:44 ?        S      0:02 resque-pool-manager: managing [13867, 13875, 13871, 13872, 13868, 13870, 13876]
-    rails    13867 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo
-    rails    13868 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
-    rails    13870 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
-    rails    13871 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
-    rails    13872 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7481 at 1280343254
-    rails     7481 13872  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing foo since 1280343254
-    rails    13875 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
-    rails    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
-    rails     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
+   resque    13858     1  0 13:44 ?        S      0:02 resque-pool-manager: managing [13867, 13875, 13871, 13872, 13868, 13870, 13876]
+   resque    13867 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo
+   resque    13868 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
+   resque    13870 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
+   resque    13871 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
+   resque    13872 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7481 at 1280343254
+   resque     7481 13872  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing foo since 1280343254
+   resque    13875 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
+   resque    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
+   resque     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
 
-You can also run resque-pool as a daemon via `--daemon`.  It will default to
-placing the pidfile and logfiles in the rails default locations, which you may
-want to configure.  The `RAILS_ENV` can be specified via `--environment`.  See
+Running as a daemon will default to placing the pidfile and logfiles in the
+conventional rails locations, although you can configure that.  See
 `resque-pool --help` for more options.
 
 SIGNALS
@@ -114,11 +115,10 @@ via `QUIT`.
 Other Features
 --------------
 
-An example chef recipe is provided (it should work at Engine Yard as is; just
-provide a `/data/#{app_name}/shared/config/resque-pool.yml` on your utility
-servers).  Even if you don't use chef, you can still use the example init.d
-script and monitrc (erb templates) provided in
-`examples/chef_cookbook/templates/default`.
+An example chef cookbook is provided (and should Just Work at Engine Yard as
+is; just provide a `/data/#{app_name}/shared/config/resque-pool.yml` on your
+utility instances).  Even if you don't use chef you can use the example init.d
+and monitrc erb templates in `examples/chef_cookbook/templates/default`.
 
 You can also start a pool manager via `rake resque:pool` or from a plain old
 ruby script by calling `Resque::Pool.run`.
@@ -141,3 +141,4 @@ Contributors
 * Stephen Celis (increased gemspec sanity)
 * Vincent Agnello, Robert Kamunyori, Paul Kauders; for pairing with me at
   B'more on Rails Open Source Hack Nights. :)
+
