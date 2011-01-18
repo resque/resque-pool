@@ -132,20 +132,7 @@ with the `--config` command line option.
 TODO
 -----
 
-* web interface for adding and removing workers (etc)
-* config file split by hostname
-* rename to `resque-squad`?
-* cmd line option for non-rake loading
-* cmd line option for preloading ruby file
-* provide Unix style log formatter (compatible with $stdout/$stderr)
-* recover gracefully from a malformed config file (on startup and HUP)
-* change procline for malformed config file, graceful shutdown... and other states?
-* figure out a good automated way to test this (cucumber or rspec?)
-* clean up the code (I stole most of it from unicorn, and it's still a bit
-  bastardized); excessive use of vim foldmarkers are a code smell!
-* rdoc
-* integrate with or incorporate resque-batchworker features? (v2.0)
-* integrate with resque-scheduler? (v2.0)
+See [the TODO list](https://github.com/nevans/resque-pool/issues) at github issues.
 
 Contributors
 -------------
