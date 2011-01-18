@@ -1,2 +1,5 @@
-.bundle
+pkg/*
 *.gem
+.bundle
+*.log
+*.pid

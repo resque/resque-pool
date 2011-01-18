@@ -1,0 +1,6 @@
+check process <%= @app_name %>_resque
+  with pidfile <%= @pidfile %>
+  start program = "/etc/init.d/<%= @app_name %>_resque start" with timeout 90 seconds
+  stop program  = "/etc/init.d/<%= @app_name %>_resque stop"  with timeout 90 seconds
+  #if totalmem is greater than <%= @max_mem || "300 MB" %> for 10 cycles then restart # eating up memory?
+  group resque

@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
+require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
 require 'resque/pool/pool_status'

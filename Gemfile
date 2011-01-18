@@ -1,5 +1,3 @@
-source :rubygems
+source "http://rubygems.org"
 
-gem "rake"
-gem "thin"
 gemspec
