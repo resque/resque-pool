@@ -90,8 +90,8 @@ module Resque
     end
 
     def environment
-      if defined? RAILS_ENV
-        RAILS_ENV
+      if defined? Rails
+        Rails.env
       else
         ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
       end
