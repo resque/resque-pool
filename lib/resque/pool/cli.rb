@@ -56,7 +56,8 @@ where [options] are:
         pid = Process.pid
         if pidfile
           if File.exist? pidfile
-            if `ps ax | awk '{print $1}' | egrep ^#{File.open(pidfile).read.strip}$`.blank? 
+            running_pid = `ps ax | awk '{print $1}' | egrep ^#{File.open(pidfile).read.strip}$`
+            if running_pid.nil? || running_pid.to_s.strip == ''
               File.delete pidfile
             else
               raise "Pidfile already exists at #{pidfile}.  Check to make sure process is not already running."
