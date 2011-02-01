@@ -56,7 +56,11 @@ where [options] are:
         pid = Process.pid
         if pidfile
           if File.exist? pidfile
-            raise "Pidfile already exists at #{pidfile}.  Check to make sure process is not already running."
+            if `ps x | awk '{print $1}' | grep #{File.open(pidfile).read}` 
+              raise "Pidfile already exists at #{pidfile}.  Check to make sure process is not already running."
+            else
+              File.delete pidfile
+            end
           end
           File.open pidfile, "w" do |f|
             f.write pid
