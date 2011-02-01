@@ -79,7 +79,7 @@ where [options] are:
       def setup_environment(opts)
         ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
         puts "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment."
-        ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
+        ENV["RESQUE_POOL_CONFIG"] = opts[:config].to_s if opts[:config]
       end
 
       def start_pool
