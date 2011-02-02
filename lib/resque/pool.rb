@@ -291,16 +291,10 @@ module Resque
         #self_pipe.each {|io| io.close }
         begin
           worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
-        rescue Exception => e
-          if e.message =~ /Errno::EINTR/
-            log "Caught interrupted system call Errno::EINTR. Retrying connection"
-            retry
-          else
-            log "re-raising Exception: #{e.message}"
-            raise e
-          end
+        rescue Errno::EINTR
+          log "Caught interrupted system call Errno::EINTR. Retrying."
+          retry
         end
-
       end
       workers[queues] ||= {}
       workers[queues][pid] = worker
