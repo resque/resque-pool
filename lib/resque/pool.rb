@@ -296,6 +296,7 @@ module Resque
             log "Caught interrupted system call Errno::EINTR. Retrying connection"
             retry
           else
+            log "re-raising Exception: #{e.message}"
             raise e
           end
         end
