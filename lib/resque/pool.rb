@@ -289,7 +289,17 @@ module Resque
         call_after_prefork!
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }
-        worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
+        begin
+          worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
+        rescue Exception => e
+          if e.message =~ /Errno::EINTR/
+            log "Caught interrupted system call Errno::EINTR. Retrying connection"
+            retry
+          else
+            raise e
+          end
+        end
+
       end
       workers[queues] ||= {}
       workers[queues][pid] = worker
