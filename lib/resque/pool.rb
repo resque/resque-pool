@@ -189,6 +189,7 @@ module Resque
         break if handle_sig_queue! == :break
         if sig_queue.empty?
           master_sleep
+          monitor_memory_usage
           maintain_worker_count
         end
         procline("managing #{all_pids.inspect}")
@@ -239,6 +240,36 @@ module Resque
     def signal_all_workers(signal)
       all_pids.each do |pid|
         Process.kill signal, pid
+      end
+    end
+
+    def monitor_memory_usage
+      #only check every minute
+      if @last_mem_check.nil? || @last_mem_check < Time.now - 60
+        
+        all_pids.each do |pid|
+          smaps_filename = "/proc/#{pid}/smaps"
+          
+          #Grab actual memory usage from proc in MB
+          mem_usage = `
+            if [ -f #{smaps_filename} ];
+            then
+              grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
+            else echo "0"
+            fi
+          `.to_i
+
+          if mem_usage > 800
+            log "Terminating worker #{pid} for using #{mem_usage}MB memory"
+            Process.kill :TERM, pid
+          elsif mem_usage > 400
+            log "Gracefully shutting down worker #{pid} for using #{mem_usage}MB memory"
+            Process.kill :QUIT, pid
+          end
+
+        end
+
+        @last_mem_check = Time.now
       end
     end
 
