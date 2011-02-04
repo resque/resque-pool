@@ -251,13 +251,17 @@ module Resque
           smaps_filename = "/proc/#{pid}/smaps"
           
           #Grab actual memory usage from proc in MB
-          mem_usage = `
-            if [ -f #{smaps_filename} ];
-            then
-              grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
-            else echo "0"
-            fi
-          `.to_i
+          begin
+            mem_usage = `
+              if [ -f #{smaps_filename} ];
+                then
+                  grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
+                else echo "0"
+              fi
+            `.to_i
+          rescue Errno::EINTR
+            retry
+          end
 
           if mem_usage > 800
             log "Terminating worker #{pid} for using #{mem_usage}MB memory"
