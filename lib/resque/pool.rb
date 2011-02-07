@@ -277,14 +277,37 @@ module Resque
       end
     end
 
+    def orphaned_worker_count
+      if @last_orphaned_check.nil? || @last_orphaned_check < Time.now - 60
+        if @orphaned_pids.nil?
+            printf_line = '%d %d\n'
+          pids_with_parents = `ps -f axf | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
+          pids = pids_with_parents.collect {|x| x.split[0].to_i}
+          parents = pids_with_parents.collect {|x| x.split[1].to_i}
+          pids.delete_if {|x| parents.include?(x)}
+          pids.delete_if {|x| all_pids.include?(x)}
+          @orphaned_pids = pids
+        elsif @orphaned_pids.size > 0
+          @orphaned_pids.delete_if do |pid|
+            ps_out = `ps --no-heading p #{pid}`
+            ps_out.nil? || ps_out.strip == ''
+          end
+        end
+        @last_orphaned_check = Time.now
+        log "Current orphaned pids: #{@orphaned_pids}" if @orphaned_pids.size > 0
+      end
+      @orphaned_pids.size
+    end
+
     # }}}
     # ???: maintain_worker_count, all_known_queues {{{
 
     def maintain_worker_count
+      orphaned_offset = orphaned_worker_count / all_known_queues.size
       all_known_queues.each do |queues|
-        delta = worker_delta_for(queues)
-        spawn_missing_workers_for(queues) if delta > 0
-        quit_excess_workers_for(queues)   if delta < 0
+        delta = worker_delta_for(queues) - orphaned_offset
+        spawn_missing_workers_for(queues, delta) if delta > 0
+        quit_excess_workers_for(queues, delta)   if delta < 0
       end
     end
 
@@ -296,16 +319,18 @@ module Resque
     # methods that operate on a single grouping of queues {{{
     # perhaps this means a class is waiting to be extracted
 
-    def spawn_missing_workers_for(queues)
-      worker_delta_for(queues).times do |nr|
-        spawn_worker!(queues)
-      end
+    def spawn_missing_workers_for(queues, delta)
+      delta.times { spawn_worker!(queues) } if delta > 0
     end
 
-    def quit_excess_workers_for(queues)
-      delta = -worker_delta_for(queues)
-      pids_for(queues)[0...delta].each do |pid|
-        Process.kill("QUIT", pid)
+    def quit_excess_workers_for(queues, delta)
+      if delta < 0
+        queue_pids = pids_for(queues)
+        if queue_pids.size >= delta.abs
+          queue_pids[0...delta.abs].each {|pid| Process.kill("QUIT", pid)}
+        else
+          queue_pids.each {|pid| Process.kill("QUIT", pid)}
+        end
       end
     end
 
