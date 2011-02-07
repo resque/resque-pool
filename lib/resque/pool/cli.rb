@@ -56,7 +56,13 @@ where [options] are:
         pid = Process.pid
         if pidfile
           if File.exist? pidfile
-            raise "Pidfile already exists at #{pidfile}.  Check to make sure process is not already running."
+            old_pid = open(pidfile).read.strip
+            ps_output = `ps p #{old_pid}`
+            if ps_output =~ /#{old_pid}/
+              raise "Pidfile already exists at #{pidfile} and process is still running."
+            else
+              File.delete pidfile
+            end
           end
           File.open pidfile, "w" do |f|
             f.write pid
