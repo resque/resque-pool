@@ -281,7 +281,7 @@ module Resque
       if @last_orphaned_check.nil? || @last_orphaned_check < Time.now - 60
         if @orphaned_pids.nil?
             printf_line = '%d %d\n'
-          pids_with_parents = `ps -f axf | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
+          pids_with_parents = `ps -Af | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
           pids = pids_with_parents.collect {|x| x.split[0].to_i}
           parents = pids_with_parents.collect {|x| x.split[1].to_i}
           pids.delete_if {|x| parents.include?(x)}
