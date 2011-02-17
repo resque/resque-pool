@@ -291,12 +291,12 @@ module Resque
           total_usage += memory_usage(child_pid) unless child_pid == 0
           
           if total_usage > 250
-            log "Terminating worker #{pid} for using #{mem_usage}MB memory"
+            log "Terminating worker #{pid} for using #{total_usage}MB memory"
             Process.kill :TERM, pid
             add_killed_worker(pid)
             add_killed_worker(child_pid) unless child_pid == 0
-          elsif mem_usage > 200
-            log "Gracefully shutting down worker #{pid} for using #{mem_usage}MB memory"
+          elsif total_usage > 200
+            log "Gracefully shutting down worker #{pid} for using #{total_usage}MB memory"
             Process.kill :QUIT, pid
           end
 
