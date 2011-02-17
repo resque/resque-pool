@@ -243,30 +243,59 @@ module Resque
       end
     end
 
+    def memory_usage(pid)
+      smaps_filename = "/proc/#{pid}/smaps"
+          
+      #Grab actual memory usage from proc in MB
+      begin
+        mem_usage = `
+          if [ -f #{smaps_filename} ];
+            then
+              grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
+            else echo "0"
+          fi
+        `.to_i
+        rescue Errno::EINTR
+          retry
+        end
+    end
+    
+    def process_exists?(pid)
+      ps_line = `ps -p #{pid} --no-header`
+      !ps_line.nil? && ps_line.strip != ''
+    end
+
+    def hard_kill_workers
+      @term_workers ||= []
+      #look for workers that didn't terminate
+      @term_workers.delete_if {|pid| !process_exists?(pid)}
+      #send the rest a -9
+      @term_workers.each {|pid| `kill -9 #{pid}`}
+    end
+
+    def add_killed_worker(pid)
+      @term_workers ||= []
+      @term_workers << pid
+    end
+
     def monitor_memory_usage
       #only check every minute
       if @last_mem_check.nil? || @last_mem_check < Time.now - 60
-        
-        all_pids.each do |pid|
-          smaps_filename = "/proc/#{pid}/smaps"
-          
-          #Grab actual memory usage from proc in MB
-          begin
-            mem_usage = `
-              if [ -f #{smaps_filename} ];
-                then
-                  grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
-                else echo "0"
-              fi
-            `.to_i
-          rescue Errno::EINTR
-            retry
-          end
+        hard_kill_workers
 
-          if mem_usage > 800
+        all_pids.each do |pid|
+
+          total_usage = memory_usage(pid)
+
+          child_pid = `ps --ppid #{pid} -o pid --no-header`.to_i
+          total_usage += memory_usage(child_pid) unless child_pid == 0
+          
+          if total_usage > 250
             log "Terminating worker #{pid} for using #{mem_usage}MB memory"
             Process.kill :TERM, pid
-          elsif mem_usage > 400
+            add_killed_worker(pid)
+            add_killed_worker(child_pid) unless child_pid == 0
+          elsif mem_usage > 200
             log "Gracefully shutting down worker #{pid} for using #{mem_usage}MB memory"
             Process.kill :QUIT, pid
           end
