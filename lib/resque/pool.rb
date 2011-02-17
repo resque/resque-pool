@@ -261,7 +261,11 @@ module Resque
     end
     
     def process_exists?(pid)
-      ps_line = `ps -p #{pid} --no-header`
+      begin
+        ps_line = `ps -p #{pid} --no-header`
+      rescue Errno::EINTR
+        retry
+      end
       !ps_line.nil? && ps_line.strip != ''
     end
 
@@ -287,7 +291,12 @@ module Resque
 
           total_usage = memory_usage(pid)
 
-          child_pid = `ps --ppid #{pid} -o pid --no-header`.to_i
+          begin
+            child_pid = `ps --ppid #{pid} -o pid --no-header`.to_i
+          rescue Errno::EINTR
+            retry
+          end
+          
           total_usage += memory_usage(child_pid) unless child_pid == 0
           
           if total_usage > 250
@@ -310,7 +319,11 @@ module Resque
       if @last_orphaned_check.nil? || @last_orphaned_check < Time.now - 60
         if @orphaned_pids.nil?
             printf_line = '%d %d\n'
-          pids_with_parents = `ps -Af | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
+          begin
+            pids_with_parents = `ps -Af | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
+          rescue Errno::EINTR
+            retry
+          end
           pids = pids_with_parents.collect {|x| x.split[0].to_i}
           parents = pids_with_parents.collect {|x| x.split[1].to_i}
           pids.delete_if {|x| parents.include?(x)}
@@ -318,8 +331,12 @@ module Resque
           @orphaned_pids = pids
         elsif @orphaned_pids.size > 0
           @orphaned_pids.delete_if do |pid|
-            ps_out = `ps --no-heading p #{pid}`
-            ps_out.nil? || ps_out.strip == ''
+            begin
+              ps_out = `ps --no-heading p #{pid}`
+              ps_out.nil? || ps_out.strip == ''
+            rescue Errno::EINTR
+              retry
+            end
           end
         end
         @last_orphaned_check = Time.now
