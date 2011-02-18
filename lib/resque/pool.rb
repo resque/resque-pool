@@ -221,6 +221,8 @@ module Resque
           # TODO: close any file descriptors connected to worker, if any
           log "** reaped #{status.inspect}, worker=#{worker.queues.join(",")}"
         end
+      rescue Errno::EINTR
+        retry
       rescue Errno::ECHILD
       end
     end
