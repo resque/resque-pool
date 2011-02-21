@@ -1,9 +1,10 @@
 Resque Pool
 ===========
 
-Resque pool is a simple library for managing a pool of resque workers.  Given a
-a config file, it manages your workers for you, starting up the appropriate
-number of workers for each.
+Resque pool is a simple library for managing a pool of
+[resque](http://github.com/defunkt/resque) workers.  Given a a config file, it
+manages your workers for you, starting up the appropriate number of workers for
+each worker type.
 
 Benefits
 ---------

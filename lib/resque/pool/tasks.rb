@@ -4,11 +4,11 @@ require 'resque/pool'
 
 namespace :resque do
 
-  desc "resque worker config (not pool related).  e.g. hoptoad"
+  # resque worker config (not pool related).  e.g. hoptoad, rails environment
   task :setup
 
   namespace :pool do
-    "resque pool config.  e.g. after_prefork connection handling"
+     # resque pool config.  e.g. after_prefork connection handling
     task :setup
   end
 

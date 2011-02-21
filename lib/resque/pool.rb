@@ -8,16 +8,14 @@ require 'yaml'
 
 module Resque
   class Pool
-    include Logging
-    attr_reader :config
-    attr_reader :workers
-
-    # CONSTANTS {{{
     SIG_QUEUE_MAX_SIZE = 5
     DEFAULT_WORKER_INTERVAL = 5
     QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
-    CHUNK_SIZE=(16 * 1024)
-    # }}}
+    CHUNK_SIZE = (16 * 1024)
+
+    include Logging
+    attr_reader :config
+    attr_reader :workers
 
     def initialize(config)
       init_config(config)
