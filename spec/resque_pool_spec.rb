@@ -1,6 +1,6 @@
 require 'spec/spec_helper'
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   config.after {
     Object.send(:remove_const, :RAILS_ENV) if defined? RAILS_ENV
     ENV.delete 'RACK_ENV'
