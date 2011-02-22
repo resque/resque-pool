@@ -11,7 +11,12 @@ module Resque
 
       # TODO: make this use an actual logger
       def log(message)
-        puts message
+        puts "resque-pool-manager[#{Process.pid}]: #{message}"
+      end
+
+      # TODO: make this use an actual logger
+      def log_worker(message)
+        puts "resque-pool-worker[#{Process.pid}]: #{message}"
       end
 
     end

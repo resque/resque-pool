@@ -176,8 +176,8 @@ module Resque
       init_sig_handlers!
       maintain_worker_count
       procline("(started)")
-      log "**** started master at PID: #{Process.pid}"
-      log "**** Pool contains PIDs: #{all_pids.inspect}"
+      log "started manager"
+      log "Pool contains worker PIDs: #{all_pids.inspect}"
       self
     end
 
@@ -193,7 +193,7 @@ module Resque
       end
       procline("(shutting down)")
       #stop # gracefully shutdown all workers on our way out
-      log "**** master complete"
+      log "manager finished"
       #unlink_pid_safe(pid) if pid
     end
 
@@ -216,7 +216,7 @@ module Resque
           wpid or break
           worker = delete_worker(wpid)
           # TODO: close any file descriptors connected to worker, if any
-          log "** reaped #{status.inspect}, worker=#{worker.queues.join(",")}"
+          log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
         end
       rescue Errno::ECHILD
       end
@@ -283,7 +283,7 @@ module Resque
     def spawn_worker!(queues)
       worker = create_worker(queues)
       pid = fork do
-        log "*** Starting worker #{worker}"
+        log_worker "Starting worker #{worker}"
         call_after_prefork!
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }
