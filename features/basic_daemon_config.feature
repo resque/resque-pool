@@ -9,40 +9,30 @@ Feature: Basic resque-pool daemon configuration and operation
     require 'resque/pool/tasks'
     """
 
-  Scenario: basic Rakefile, no config file
+  Scenario: no config file
     When I run the pool manager as "resque-pool"
-    Then the pool manager should start up
-    And the pool manager should report to stdout that the pool is empty
+    Then the pool manager should report that the pool is empty
     And the pool manager should have no child processes
     When I send the pool manager the "QUIT" signal
     Then the pool manager should finish
-    And the pool manager should report to stdout that it is finished
+    And the pool manager should report that it is finished
 
   @slow_exit
   Scenario: basic config file
     Given a file named "config/resque-pool.yml" with:
     """
-    foo: 2
+    foo: 1
     bar: 2
-    "bar,baz": 2
+    "bar,baz": 3
     """
-    When I run "resque-pool" in the background
-    Then the output should contain the following lines (with interpolated $PID):
-      """
-      resque-pool-manager[$PID]: Resque Pool running in development environment
-      resque-pool-manager[$PID]: started manager
-      """
-    Then the output should match:
-      """
-      resque-pool-manager\[\d+\]: Pool contains worker PIDs: \[\d+, \d+, \d+, \d+, \d+, \d+\]
-      """
-    When I send "resque-pool" the "QUIT" signal
-    Then the "resque-pool" process should finish
-    And the output should match /Reaped resque worker\[\d+\] \(status: 0\) queues: foo/
-    And the output should match /Reaped resque worker\[\d+\] \(status: 0\) queues: bar/
-    And the output should match /Reaped resque worker\[\d+\] \(status: 0\) queues: bar,baz/
-    And the output should contain the following lines (with interpolated $PID):
-      """
-      resque-pool-manager[$PID]: QUIT: graceful shutdown, waiting for children
-      resque-pool-manager[$PID]: manager finished
-      """
+    When I run the pool manager as "resque-pool"
+    Then the pool manager should report that 6 workers are in the pool
+    And the pool manager should have 1 "foo" worker child processes
+    And the pool manager should have 2 "bar" worker child processes
+    And the pool manager should have 3 "bar,baz" worker child processes
+    When I send the pool manager the "QUIT" signal
+    Then the pool manager should finish
+    And the pool manager should report that a "foo" worker has been reaped
+    And the pool manager should report that a "bar" worker has been reaped
+    And the pool manager should report that a "bar,baz" worker has been reaped
+    And the pool manager should report that it is finished
