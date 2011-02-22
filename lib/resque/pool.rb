@@ -68,13 +68,14 @@ module Resque
     # }}}
     # Config: load config and config file {{{
 
+    def config_file
+      @config_file || (!@config && ::Resque::Pool.choose_config_file)
+    end
+
     def init_config(config)
-      unless config
-        raise ArgumentError,
-          "No configuration found. Please setup config/resque-pool.yml"
-      end
-      if config.kind_of? String
-        @config_file = config.to_s
+      case config
+      when String, nil
+        @config_file = config
       else
         @config = config.dup
       end
@@ -82,7 +83,11 @@ module Resque
     end
 
     def load_config
-      @config_file and @config = YAML.load_file(@config_file)
+      if config_file
+        @config = YAML.load_file(config_file)
+      else
+        @config ||= {}
+      end
       environment and @config[environment] and config.merge!(@config[environment])
       config.delete_if {|key, value| value.is_a? Hash }
     end
@@ -177,8 +182,16 @@ module Resque
       maintain_worker_count
       procline("(started)")
       log "started manager"
-      log "Pool contains worker PIDs: #{all_pids.inspect}"
+      report_worker_pool_pids
       self
+    end
+
+    def report_worker_pool_pids
+      if workers.empty?
+        log "Pool is empty"
+      else
+        log "Pool contains worker PIDs: #{all_pids.inspect}"
+      end
     end
 
     def join

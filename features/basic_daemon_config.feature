@@ -9,14 +9,13 @@ Feature: Basic resque-pool daemon configuration and operation
     require 'resque/pool/tasks'
     """
 
-  @announce @wip
   Scenario: basic Rakefile, no config file
     When I run "resque-pool" in the background
     Then the output should contain the following lines (with interpolated $PID):
       """
       resque-pool-manager[$PID]: Resque Pool running in development environment
       resque-pool-manager[$PID]: started manager
-      resque-pool-manager[$PID]: Resque worker pool is empty
+      resque-pool-manager[$PID]: Pool is empty
       """
     When I send "resque-pool" the "QUIT" signal
     Then the "resque-pool" process should finish

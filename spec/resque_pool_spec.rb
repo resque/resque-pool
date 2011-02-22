@@ -80,6 +80,13 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
 
 end
 
+describe Resque::Pool, "given no configuration" do
+  subject { Resque::Pool.new(nil) }
+  it "should have no worker types" do
+    subject.config.should == {}
+  end
+end
+
 describe Resque::Pool, "when loading the pool configuration from a file" do
 
   subject { Resque::Pool.new("spec/resque-pool.yml") }
