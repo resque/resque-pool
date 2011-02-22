@@ -3,7 +3,7 @@ When /^I run "([^"]*)" in the background$/ do |cmd|
   run_background(unescape(cmd))
   # this is a horrible hack, to make sure that it's done what it needs to do
   # before we do our next step
-  sleep 2
+  sleep 1
 end
 
 Then /^the output should contain the following lines \(with interpolated \$PID\):$/ do |partial_output|
