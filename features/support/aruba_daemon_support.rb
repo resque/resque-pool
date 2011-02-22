@@ -20,6 +20,13 @@ module Aruba
       interpolated
     end
 
+    def kill_all_processes!
+      stop_processes!
+    rescue
+      processes.each {|cmd,process| send_signal(cmd, 'KILL') }
+      raise
+    end
+
   end
 
   class Process

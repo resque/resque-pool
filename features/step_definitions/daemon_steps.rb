@@ -26,5 +26,5 @@ Before("@slow_exit") do
 end
 
 After do
-  stop_processes!
+  kill_all_processes!
 end
