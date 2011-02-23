@@ -319,20 +319,24 @@ module Resque
     end
 
     def stop_worker(pid, signal=:TERM)
-      worker = Resque.working.find do |w|
-        host, worker_pid, queues = w.id.split(':')
-        w if worker_pid.to_i == pid.to_i && host == hostname
-      end
-      if worker
-        encoded_job = worker.job
-        verb = signal == :QUIT ? 'Graceful' : 'Forcing'
-        log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % (Time.now - Time.parse(encoded_job['run_at']))}s"
-      end
+      begin
+        worker = Resque.working.find do |w|
+          host, worker_pid, queues = w.id.split(':')
+          w if worker_pid.to_i == pid.to_i && host == hostname
+        end
+        if worker
+          encoded_job = worker.job
+          verb = signal == :QUIT ? 'Graceful' : 'Forcing'
+          log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % (Time.now - Time.parse(encoded_job['run_at']))}s"
+        end
 
-      Process.kill signal, pid
-      if signal == :TERM
-        add_killed_worker(pid)
-        add_killed_worker(find_child_pid(pid))
+        Process.kill signal, pid
+        if signal == :TERM
+          add_killed_worker(pid)
+          add_killed_worker(find_child_pid(pid))
+        end
+      rescue Errno::EINTR
+        retry
       end
     end
 
