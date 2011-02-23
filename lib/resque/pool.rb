@@ -68,13 +68,14 @@ module Resque
     # }}}
     # Config: load config and config file {{{
 
+    def config_file
+      @config_file || (!@config && ::Resque::Pool.choose_config_file)
+    end
+
     def init_config(config)
-      unless config
-        raise ArgumentError,
-          "No configuration found. Please setup config/resque-pool.yml"
-      end
-      if config.kind_of? String
-        @config_file = config.to_s
+      case config
+      when String, nil
+        @config_file = config
       else
         @config = config.dup
       end
@@ -82,7 +83,11 @@ module Resque
     end
 
     def load_config
-      @config_file and @config = YAML.load_file(@config_file)
+      if config_file
+        @config = YAML.load_file(config_file)
+      else
+        @config ||= {}
+      end
       environment and @config[environment] and config.merge!(@config[environment])
       config.delete_if {|key, value| value.is_a? Hash }
     end
@@ -176,9 +181,17 @@ module Resque
       init_sig_handlers!
       maintain_worker_count
       procline("(started)")
-      log "**** started master at PID: #{Process.pid}"
-      log "**** Pool contains PIDs: #{all_pids.inspect}"
+      log "started manager"
+      report_worker_pool_pids
       self
+    end
+
+    def report_worker_pool_pids
+      if workers.empty?
+        log "Pool is empty"
+      else
+        log "Pool contains worker PIDs: #{all_pids.inspect}"
+      end
     end
 
     def join
@@ -193,7 +206,7 @@ module Resque
       end
       procline("(shutting down)")
       #stop # gracefully shutdown all workers on our way out
-      log "**** master complete"
+      log "manager finished"
       #unlink_pid_safe(pid) if pid
     end
 
@@ -216,7 +229,7 @@ module Resque
           wpid or break
           worker = delete_worker(wpid)
           # TODO: close any file descriptors connected to worker, if any
-          log "** reaped #{status.inspect}, worker=#{worker.queues.join(",")}"
+          log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
         end
       rescue Errno::ECHILD
       end
@@ -283,7 +296,7 @@ module Resque
     def spawn_worker!(queues)
       worker = create_worker(queues)
       pid = fork do
-        log "*** Starting worker #{worker}"
+        log_worker "Starting worker #{worker}"
         call_after_prefork!
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }

@@ -4,6 +4,7 @@ require 'resque/pool'
 module Resque
   class Pool
     module CLI
+      extend Logging
       extend self
 
       def run
@@ -84,7 +85,7 @@ where [options] are:
 
       def setup_environment(opts)
         ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
-        puts "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment."
+        log "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment"
         ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
       end
 
