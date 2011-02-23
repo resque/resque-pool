@@ -1,9 +1,23 @@
 When /^I run the pool manager as "([^"]*)"$/ do |cmd|
   @pool_manager_process = run_background(unescape(cmd))
-  # this is a horrible hack, to make sure that it's done what it needs to do
-  # before we do our next step
-  sleep 1
-  Then "the pool manager should start up"
+  keep_trying do
+    Then "the pool manager should start up"
+  end
+end
+
+# this is a horrible hack, to make sure that it's done what it needs to do
+# before we do our next step
+def keep_trying(timeout=10, tries=0)
+  announce "Try: #{tries}" if @announce_env
+  yield
+rescue RSpec::Expectations::ExpectationNotMetError
+  if tries < 10
+    sleep 1
+    tries += 1
+    retry
+  else
+    raise
+  end
 end
 
 When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
@@ -33,7 +47,6 @@ end
 
 Then /^the pool manager should report that (\d+) workers are in the pool$/ do |count|
   count = Integer(count)
-  announce "TODO: check ps output"
   announce "TODO: check output for worker started messages"
   pid_regex = (1..count).map { '\d+' }.join ', '
   Then "the output should match:", <<-EOF
@@ -41,12 +54,22 @@ resque-pool-manager\\[\\d+\\]: Pool contains worker PIDs: \\[#{pid_regex}\\]
   EOF
 end
 
-Then "the pool manager should have no child processes" do
-  announce "TODO: check ps output"
+def children_of(ppid)
+  ps = `ps -eo ppid,pid,cmd | grep '^ *#{ppid} '`
+  ps.split(/\s*\n/).map do |line|
+    _, pid, cmd = line.split(/\s+/, 3)
+    [pid, cmd]
+  end
 end
 
-Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do |arg1, arg2|
-  announce "TODO: check ps output"
+Then "the pool manager should have no child processes" do
+  children_of(@background.pid).should have(:no).keys
+end
+
+Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do |count, queues|
+  children_of(@background.pid).select do |pid, cmd|
+    cmd =~ /^resque-\d+.\d+.\d+: Waiting for #{queues}$/
+  end.should have(Integer(count)).members
 end
 
 Then "the pool manager should finish" do

@@ -5,6 +5,21 @@ module Aruba
 
   module Api
 
+    # this is a horrible hack, to make sure that it's done what it needs to do
+    # before we do our next step
+    def keep_trying(timeout=10, tries=0)
+      announce "Try: #{tries}" if @announce_env
+      yield
+    rescue RSpec::Expectations::ExpectationNotMetError
+      if tries < 10
+        sleep 1
+        tries += 1
+        retry
+      else
+        raise
+      end
+    end
+
     def run_background(cmd)
       @background = run(cmd)
     end
