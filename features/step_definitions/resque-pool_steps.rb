@@ -33,10 +33,19 @@ end
 Then /^the pool manager should report that (\d+) workers are in the pool$/ do |count|
   count = Integer(count)
   announce "TODO: check output for worker started messages"
-  pid_regex = (1..count).map { '\d+' }.join ', '
-  Then "the output should match:", <<-EOF
-resque-pool-manager\\[\\d+\\]: Pool contains worker PIDs: \\[#{pid_regex}\\]
-  EOF
+  pid_regex = (1..count).map { '(\d+)' }.join ', '
+  full_regex = /resque-pool-manager\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
+  output = all_output
+  output.should =~ full_regex
+  @worker_pids = full_regex.match(output).captures.map {|pid| pid.to_i }
+end
+
+Then /^the resque workers should all shutdown$/ do
+  @worker_pids.each do |pid|
+    keep_trying do
+      lambda { Process.kill(0, pid) }.should raise_error(Errno::ESRCH)
+    end
+  end
 end
 
 def children_of(ppid)

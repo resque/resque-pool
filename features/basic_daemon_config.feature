@@ -31,8 +31,34 @@ Feature: Basic resque-pool daemon configuration and operation
     And the pool manager should have 2 "bar" worker child processes
     And the pool manager should have 3 "bar,baz" worker child processes
     When I send the pool manager the "QUIT" signal
-    Then the pool manager should finish
+    Then the resque workers should all shutdown
+    And the pool manager should finish
     And the pool manager should report that a "foo" worker has been reaped
     And the pool manager should report that a "bar" worker has been reaped
     And the pool manager should report that a "bar,baz" worker has been reaped
     And the pool manager should report that it is finished
+
+  @wip
+  Scenario: daemonized
+    Given a directory named "log"
+    And a directory named "tmp/pids"
+    And a file named "config/resque-pool.yml" with:
+    """
+    foo: 2
+    bar: 4
+    "baz,quux": 4
+    """
+    When I run the pool manager as "resque-pool -d"
+    Then the pool manager should daemonize
+    And the pool manager should record its pid in "tmp/pids/resque-pool.pid"
+    Then the pool manager should log that 10 workers are in the pool
+    And the pool manager should have 2 "foo" worker child processes
+    And the pool manager should have 4 "bar" worker child processes
+    And the pool manager should have 4 "baz,quux" worker child processes
+    When I send the pool manager the "QUIT" signal
+    Then the resque workers should all shutdown
+    And the pool manager daemon should finish
+    And the pool manager should log that a "foo" worker has been reaped
+    And the pool manager should log that a "bar" worker has been reaped
+    And the pool manager should log that a "bar,baz" worker has been reaped
+    And the pool manager should log that it is finished

@@ -11,7 +11,7 @@ module Aruba
       announce "Try: #{tries}" if @announce_env
       yield
     rescue RSpec::Expectations::ExpectationNotMetError
-      if tries < 10
+      if tries < timeout
         sleep 1
         tries += 1
         retry
