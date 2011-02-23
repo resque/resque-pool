@@ -281,7 +281,7 @@ module Resque
 
     def add_killed_worker(pid)
       @term_workers ||= []
-      @term_workers << pid
+      @term_workers << pid if pid
     end
 
     def monitor_memory_usage
@@ -292,28 +292,56 @@ module Resque
         all_pids.each do |pid|
 
           total_usage = memory_usage(pid)
-
-          begin
-            child_pid = `ps --ppid #{pid} -o pid --no-header`.to_i
-          rescue Errno::EINTR
-            retry
-          end
+          child_pid = find_child_pid(pid)
           
-          total_usage += memory_usage(child_pid) unless child_pid == 0
+          total_usage += memory_usage(child_pid) if child_pid
           
           if total_usage > 250
             log "Terminating worker #{pid} for using #{total_usage}MB memory"
-            Process.kill :TERM, pid
-            add_killed_worker(pid)
-            add_killed_worker(child_pid) unless child_pid == 0
+            stop_worker(pid)
           elsif total_usage > 200
             log "Gracefully shutting down worker #{pid} for using #{total_usage}MB memory"
-            Process.kill :QUIT, pid
+            stop_worker(pid, :QUIT)
           end
 
         end
 
         @last_mem_check = Time.now
+      end
+    end
+
+    def hostname
+      begin
+        @hostname ||= `hostname`.strip
+      rescue Errno::EINTR
+        retry
+      end
+    end
+
+    def stop_worker(pid, signal=:TERM)
+      worker = Resque.working.find do |w|
+        host, worker_pid, queues = w.id.split(':')
+        w if worker_pid.to_i == pid.to_i && host == hostname
+      end
+      if worker
+        encoded_job = worker.job
+        verb = signal == :QUIT ? 'Graceful' : 'Forcing'
+        log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % (Time.now - Time.parse(encoded_job['run_at']))}s"
+      end
+
+      Process.kill signal, pid
+      if signal == :TERM
+        add_killed_worker(pid)
+        add_killed_worker(find_child_pid(pid))
+      end
+    end
+
+    def find_child_pid(parent_pid)
+      begin
+        p = `ps --ppid #{parent_pid} -o pid --no-header`.to_i
+        p == 0 ? nil : p
+      rescue Errno::EINTR
+        retry
       end
     end
 
