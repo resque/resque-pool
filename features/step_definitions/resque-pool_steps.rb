@@ -5,21 +5,6 @@ When /^I run the pool manager as "([^"]*)"$/ do |cmd|
   end
 end
 
-# this is a horrible hack, to make sure that it's done what it needs to do
-# before we do our next step
-def keep_trying(timeout=10, tries=0)
-  announce "Try: #{tries}" if @announce_env
-  yield
-rescue RSpec::Expectations::ExpectationNotMetError
-  if tries < 10
-    sleep 1
-    tries += 1
-    retry
-  else
-    raise
-  end
-end
-
 When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
   @pool_manager_process.send_signal signal
   case signal
@@ -57,7 +42,7 @@ end
 def children_of(ppid)
   ps = `ps -eo ppid,pid,cmd | grep '^ *#{ppid} '`
   ps.split(/\s*\n/).map do |line|
-    _, pid, cmd = line.split(/\s+/, 3)
+    _, pid, cmd = line.strip.split(/\s+/, 3)
     [pid, cmd]
   end
 end
