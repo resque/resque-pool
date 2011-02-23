@@ -4,7 +4,7 @@ When /^I run "([^"]*)" in the background$/ do |cmd|
 end
 
 Then /^the output should contain the following lines \(with interpolated \$PID\):$/ do |partial_output|
-  interpolate_background_pid(partial_output).lines.each do |line|
+  interpolate_background_pid(partial_output).split("\n").each do |line|
     all_output.should include(line)
   end
 end
