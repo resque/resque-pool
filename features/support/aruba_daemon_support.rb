@@ -29,8 +29,12 @@ module Aruba
       processes[cmd].send_signal signal
     end
 
+    def background_pid
+      @pid_from_pidfile || @background.pid
+    end
+
     def interpolate_background_pid(string)
-      interpolated = string.gsub('$PID', @background.pid.to_s)
+      interpolated = string.gsub('$PID', background_pid.to_s)
       announce_or_puts interpolated if @announce_env
       interpolated
     end

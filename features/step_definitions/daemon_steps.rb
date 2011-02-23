@@ -3,9 +3,9 @@ When /^I run "([^"]*)" in the background$/ do |cmd|
   run_background(unescape(cmd))
 end
 
-Then /^the output should contain the following lines \(with interpolated \$PID\):$/ do |partial_output|
+Then /^the (output|logfiles) should contain the following lines \(with interpolated \$PID\):$/ do |output_logfiles, partial_output|
   interpolate_background_pid(partial_output).split("\n").each do |line|
-    all_output.should include(line)
+    output_or_log(output_logfiles).should include(line)
   end
 end
 
@@ -24,4 +24,6 @@ end
 
 After do
   kill_all_processes!
+  # now kill the daemon!
+  `pkill -9 -f resque-pool`
 end
