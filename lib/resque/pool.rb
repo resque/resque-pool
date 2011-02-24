@@ -327,7 +327,8 @@ module Resque
         if worker
           encoded_job = worker.job
           verb = signal == :QUIT ? 'Graceful' : 'Forcing'
-          log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % (Time.now - Time.parse(encoded_job['run_at']))}s"
+          total_time = Time.now - Time.parse(encoded_job['run_at']) rescue 0
+          log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % total_time}s"
         end
 
         Process.kill signal, pid
