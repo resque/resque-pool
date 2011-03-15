@@ -5,6 +5,9 @@ require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
 require 'resque/pool/manager'
 require 'resque/pool/worker_type_manager'
+
+require 'resque/pool/orphan_watcher'
+
 require 'fcntl'
 require 'yaml'
 
@@ -271,7 +274,7 @@ module Resque
           retry
         end
     end
-    
+
     def process_exists?(pid)
       begin
         ps_line = `ps -p #{pid} --no-header`
@@ -301,9 +304,7 @@ module Resque
       #only check every minute
       if @last_mem_check.nil? || @last_mem_check < Time.now - 60
         hard_kill_workers
-
         all_pids.each do |pid|
-
           total_usage = memory_usage(pid)
           child_pid = find_child_pid(pid)
           
@@ -316,9 +317,7 @@ module Resque
             log "Gracefully shutting down worker #{pid} for using #{total_usage}MB memory"
             stop_worker(pid, :QUIT)
           end
-
         end
-
         @last_mem_check = Time.now
       end
     end
@@ -343,7 +342,6 @@ module Resque
           total_time = Time.now - Time.parse(encoded_job['run_at']) rescue 0
           log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % total_time}s"
         end
-
         Process.kill signal, pid
         if signal == :TERM
           add_killed_worker(pid)
@@ -363,52 +361,25 @@ module Resque
       end
     end
 
-    def orphaned_worker_count
-      if @last_orphaned_check.nil? || @last_orphaned_check < Time.now - 60
-        if @orphaned_pids.nil?
-            printf_line = '%d %d\n'
-          begin
-            pids_with_parents = `ps -Af | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
-          rescue Errno::EINTR
-            retry
-          end
-          pids = pids_with_parents.collect {|x| x.split[0].to_i}
-          parents = pids_with_parents.collect {|x| x.split[1].to_i}
-          pids.delete_if {|x| parents.include?(x)}
-          pids.delete_if {|x| all_pids.include?(x)}
-          @orphaned_pids = pids
-        elsif @orphaned_pids.size > 0
-          @orphaned_pids.delete_if do |pid|
-            begin
-              ps_out = `ps --no-heading p #{pid}`
-              ps_out.nil? || ps_out.strip == ''
-            rescue Errno::EINTR
-              retry
-            end
-          end
-        end
-        @last_orphaned_check = Time.now
-        log "Current orphaned pids: #{@orphaned_pids}" if @orphaned_pids.size > 0
-      end
-      @orphaned_pids.size
-    end
-
     # }}}
-    # maintain_worker_count, all_known_worker_types {{{
+    # maintain_worker_count, all_known_worker_types, worker_offset {{{
 
     def maintain_worker_count
-      orphaned_offset = if ENV["RESQUE_WAIT_FOR_ORPHANS"]
-                          orphaned_worker_count / all_known_worker_types.size
-                        else
-                          0
-                        end
       all_known_worker_types.each do |queues|
-        WorkerTypeManager.new(self, queues).maintain_worker_count(orphaned_offset)
+        WorkerTypeManager.new(self, queues).maintain_worker_count(worker_offset)
       end
     end
 
     def all_known_worker_types
       config.keys | workers.keys
+    end
+
+    def worker_offset
+      if ENV["RESQUE_WAIT_FOR_ORPHANS"]
+        OrphanWatcher.new(self).worker_offset
+      else
+        0
+      end
     end
 
     # }}}
