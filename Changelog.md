@@ -1,6 +1,10 @@
 ## unreleased
 
 * bugfix: pidfile will be cleaned up on startup if old process was kill-9'd
+* experimental: memory management
+* experimental: check orphaned workers
+
+See ExperimentalFeatures.md for more info.
 
 ## 0.1.0 (2011-01-18)
 
