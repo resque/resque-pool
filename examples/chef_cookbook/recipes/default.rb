@@ -30,7 +30,7 @@ if roles.include?(node[:instance_role])
     execute "enable-resque" do
       command "rc-update add #{app}_resque default"
       action :run
-      not_if "rc-update show | grep -q '^ *#{app}_resque |.*default"
+      not_if "rc-update show | grep -q '^ *#{app}_resque |.*default'"
     end
 
     execute "start-resque" do

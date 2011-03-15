@@ -1,9 +1,10 @@
 Resque Pool
 ===========
 
-Resque pool is a simple library for managing a pool of resque workers.  Given a
-a config file, it manages your workers for you, starting up the appropriate
-number of workers for each.
+Resque pool is a simple library for managing a pool of
+[resque](http://github.com/defunkt/resque) workers.  Given a a config file, it
+manages your workers for you, starting up the appropriate number of workers for
+each worker type.
 
 Benefits
 ---------
@@ -82,16 +83,16 @@ three levels: a single pool manager, many worker parents, and one worker child
 per worker (when the actual job is being processed).  For example, `ps -ef f |
 grep [r]esque` (in Linux) might return something like the following:
 
-   resque    13858     1  0 13:44 ?        S      0:02 resque-pool-manager: managing [13867, 13875, 13871, 13872, 13868, 13870, 13876]
-   resque    13867 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo
-   resque    13868 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
-   resque    13870 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
-   resque    13871 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
-   resque    13872 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7481 at 1280343254
-   resque     7481 13872  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing foo since 1280343254
-   resque    13875 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
-   resque    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
-   resque     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
+    resque    13858     1  0 13:44 ?        S      0:02 resque-pool-manager: managing [13867, 13875, 13871, 13872, 13868, 13870, 13876]
+    resque    13867 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo
+    resque    13868 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
+    resque    13870 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for bar
+    resque    13871 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
+    resque    13872 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7481 at 1280343254
+    resque     7481 13872  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing foo since 1280343254
+    resque    13875 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Waiting for foo,bar,baz
+    resque    13876 13858  0 13:44 ?        S      0:00  \_ resque-1.9.9: Forked 7485 at 1280343255
+    resque     7485 13876  0 14:54 ?        S      0:00      \_ resque-1.9.9: Processing bar since 1280343254
 
 Running as a daemon will default to placing the pidfile and logfiles in the
 conventional rails locations, although you can configure that.  See
