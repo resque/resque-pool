@@ -1,6 +1,8 @@
 ## unreleased
 
 * bugfix: pidfile will be cleaned up on startup if old process was kill-9'd
+* bugfix: TERM/INT are ignored when HUP is waiting on children
+* bugfix: `resque-pool -c config.yml` command line option was broken
 
 ## 0.1.0 (2011-01-18)
 

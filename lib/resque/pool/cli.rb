@@ -29,12 +29,12 @@ Usage:
    resque-pool [options]
 where [options] are:
           EOS
-          opt :config, "Alternate path to config file",                 :short => "-c"
-          opt :daemon, "Run as a background daemon", :default => false, :short => "-d"
-          opt :stdout, "Redirect stdout to logfile", :type => String,   :short => '-o'
-          opt :stderr, "Redirect stderr to logfile", :type => String,   :short => '-e'
+          opt :config, "Alternate path to config file", :type => String, :short => "-c"
+          opt :daemon, "Run as a background daemon", :default => false,  :short => "-d"
+          opt :stdout, "Redirect stdout to logfile", :type => String,    :short => '-o'
+          opt :stderr, "Redirect stderr to logfile", :type => String,    :short => '-e'
           opt :nosync, "Don't sync logfiles on every write"
-          opt :pidfile, "PID file location",         :type => String,   :short => "-p"
+          opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
         end
         if opts[:daemon]

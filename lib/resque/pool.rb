@@ -127,9 +127,14 @@ module Resque
       end
     end
 
+    class QuitNowException < Exception; end
     # defer a signal for later processing in #join (master process)
     def trap_deferred(signal)
       trap(signal) do |sig_nr|
+        if @waiting_for_reaper && [:INT, :TERM].include?(signal)
+          log "Recieved #{signal}: short circuiting QUIT waitpid"
+          raise QuitNowException
+        end
         if sig_queue.size < SIG_QUEUE_MAX_SIZE
           sig_queue << signal
           awaken_master
@@ -223,15 +228,17 @@ module Resque
     # worker process management {{{
 
     def reap_all_workers(waitpid_flags=Process::WNOHANG)
+      @waiting_for_reaper = waitpid_flags == 0
       begin
         loop do
+          # -1, wait for any child process
           wpid, status = Process.waitpid2(-1, waitpid_flags)
           wpid or break
           worker = delete_worker(wpid)
           # TODO: close any file descriptors connected to worker, if any
           log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
         end
-      rescue Errno::ECHILD
+      rescue Errno::ECHILD, QuitNowException
       end
     end
 
