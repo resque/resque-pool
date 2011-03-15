@@ -1,4 +1,8 @@
-## 0.1.0 (unreleased)
+## unreleased
+
+* bugfix: pidfile will be cleaned up on startup if old process was kill-9'd
+
+## 0.1.0 (2011-01-18)
 
 * new feature: `resque-pool` command line interface
   * this replaces need for a special startup script.
