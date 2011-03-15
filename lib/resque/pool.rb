@@ -95,6 +95,8 @@ module Resque
     def environment
       if defined? Rails
         Rails.env
+      elsif defined? RAILS_ENV # keep compatibility with older versions of rails
+        RAILS_ENV
       else
         ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
       end
@@ -258,7 +260,6 @@ module Resque
 
     def memory_usage(pid)
       smaps_filename = "/proc/#{pid}/smaps"
-          
       #Grab actual memory usage from proc in MB
       begin
         mem_usage = `
@@ -296,6 +297,9 @@ module Resque
     end
 
     def monitor_memory_usage
+      return unless ENV["RESQUE_MEM_HARD_LIMIT"] && ENV["RESQUE_MEM_SOFT_LIMIT"]
+      hard_limit = ENV["RESQUE_MEM_HARD_LIMIT"]
+      soft_limit = ENV["RESQUE_MEM_SOFT_LIMIT"]
       #only check every minute
       if @last_mem_check.nil? || @last_mem_check < Time.now - 60
         hard_kill_workers
@@ -307,10 +311,10 @@ module Resque
           
           total_usage += memory_usage(child_pid) if child_pid
           
-          if total_usage > 250
+          if total_usage > hard_limit
             log "Terminating worker #{pid} for using #{total_usage}MB memory"
             stop_worker(pid)
-          elsif total_usage > 200
+          elsif total_usage > soft_limit
             log "Gracefully shutting down worker #{pid} for using #{total_usage}MB memory"
             stop_worker(pid, :QUIT)
           end
