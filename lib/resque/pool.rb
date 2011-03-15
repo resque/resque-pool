@@ -3,6 +3,8 @@ require 'resque'
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
+require 'resque/pool/manager'
+require 'resque/pool/worker_type_manager'
 require 'fcntl'
 require 'yaml'
 
@@ -139,10 +141,6 @@ module Resque
           log "ignoring SIG#{signal}, queue=#{sig_queue.inspect}"
         end
       end
-    end
-
-    def reset_sig_handlers!
-      QUEUE_SIGS.each {|sig| trap(sig, "DEFAULT") }
     end
 
     def handle_sig_queue!
@@ -396,76 +394,21 @@ module Resque
     end
 
     # }}}
-    # ???: maintain_worker_count, all_known_queues {{{
+    # maintain_worker_count, all_known_worker_types {{{
 
     def maintain_worker_count
       orphaned_offset = if ENV["RESQUE_WAIT_FOR_ORPHANS"]
-                          orphaned_worker_count / all_known_queues.size
+                          orphaned_worker_count / all_known_worker_types.size
                         else
                           0
                         end
-      all_known_queues.each do |queues|
-        delta = worker_delta_for(queues) - orphaned_offset
-        spawn_missing_workers_for(queues, delta) if delta > 0
-        quit_excess_workers_for(queues, delta)   if delta < 0
+      all_known_worker_types.each do |queues|
+        WorkerTypeManager.new(self, queues).maintain_worker_count(orphaned_offset)
       end
     end
 
-    def all_known_queues
+    def all_known_worker_types
       config.keys | workers.keys
-    end
-
-    # }}}
-    # methods that operate on a single grouping of queues {{{
-    # perhaps this means a class is waiting to be extracted
-
-    def spawn_missing_workers_for(queues, delta)
-      delta.times { spawn_worker!(queues) } if delta > 0
-    end
-
-    def quit_excess_workers_for(queues, delta)
-      if delta < 0
-        queue_pids = pids_for(queues)
-        if queue_pids.size >= delta.abs
-          queue_pids[0...delta.abs].each {|pid| Process.kill("QUIT", pid)}
-        else
-          queue_pids.each {|pid| Process.kill("QUIT", pid)}
-        end
-      end
-    end
-
-    def worker_delta_for(queues)
-      config.fetch(queues, 0) - workers.fetch(queues, []).size
-    end
-
-    def pids_for(queues)
-      workers[queues].keys
-    end
-
-    def spawn_worker!(queues)
-      worker = create_worker(queues)
-      pid = fork do
-        log_worker "Starting worker #{worker}"
-        call_after_prefork!
-        reset_sig_handlers!
-        #self_pipe.each {|io| io.close }
-        begin
-          worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
-        rescue Errno::EINTR
-          log "Caught interrupted system call Errno::EINTR. Retrying."
-          retry
-        end
-      end
-      workers[queues] ||= {}
-      workers[queues][pid] = worker
-    end
-
-    def create_worker(queues)
-      queues = queues.to_s.split(',')
-      worker = PooledWorker.new(*queues)
-      worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
-      worker.very_verbose = ENV['VVERBOSE']
-      worker
     end
 
     # }}}
