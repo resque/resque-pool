@@ -28,26 +28,70 @@ module Resque
       procline "(initialized)"
     end
 
-    # Config: after_prefork {{{
+    # Config: hooks {{{
 
-    # The `after_prefork` hook will be run in workers if you are using the
+    # The +configure+ block will be run once during pool startup, after the
+    # internal initialization is complete, but before any workers are started
+    # up.  This is for configuring any runtime callbacks that you want to
+    # customize (e.g.  +after_wakup+, +worker_offset_handler+)
+    #
+    # Call with a block to set.
+    # Call with no arguments to return the hook.
+    def self.configure(&block)
+      block ? (@configure = block) : @configure
+    end
+
+    def call_configure!
+      self.class.configure && self.class.configure.call(self)
+    end
+
+    # The +after_manager_wakeup+ hook will be run in the pool manager every
+    # time the pool manager wakes up from IO.select (normally once a second).
+    # It will run immediately before the pool manager performs its normal
+    # worker maintenance (starting and stopping workers as necessary).  If you
+    # have some special logic for killing workers that are taking too long or
+    # using too much memory, this is the place to put it.
+    #
+    # Call with a block to set the hook.
+    # Call with no arguments to return the hook.
+    def after_manager_wakeup(&block)
+      block ? (@after_manager_wakeup = block) : @after_manager_wakeup
+    end
+
+    def call_after_manager_wakeup!
+      after_manager_wakeup && after_manager_wakeup.call(self)
+    end
+
+    def to_calculate_worker_offset(&block)
+      block ? (@to_calculate_worker_offset = block) : @to_calculate_worker_offset
+    end
+
+    # deprecated by instance level +after_prefork+ hook
+    def self.after_prefork(&block)
+      #log '"Resque::Pool.after_prefork(&blk)" is deprecated.'
+      #log 'Please use "Resque::Pool.configure {|p| p.after_prefork(&blk) }" instead.'
+      block ? (@after_prefork = block) : @after_prefork
+    end
+
+    # The +after_prefork+ hook will be run in workers if you are using the
     # preforking master worker to save memory. Use this hook to reload
     # database connections and so forth to ensure that they're not shared
     # among workers.
     #
     # Call with a block to set the hook.
     # Call with no arguments to return the hook.
-    def self.after_prefork(&block)
+    def after_prefork(&block)
       block ? (@after_prefork = block) : @after_prefork
     end
 
     # Set the after_prefork proc.
-    def self.after_prefork=(after_prefork)
+    def after_prefork=(after_prefork)
       @after_prefork = after_prefork
     end
 
     def call_after_prefork!
-      self.class.after_prefork && self.class.after_prefork.call
+      (after_prefork && after_prefork.call) ||
+        (self.class.after_prefork && self.class.after_prefork.call)
     end
 
     # }}}
@@ -179,6 +223,8 @@ module Resque
     # start, join, and master sleep {{{
 
     def start
+      procline("(configuring)")
+      call_configure!
       procline("(starting)")
       init_self_pipe!
       init_sig_handlers!
@@ -203,6 +249,7 @@ module Resque
         break if handle_sig_queue! == :break
         if sig_queue.empty?
           master_sleep
+          call_after_manager_wakeup!
           maintain_worker_count
         end
         procline("managing #{all_pids.inspect}")
@@ -272,11 +319,7 @@ module Resque
     end
 
     def worker_offset
-      if ENV["RESQUE_WAIT_FOR_ORPHANS"]
-        OrphanWatcher.new(self).worker_offset
-      else
-        0
-      end
+      to_calculate_worker_offset && to_calculate_worker_offset.call || 0
     end
 
     # }}}
