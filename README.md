@@ -133,8 +133,7 @@ with the `--config` command line option.
 Experimental Features
 ---------------------
 
-See [ExperimentalFeatures.md](ExperimentalFeatures.md) for some
-potentially helpful works in progress.
+See `ExperimentalFeatures.md` for some potentially useful works in progress.
 
 TODO
 -----
