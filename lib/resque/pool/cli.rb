@@ -10,7 +10,7 @@ module Resque
       def run
         opts = parse_options
         daemonize if opts[:daemon]
-        pidfile opts[:pidfile]
+        manage_pidfile opts[:pidfile]
         redirect opts
         setup_environment opts
         start_pool
@@ -53,27 +53,37 @@ where [options] are:
         exit unless pid.nil?
       end
 
-      def pidfile(pidfile)
+      def manage_pidfile(pidfile)
+        return unless pidfile
         pid = Process.pid
-        if pidfile
-          if File.exist? pidfile
-            old_pid = open(pidfile).read.strip
-            ps_output = `ps p #{old_pid}`
-            if ps_output =~ /#{old_pid}/
-              raise "Pidfile already exists at #{pidfile} and process is still running."
-            else
-              File.delete pidfile
-            end
-          end
-          File.open pidfile, "w" do |f|
-            f.write pid
-          end
-          at_exit do
-            if Process.pid == pid
-              File.delete pidfile
-            end
+        if File.exist? pidfile
+          if process_still_running? pidfile
+            raise "Pidfile already exists at #{pidfile} and process is still running."
+          else
+            File.delete pidfile
           end
         end
+        File.open pidfile, "w" do |f|
+          f.write pid
+        end
+        at_exit do
+          if Process.pid == pid
+            File.delete pidfile
+          end
+        end
+      end
+
+      def process_still_running?(pidfile)
+        old_pid = open(pidfile).read.strip.to_i
+        Process.kill 0, old_pid
+        true
+      rescue Errno::ESRCH
+        false
+      rescue Errno::EPERM
+        true
+      rescue ::Exception
+        $stderr.puts "While checking if PID #{old_pid} is running, unexpected #{e.class}: #{e}"
+        true
       end
 
       def redirect(opts)
