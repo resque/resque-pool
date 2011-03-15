@@ -399,7 +399,11 @@ module Resque
     # ???: maintain_worker_count, all_known_queues {{{
 
     def maintain_worker_count
-      orphaned_offset = orphaned_worker_count / all_known_queues.size
+      orphaned_offset = if ENV["RESQUE_WAIT_FOR_ORPHANS"]
+                          orphaned_worker_count / all_known_queues.size
+                        else
+                          0
+                        end
       all_known_queues.each do |queues|
         delta = worker_delta_for(queues) - orphaned_offset
         spawn_missing_workers_for(queues, delta) if delta > 0
