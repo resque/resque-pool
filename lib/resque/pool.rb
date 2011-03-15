@@ -93,8 +93,8 @@ module Resque
     end
 
     def environment
-      if defined? RAILS_ENV
-        RAILS_ENV
+      if defined? Rails
+        Rails.env
       else
         ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
       end
@@ -200,6 +200,7 @@ module Resque
         break if handle_sig_queue! == :break
         if sig_queue.empty?
           master_sleep
+          monitor_memory_usage
           maintain_worker_count
         end
         procline("managing #{all_pids.inspect}")
@@ -231,6 +232,8 @@ module Resque
           # TODO: close any file descriptors connected to worker, if any
           log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
         end
+      rescue Errno::EINTR
+        retry
       rescue Errno::ECHILD
       end
     end
@@ -253,14 +256,150 @@ module Resque
       end
     end
 
+    def memory_usage(pid)
+      smaps_filename = "/proc/#{pid}/smaps"
+          
+      #Grab actual memory usage from proc in MB
+      begin
+        mem_usage = `
+          if [ -f #{smaps_filename} ];
+            then
+              grep Private_Dirty #{smaps_filename} | awk '{s+=$2} END {printf("%d", s/1000)}'
+            else echo "0"
+          fi
+        `.to_i
+        rescue Errno::EINTR
+          retry
+        end
+    end
+    
+    def process_exists?(pid)
+      begin
+        ps_line = `ps -p #{pid} --no-header`
+      rescue Errno::EINTR
+        retry
+      end
+      !ps_line.nil? && ps_line.strip != ''
+    end
+
+    def hard_kill_workers
+      @term_workers ||= []
+      #look for workers that didn't terminate
+      @term_workers.delete_if {|pid| !process_exists?(pid)}
+      #send the rest a -9
+      @term_workers.each {|pid| `kill -9 #{pid}`}
+    end
+
+    def add_killed_worker(pid)
+      @term_workers ||= []
+      @term_workers << pid if pid
+    end
+
+    def monitor_memory_usage
+      #only check every minute
+      if @last_mem_check.nil? || @last_mem_check < Time.now - 60
+        hard_kill_workers
+
+        all_pids.each do |pid|
+
+          total_usage = memory_usage(pid)
+          child_pid = find_child_pid(pid)
+          
+          total_usage += memory_usage(child_pid) if child_pid
+          
+          if total_usage > 250
+            log "Terminating worker #{pid} for using #{total_usage}MB memory"
+            stop_worker(pid)
+          elsif total_usage > 200
+            log "Gracefully shutting down worker #{pid} for using #{total_usage}MB memory"
+            stop_worker(pid, :QUIT)
+          end
+
+        end
+
+        @last_mem_check = Time.now
+      end
+    end
+
+    def hostname
+      begin
+        @hostname ||= `hostname`.strip
+      rescue Errno::EINTR
+        retry
+      end
+    end
+
+    def stop_worker(pid, signal=:TERM)
+      begin
+        worker = Resque.working.find do |w|
+          host, worker_pid, queues = w.id.split(':')
+          w if worker_pid.to_i == pid.to_i && host == hostname
+        end
+        if worker
+          encoded_job = worker.job
+          verb = signal == :QUIT ? 'Graceful' : 'Forcing'
+          total_time = Time.now - Time.parse(encoded_job['run_at']) rescue 0
+          log "#{verb} shutdown while processing: #{encoded_job} -- ran for #{'%.2f' % total_time}s"
+        end
+
+        Process.kill signal, pid
+        if signal == :TERM
+          add_killed_worker(pid)
+          add_killed_worker(find_child_pid(pid))
+        end
+      rescue Errno::EINTR
+        retry
+      end
+    end
+
+    def find_child_pid(parent_pid)
+      begin
+        p = `ps --ppid #{parent_pid} -o pid --no-header`.to_i
+        p == 0 ? nil : p
+      rescue Errno::EINTR
+        retry
+      end
+    end
+
+    def orphaned_worker_count
+      if @last_orphaned_check.nil? || @last_orphaned_check < Time.now - 60
+        if @orphaned_pids.nil?
+            printf_line = '%d %d\n'
+          begin
+            pids_with_parents = `ps -Af | grep resque | grep -v grep | grep -v resque-web | grep -v master | awk '{printf("%d %d\\n", $2, $3)}'`.split("\n")
+          rescue Errno::EINTR
+            retry
+          end
+          pids = pids_with_parents.collect {|x| x.split[0].to_i}
+          parents = pids_with_parents.collect {|x| x.split[1].to_i}
+          pids.delete_if {|x| parents.include?(x)}
+          pids.delete_if {|x| all_pids.include?(x)}
+          @orphaned_pids = pids
+        elsif @orphaned_pids.size > 0
+          @orphaned_pids.delete_if do |pid|
+            begin
+              ps_out = `ps --no-heading p #{pid}`
+              ps_out.nil? || ps_out.strip == ''
+            rescue Errno::EINTR
+              retry
+            end
+          end
+        end
+        @last_orphaned_check = Time.now
+        log "Current orphaned pids: #{@orphaned_pids}" if @orphaned_pids.size > 0
+      end
+      @orphaned_pids.size
+    end
+
     # }}}
     # ???: maintain_worker_count, all_known_queues {{{
 
     def maintain_worker_count
+      orphaned_offset = orphaned_worker_count / all_known_queues.size
       all_known_queues.each do |queues|
-        delta = worker_delta_for(queues)
-        spawn_missing_workers_for(queues) if delta > 0
-        quit_excess_workers_for(queues)   if delta < 0
+        delta = worker_delta_for(queues) - orphaned_offset
+        spawn_missing_workers_for(queues, delta) if delta > 0
+        quit_excess_workers_for(queues, delta)   if delta < 0
       end
     end
 
@@ -272,16 +411,18 @@ module Resque
     # methods that operate on a single grouping of queues {{{
     # perhaps this means a class is waiting to be extracted
 
-    def spawn_missing_workers_for(queues)
-      worker_delta_for(queues).times do |nr|
-        spawn_worker!(queues)
-      end
+    def spawn_missing_workers_for(queues, delta)
+      delta.times { spawn_worker!(queues) } if delta > 0
     end
 
-    def quit_excess_workers_for(queues)
-      delta = -worker_delta_for(queues)
-      pids_for(queues)[0...delta].each do |pid|
-        Process.kill("QUIT", pid)
+    def quit_excess_workers_for(queues, delta)
+      if delta < 0
+        queue_pids = pids_for(queues)
+        if queue_pids.size >= delta.abs
+          queue_pids[0...delta.abs].each {|pid| Process.kill("QUIT", pid)}
+        else
+          queue_pids.each {|pid| Process.kill("QUIT", pid)}
+        end
       end
     end
 
@@ -300,7 +441,12 @@ module Resque
         call_after_prefork!
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }
-        worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
+        begin
+          worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
+        rescue Errno::EINTR
+          log "Caught interrupted system call Errno::EINTR. Retrying."
+          retry
+        end
       end
       workers[queues] ||= {}
       workers[queues][pid] = worker
