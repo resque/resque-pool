@@ -1,4 +1,5 @@
 require 'resque/pool/logging'
+require 'resque/pool/pooled_worker'
 
 module Resque
   class Pool
