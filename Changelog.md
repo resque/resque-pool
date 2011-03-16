@@ -1,3 +1,17 @@
+## unreleased
+
+* enhancement: new callbacks for configuration
+  * `Resque::Pool.configure do |pool| ... end`
+  * `pool.after_manager_wakeup`
+  * `pool.to_calculate_worker_offset`
+  * `pool.after_prefork` (instance callback prefered over class callback)
+* experimental: memory management
+* experimental: check orphaned workers
+* development: a good bit of code cleanup and rearrangement
+
+See ExperimentalFeatures.md for more info.  Thanks to Jason Haruska for these
+features!
+
 ## 0.2.0 (2011-03-15)
 
 * new feature: sending `HUP` to pool manager will reload the logfiles and
@@ -12,10 +26,6 @@
 * bugfix: `resque-pool -c config.yml` command line option was broken
 * development: simple cucumber features for core functionality.
 * upstream: depends on resque ~> 1.13
-* experimental: memory management
-* experimental: check orphaned workers
-
-See ExperimentalFeatures.md for more info.
 
 ## 0.1.0 (2011-01-18)
 
