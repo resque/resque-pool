@@ -103,15 +103,15 @@ SIGNALS
 
 The pool manager responds to the following signals:
 
-* `HUP`   - reload the config file, e.g. to change the number of workers per queue list
+* `HUP`   - reload the config file, reload logfiles, restart all workers.
 * `QUIT`  - send `QUIT` to each worker parent and shutdown the manager after all workers are done.
 * `INT`   - send `QUIT` to each worker parent and immediately shutdown manager
 * `TERM`  - send `TERM` to each worker parent and immediately shutdown manager
 * `WINCH` - send `QUIT` to each worker, but keep manager running (send `HUP` to reload config and restart workers)
-* `USR1`/`USR2`/`CONT` - send the signal on to all worker parents (see Resque docs).
+* `USR1`/`USR2`/`CONT` - pass the signal on to all worker parents (see Resque docs).
 
-After a `HUP`, workers that are no longer needed will be gracefully shutdown
-via `QUIT`.
+Use `HUP` to help logrotate run smoothly and to change the number of workers
+per worker type.
 
 Other Features
 --------------

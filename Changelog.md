@@ -1,6 +1,17 @@
 ## unreleased
 
-* bugfix: pidfile will be cleaned up on startup if old process was kill-9'd
+* new feature: sending `HUP` to pool manager will reload the logfiles and
+  gracefully restart all workers.
+* enhancement: logging now includes timestamp, process "name" (worker or
+  manager), and PID.
+* enhancement: can be used with no config file or empty config file (not all
+  *that* useful, but it's better than unceromoniously dieing!)
+* bugfix: pidfile will be cleaned up on startup, e.g. if old process was
+  kill-9'd (Jason Haruska)
+* bugfix: TERM/INT are no longer ignored when HUP is waiting on children
+* bugfix: `resque-pool -c config.yml` command line option was broken
+* development: simple cucumber features for core functionality.
+* upstream: depends on resque ~> 1.13
 * experimental: memory management
 * experimental: check orphaned workers
 

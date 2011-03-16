@@ -178,9 +178,14 @@ module Resque
       end
     end
 
+    class QuitNowException < Exception; end
     # defer a signal for later processing in #join (master process)
     def trap_deferred(signal)
       trap(signal) do |sig_nr|
+        if @waiting_for_reaper && [:INT, :TERM].include?(signal)
+          log "Recieved #{signal}: short circuiting QUIT waitpid"
+          raise QuitNowException
+        end
         if sig_queue.size < SIG_QUEUE_MAX_SIZE
           sig_queue << signal
           awaken_master
@@ -196,8 +201,12 @@ module Resque
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file"
+        log "HUP: reload config file and reload logfiles"
         load_config
+        Logging.reopen_logs!
+        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        signal_all_workers(:QUIT)
+        log "HUP: new children will inherit new logfiles"
         maintain_worker_count
       when :WINCH
         log "WINCH: gracefully stopping all workers"
@@ -273,8 +282,10 @@ module Resque
     # worker process management {{{
 
     def reap_all_workers(waitpid_flags=Process::WNOHANG)
+      @waiting_for_reaper = waitpid_flags == 0
       begin
         loop do
+          # -1, wait for any child process
           wpid, status = Process.waitpid2(-1, waitpid_flags)
           wpid or break
           worker = delete_worker(wpid)
@@ -283,7 +294,7 @@ module Resque
         end
       rescue Errno::EINTR
         retry
-      rescue Errno::ECHILD
+      rescue Errno::ECHILD, QuitNowException
       end
     end
 
