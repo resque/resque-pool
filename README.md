@@ -13,11 +13,18 @@ Benefits
   will monitor your workers for you.  An example init.d script, monit config,
   and chef cookbook are provided.
 * Less memory - If you are using Ruby Enterprise Edition, or any ruby with
-  copy-on-write safe garbage collection, this should save you a lot of memory
+  copy-on-write safe garbage collection, this should save you a *lot* of memory
   when you are managing many workers.
 * Faster startup - when you start many workers at once, they would normally
   compete for CPU as they load their environments.  Resque-pool can load the
   environment once and fork all of the workers almost instantly.
+
+Upgrading?
+-----------
+
+See
+[Changelog.md](https://github.com/nevans/resque-pool/blob/master/Changelog.md)
+in case there are important or helpful changes.
 
 How to use
 -----------
