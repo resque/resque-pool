@@ -88,8 +88,11 @@ where [options] are:
 
       def redirect(opts)
         $stdin.reopen  '/dev/null'        if opts[:daemon]
-        $stdout.reopen opts[:stdout], "a" if opts[:stdout] && !opts[:stdout].empty?
-        $stderr.reopen opts[:stderr], "a" if opts[:stderr] && !opts[:stderr].empty?
+        # need to reopen as File, or else Resque::Pool::Logging.reopen_logs! won't work
+        out = File.new(opts[:stdout], "a") if opts[:stdout] && !opts[:stdout].empty?
+        err = File.new(opts[:stderr], "a") if opts[:stderr] && !opts[:stderr].empty?
+        $stdout.reopen out if out
+        $stderr.reopen err if err
         $stdout.sync = $stderr.sync = true unless opts[:nosync]
       end
 

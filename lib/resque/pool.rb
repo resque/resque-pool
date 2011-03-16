@@ -154,8 +154,12 @@ module Resque
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file"
+        log "HUP: reload config file and reload logfiles"
         load_config
+        Logging.reopen_logs!
+        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        signal_all_workers(:QUIT)
+        log "HUP: new children will inherit new logfiles"
         maintain_worker_count
       when :WINCH
         log "WINCH: gracefully stopping all workers"
