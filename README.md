@@ -103,15 +103,15 @@ SIGNALS
 
 The pool manager responds to the following signals:
 
-* `HUP`   - reload the config file, e.g. to change the number of workers per queue list
+* `HUP`   - reload the config file, reload logfiles, restart all workers.
 * `QUIT`  - send `QUIT` to each worker parent and shutdown the manager after all workers are done.
 * `INT`   - send `QUIT` to each worker parent and immediately shutdown manager
 * `TERM`  - send `TERM` to each worker parent and immediately shutdown manager
 * `WINCH` - send `QUIT` to each worker, but keep manager running (send `HUP` to reload config and restart workers)
-* `USR1`/`USR2`/`CONT` - send the signal on to all worker parents (see Resque docs).
+* `USR1`/`USR2`/`CONT` - pass the signal on to all worker parents (see Resque docs).
 
-After a `HUP`, workers that are no longer needed will be gracefully shutdown
-via `QUIT`.
+Use `HUP` to help logrotate run smoothly and to change the number of workers
+per worker type.
 
 Other Features
 --------------
@@ -130,6 +130,11 @@ their current job) if the manager process disappears before them.
 You can specify an alternate config file by setting the `RESQUE_POOL_CONFIG` or
 with the `--config` command line option.
 
+Experimental Features
+---------------------
+
+See `ExperimentalFeatures.md` for some potentially useful works in progress.
+
 TODO
 -----
 
@@ -138,8 +143,8 @@ See [the TODO list](https://github.com/nevans/resque-pool/issues) at github issu
 Contributors
 -------------
 
+* Jason Haruska from Backupify (pidfile management, memory management, wait for orphaned workers)
 * John Schult (config file can be split by environment)
 * Stephen Celis (increased gemspec sanity)
 * Vincent Agnello, Robert Kamunyori, Paul Kauders; for pairing with me at
-  B'more on Rails Open Source Hack Nights. :)
-
+  [B'more on Rails](http://twitter.com/bmoreonrails) Open Source Hack Nights. :)

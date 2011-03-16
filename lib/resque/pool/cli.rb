@@ -29,12 +29,12 @@ Usage:
    resque-pool [options]
 where [options] are:
           EOS
-          opt :config, "Alternate path to config file",                 :short => "-c"
-          opt :daemon, "Run as a background daemon", :default => false, :short => "-d"
-          opt :stdout, "Redirect stdout to logfile", :type => String,   :short => '-o'
-          opt :stderr, "Redirect stderr to logfile", :type => String,   :short => '-e'
+          opt :config, "Alternate path to config file", :type => String, :short => "-c"
+          opt :daemon, "Run as a background daemon", :default => false,  :short => "-d"
+          opt :stdout, "Redirect stdout to logfile", :type => String,    :short => '-o'
+          opt :stderr, "Redirect stderr to logfile", :type => String,    :short => '-e'
           opt :nosync, "Don't sync logfiles on every write"
-          opt :pidfile, "PID file location",         :type => String,   :short => "-p"
+          opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
         end
         if opts[:daemon]
@@ -88,15 +88,18 @@ where [options] are:
 
       def redirect(opts)
         $stdin.reopen  '/dev/null'        if opts[:daemon]
-        $stdout.reopen opts[:stdout], "a" if opts[:stdout] && !opts[:stdout].empty?
-        $stderr.reopen opts[:stderr], "a" if opts[:stderr] && !opts[:stderr].empty?
+        # need to reopen as File, or else Resque::Pool::Logging.reopen_logs! won't work
+        out = File.new(opts[:stdout], "a") if opts[:stdout] && !opts[:stdout].empty?
+        err = File.new(opts[:stderr], "a") if opts[:stderr] && !opts[:stderr].empty?
+        $stdout.reopen out if out
+        $stderr.reopen err if err
         $stdout.sync = $stderr.sync = true unless opts[:nosync]
       end
 
       def setup_environment(opts)
         ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
         log "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment"
-        ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
+        ENV["RESQUE_POOL_CONFIG"] = opts[:config].to_s if opts[:config]
       end
 
       def start_pool

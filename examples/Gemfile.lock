@@ -1,13 +1,12 @@
 PATH
-  remote: .
+  remote: /home/nick/src/active/resque-pool
   specs:
-    resque-pool (0.3.0.beta.1)
+    resque-pool (0.1.0.dev)
       rake
       resque (~> 1.13)
       trollop (~> 1.16)
 
 GEM
-  remote: http://rubygems.org/
   specs:
     SystemTimer (1.2.2)
     aruba (0.3.2)
@@ -23,9 +22,7 @@ GEM
       gherkin (~> 2.3.2)
       json (~> 1.4.6)
       term-ansicolor (~> 1.0.5)
-    daemons (1.1.0)
     diff-lcs (1.1.2)
-    eventmachine (0.12.10)
     ffi (0.6.3)
       rake (>= 0.8.7)
     gherkin (2.3.3)
@@ -53,11 +50,6 @@ GEM
       rack (~> 1.1)
       tilt (>= 1.2.2, < 2.0)
     term-ansicolor (1.0.5)
-    thin (1.2.7)
-      daemons (>= 1.0.9)
-      eventmachine (>= 0.12.6)
-      rack (>= 1.0.0)
-      tilt (>= 1.2.2, < 2.0)
     tilt (1.2.2)
     trollop (1.16.2)
     vegas (0.1.8)
@@ -73,4 +65,3 @@ DEPENDENCIES
   cucumber (~> 0.10.0)
   resque-pool!
   rspec (~> 2.3.0)
-  thin

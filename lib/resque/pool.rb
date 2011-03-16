@@ -4,6 +4,12 @@ require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
 require 'resque/pool/pool_status'
+require 'resque/pool/manager'
+require 'resque/pool/worker_type_manager'
+# experimental features!
+require 'resque/pool/memory_manager'
+require 'resque/pool/orphan_watcher'
+
 require 'fcntl'
 require 'yaml'
 
@@ -36,26 +42,70 @@ module Resque
       end
     end
 
-    # Config: after_prefork {{{
+    # Config: hooks {{{
 
-    # The `after_prefork` hook will be run in workers if you are using the
+    # The +configure+ block will be run once during pool startup, after the
+    # internal initialization is complete, but before any workers are started
+    # up.  This is for configuring any runtime callbacks that you want to
+    # customize (e.g.  +after_wakup+, +worker_offset_handler+)
+    #
+    # Call with a block to set.
+    # Call with no arguments to return the hook.
+    def self.configure(&block)
+      block ? (@configure = block) : @configure
+    end
+
+    def call_configure!
+      self.class.configure && self.class.configure.call(self)
+    end
+
+    # The +after_manager_wakeup+ hook will be run in the pool manager every
+    # time the pool manager wakes up from IO.select (normally once a second).
+    # It will run immediately before the pool manager performs its normal
+    # worker maintenance (starting and stopping workers as necessary).  If you
+    # have some special logic for killing workers that are taking too long or
+    # using too much memory, this is the place to put it.
+    #
+    # Call with a block to set the hook.
+    # Call with no arguments to return the hook.
+    def after_manager_wakeup(&block)
+      block ? (@after_manager_wakeup = block) : @after_manager_wakeup
+    end
+
+    def call_after_manager_wakeup!
+      after_manager_wakeup && after_manager_wakeup.call(self)
+    end
+
+    def to_calculate_worker_offset(&block)
+      block ? (@to_calculate_worker_offset = block) : @to_calculate_worker_offset
+    end
+
+    # deprecated by instance level +after_prefork+ hook
+    def self.after_prefork(&block)
+      #log '"Resque::Pool.after_prefork(&blk)" is deprecated.'
+      #log 'Please use "Resque::Pool.configure {|p| p.after_prefork(&blk) }" instead.'
+      block ? (@after_prefork = block) : @after_prefork
+    end
+
+    # The +after_prefork+ hook will be run in workers if you are using the
     # preforking master worker to save memory. Use this hook to reload
     # database connections and so forth to ensure that they're not shared
     # among workers.
     #
     # Call with a block to set the hook.
     # Call with no arguments to return the hook.
-    def self.after_prefork(&block)
+    def after_prefork(&block)
       block ? (@after_prefork = block) : @after_prefork
     end
 
     # Set the after_prefork proc.
-    def self.after_prefork=(after_prefork)
+    def after_prefork=(after_prefork)
       @after_prefork = after_prefork
     end
 
     def call_after_prefork!
-      self.class.after_prefork && self.class.after_prefork.call
+      (after_prefork && after_prefork.call) ||
+        (self.class.after_prefork && self.class.after_prefork.call)
     end
 
     # }}}
@@ -106,7 +156,9 @@ module Resque
     end
 
     def environment
-      if defined? RAILS_ENV
+      if defined? Rails
+        Rails.env
+      elsif defined? RAILS_ENV # keep compatibility with older versions of rails
         RAILS_ENV
       else
         ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
@@ -140,9 +192,14 @@ module Resque
       end
     end
 
+    class QuitNowException < Exception; end
     # defer a signal for later processing in #join (master process)
     def trap_deferred(signal)
       trap(signal) do |sig_nr|
+        if @waiting_for_reaper && [:INT, :TERM].include?(signal)
+          log "Recieved #{signal}: short circuiting QUIT waitpid"
+          raise QuitNowException
+        end
         if sig_queue.size < SIG_QUEUE_MAX_SIZE
           sig_queue << signal
           awaken_master
@@ -152,18 +209,18 @@ module Resque
       end
     end
 
-    def reset_sig_handlers!
-      QUEUE_SIGS.each {|sig| trap(sig, "DEFAULT") }
-    end
-
     def handle_sig_queue!
       case signal = sig_queue.shift
       when :USR1, :USR2, :CONT
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file"
+        log "HUP: reload config file and reload logfiles"
         load_config
+        Logging.reopen_logs!
+        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        signal_all_workers(:QUIT)
+        log "HUP: new children will inherit new logfiles"
         maintain_worker_count
       when :WINCH
         log "WINCH: gracefully stopping all workers"
@@ -189,6 +246,8 @@ module Resque
     # start, join, and master sleep {{{
 
     def start
+      procline("(configuring)")
+      call_configure!
       procline("(starting)")
       init_self_pipe!
       init_sig_handlers!
@@ -213,6 +272,7 @@ module Resque
         break if handle_sig_queue! == :break
         if sig_queue.empty?
           master_sleep
+          call_after_manager_wakeup!
           maintain_worker_count
         end
         procline("managing #{all_pids.inspect}")
@@ -236,15 +296,19 @@ module Resque
     # worker process management {{{
 
     def reap_all_workers(waitpid_flags=Process::WNOHANG)
+      @waiting_for_reaper = waitpid_flags == 0
       begin
         loop do
+          # -1, wait for any child process
           wpid, status = Process.waitpid2(-1, waitpid_flags)
           wpid or break
           worker = delete_worker(wpid)
           # TODO: close any file descriptors connected to worker, if any
           log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
         end
-      rescue Errno::ECHILD
+      rescue Errno::EINTR
+        retry
+      rescue Errno::ECHILD, QuitNowException
       end
     end
 
@@ -267,64 +331,20 @@ module Resque
     end
 
     # }}}
-    # ???: maintain_worker_count, all_known_queues {{{
+    # maintain_worker_count, all_known_worker_types, worker_offset {{{
 
     def maintain_worker_count
-      all_known_queues.each do |queues|
-        delta = worker_delta_for(queues)
-        spawn_missing_workers_for(queues) if delta > 0
-        quit_excess_workers_for(queues)   if delta < 0
+      all_known_worker_types.each do |queues|
+        WorkerTypeManager.new(self, queues).maintain_worker_count(worker_offset)
       end
     end
 
-    def all_known_queues
+    def all_known_worker_types
       config.keys | workers.keys
     end
 
-    # }}}
-    # methods that operate on a single grouping of queues {{{
-    # perhaps this means a class is waiting to be extracted
-
-    def spawn_missing_workers_for(queues)
-      worker_delta_for(queues).times do |nr|
-        spawn_worker!(queues)
-      end
-    end
-
-    def quit_excess_workers_for(queues)
-      delta = -worker_delta_for(queues)
-      pids_for(queues)[0...delta].each do |pid|
-        Process.kill("QUIT", pid)
-      end
-    end
-
-    def worker_delta_for(queues)
-      config.fetch(queues, 0) - workers.fetch(queues, []).size
-    end
-
-    def pids_for(queues)
-      workers[queues].keys
-    end
-
-    def spawn_worker!(queues)
-      worker = create_worker(queues)
-      pid = fork do
-        log_worker "Starting worker #{worker}"
-        call_after_prefork!
-        reset_sig_handlers!
-        #self_pipe.each {|io| io.close }
-        worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
-      end
-      workers[queues] ||= {}
-      workers[queues][pid] = worker
-    end
-
-    def create_worker(queues)
-      queues = queues.to_s.split(',')
-      worker = PooledWorker.new(*queues)
-      worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
-      worker.very_verbose = ENV['VVERBOSE']
-      worker
+    def worker_offset
+      to_calculate_worker_offset && to_calculate_worker_offset.call || 0
     end
 
     # }}}
