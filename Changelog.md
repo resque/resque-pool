@@ -1,4 +1,4 @@
-## unreleased
+## 0.2.0 (2011-03-15)
 
 * new feature: sending `HUP` to pool manager will reload the logfiles and
   gracefully restart all workers.
