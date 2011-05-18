@@ -1,5 +1,10 @@
 # -*- encoding: utf-8 -*-
+# external requires {{{
+require 'fcntl'
+require 'yaml'
 require 'resque'
+# }}}
+# internal requires {{{
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
@@ -9,9 +14,7 @@ require 'resque/pool/worker_type_manager'
 # experimental features!
 require 'resque/pool/memory_manager'
 require 'resque/pool/orphan_watcher'
-
-require 'fcntl'
-require 'yaml'
+# }}}
 
 module Resque
   class Pool
