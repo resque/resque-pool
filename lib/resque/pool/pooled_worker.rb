@@ -1,6 +1,7 @@
-class Resque::Pool
+require 'resque/worker'
 
-  class PooledWorker < ::Resque::Worker
+class Resque::Pool
+  module PooledWorker
 
     def initialize(*args)
       @pool_master_pid = Process.pid
@@ -17,5 +18,8 @@ class Resque::Pool
     end
 
   end
+end
 
+Resque::Worker.class_eval do
+  include Resque::Pool::PooledWorker
 end

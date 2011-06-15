@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
+require 'resque/worker'
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
@@ -323,7 +324,7 @@ module Resque
 
     def create_worker(queues)
       queues = queues.to_s.split(',')
-      worker = PooledWorker.new(*queues)
+      worker = ::Resque::Worker.new(*queues)
       worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
       worker.very_verbose = ENV['VVERBOSE']
       worker
