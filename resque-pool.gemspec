@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec",    "~> 2.3.0"
   s.add_development_dependency "cucumber", "~> 0.10.0"
   s.add_development_dependency "aruba",    "~> 0.3.2"
-  s.add_development_dependency "SystemTimer" # to silence redis gem's warning
+  s.add_development_dependency "SystemTimer" if RUBY_VERSION =~ /^1\.8/# to silence redis gem's warning
   s.add_development_dependency "bundler", "~> 1.0"
 
   # hidden files are automatically ignored by Dir.glob
