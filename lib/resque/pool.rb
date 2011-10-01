@@ -19,7 +19,7 @@ module Resque
 
     def initialize(config)
       init_config(config)
-      @workers = {}
+      @workers = Hash.new { |workers, queues| workers[queues] = {} }
       procline "(initialized)"
     end
 
@@ -196,7 +196,7 @@ module Resque
     end
 
     def report_worker_pool_pids
-      if workers.empty?
+      if @workers.empty?
         log "Pool is empty"
       else
         log "Pool contains worker PIDs: #{all_pids.inspect}"
@@ -249,7 +249,7 @@ module Resque
 
     def delete_worker(pid)
       worker = nil
-      workers.detect do |queues, pid_to_worker|
+      @workers.detect do |queues, pid_to_worker|
         if worker = pid_to_worker.delete(pid)
           # TODO: close any file descriptors connected to worker, if any
           log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
@@ -259,7 +259,7 @@ module Resque
     end
 
     def all_pids
-      workers.map {|q,workers| workers.keys }.flatten
+      @workers.map {|q,workers| workers.keys }.flatten
     end
 
     def signal_all_workers(signal)
@@ -280,7 +280,7 @@ module Resque
     end
 
     def all_known_queues
-      config.keys | workers.keys
+      config.keys | @workers.keys
     end
 
     # }}}
@@ -301,11 +301,11 @@ module Resque
     end
 
     def worker_delta_for(queues)
-      config.fetch(queues, 0) - workers.fetch(queues, []).size
+      config.fetch(queues, 0) - @workers.fetch(queues, []).size
     end
 
     def pids_for(queues)
-      workers[queues].keys
+      @workers[queues].keys
     end
 
     def spawn_worker!(queues)
@@ -317,8 +317,7 @@ module Resque
         #self_pipe.each {|io| io.close }
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
       end
-      workers[queues] ||= {}
-      workers[queues][pid] = worker
+      @workers[queues][pid] = worker
     end
 
     def create_worker(queues)
