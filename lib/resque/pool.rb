@@ -237,10 +237,11 @@ module Resque
         loop do
           # -1, wait for any child process
           wpid, status = Process.waitpid2(-1, waitpid_flags)
-          wpid or break
-          worker = delete_worker(wpid)
-          # TODO: close any file descriptors connected to worker, if any
-          log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
+          if wpid
+            delete_worker(wpid)
+          else
+            break
+          end
         end
       rescue Errno::ECHILD, QuitNowException
       end
@@ -249,7 +250,10 @@ module Resque
     def delete_worker(pid)
       worker = nil
       workers.detect do |queues, pid_to_worker|
-        worker = pid_to_worker.delete(pid)
+        if worker = pid_to_worker.delete(pid)
+          # TODO: close any file descriptors connected to worker, if any
+          log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
+        end
       end
       worker
     end
