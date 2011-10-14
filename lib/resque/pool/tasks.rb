@@ -1,6 +1,5 @@
 # -*- encoding: utf-8 -*-
 require 'resque/tasks'
-require 'resque/pool'
 
 namespace :resque do
 
@@ -14,6 +13,7 @@ namespace :resque do
 
   desc "Launch a pool of resque workers"
   task :pool => %w[resque:setup resque:pool:setup] do
+    require 'resque/pool'
     Resque::Pool.run
   end
 
