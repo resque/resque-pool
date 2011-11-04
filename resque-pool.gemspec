@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "aruba",    "~> 0.3.2"
   s.add_development_dependency "SystemTimer" # to silence redis gem's warning
   s.add_development_dependency "bundler", "~> 1.0"
+  s.add_development_dependency "ronn"
 
   # hidden files are automatically ignored by Dir.glob
   ignore_patterns = %w[**/*.gem **/*.pid **/*.log pkg Gemfile.lock]
