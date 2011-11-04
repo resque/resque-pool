@@ -26,5 +26,5 @@ rule(/\.[1-9]$/ => [proc { |tn| "#{tn}.ronn" }]) do |t|
 end
 
 file 'man/resque-pool.1'
-file 'man/resque-pool-yml.5'
-task :manpages => ['man/resque-pool.1','man/resque-pool-yml.5']
+file 'man/resque-pool.yml.5'
+task :manpages => ['man/resque-pool.1','man/resque-pool.yml.5']

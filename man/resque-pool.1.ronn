@@ -65,4 +65,4 @@ Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
 
 ## SEE ALSO
 
-resque-pool-yml(5)
+resque-pool.yml(5)
