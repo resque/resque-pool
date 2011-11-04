@@ -1,0 +1,48 @@
+resque-pool(1) -- resque worker pool management
+================================================
+
+## SYNOPSIS
+
+`resque-pool` [options]
+
+## DESCRIPTION
+
+resque-pool(1) is the best way to manage a group (pool) of resque workers
+
+When daemonized, `stdout` and `stderr` default to `resque-pool.stdxxx.log` files in
+the `log` directory and pidfile defaults to `resque-pool.pid` in the current dir.
+
+## OPTIONS
+
+  * `-c, --config` <file>:
+    Alternate path to config file
+  * `-d, --daemon`:
+    Run as a background daemon
+  * `-o, --stdout` <file>:
+    Redirect stdout to logfile
+  * `-e, --stderr` <file>:
+    Redirect stderr to logfile
+  * `--nosync`
+    Don't sync logfiles on every write
+  * `-p, --pidfile` <file>:
+    PID file location
+  * `-E, --environment` <env>:
+    Set `RAILS_ENV`/`RACK_ENV`/`RESQUE_ENV`
+
+## HISTORY
+
+  * `v0.1.0`:
+    `resque-pool` command line interface added
+
+## AUTHOR
+
+Nicholas Evans
+
+## COPYRIGHT
+
+Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
+
+## SEE ALSO
+
+resque-pool.yml(5)
+
