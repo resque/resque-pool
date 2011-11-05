@@ -240,7 +240,12 @@ module Resque
           wpid or break
           worker = delete_worker(wpid)
           # TODO: close any file descriptors connected to worker, if any
-          log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
+          if worker.nil?
+            # this died before it could be killed, so it's not going to have any extra info
+            log "Tried to reap worker [#{status.pid}], but it had already died. (status: #{status.exitstatus})"
+          else
+            log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
+          end
         end
       rescue Errno::ECHILD, QuitNowException
       end
