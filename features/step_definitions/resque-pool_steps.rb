@@ -7,7 +7,7 @@ def process_should_not_exist(pid)
 end
 
 def grab_worker_pids(count, str)
-  announce "TODO: check output_or_log for #{count} worker started messages"
+  puts "TODO: check output_or_log for #{count} worker started messages"
   pid_regex = (1..count).map { '(\d+)' }.join ', '
   full_regex = /resque-pool-manager\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
   str.should =~ full_regex
@@ -28,7 +28,7 @@ end
 def output_or_log(report_log)
   case report_log
   when "report", "output"
-    all_output
+    interactive_output
   when "log", "logfiles"
     in_current_dir do
       File.read("log/resque-pool.stdout.log") << File.read("log/resque-pool.stderr.log")
@@ -56,7 +56,7 @@ When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
   case signal
   when "QUIT"
     keep_trying do
-      Then "the #{output_logfiles} should contain the following lines (with interpolated $PID):", <<-EOF
+      step "the #{output_logfiles} should contain the following lines (with interpolated $PID):", <<-EOF
 resque-pool-manager[$PID]: QUIT: graceful shutdown, waiting for children
       EOF
     end
@@ -77,7 +77,7 @@ Then /^the pool manager should record its pid in "([^"]*)"$/ do |pidfile|
 end
 
 Then /^the pool manager should daemonize$/ do
-  @pool_manager_process.stop
+  stop_processes!
 end
 
 Then /^the pool manager daemon should finish$/ do
@@ -91,7 +91,7 @@ end
 
 Then /^the pool manager should (report|log) that it has started up$/ do |report_log|
   keep_trying do
-    Then "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
+    step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
 resque-pool-manager[$PID]: Resque Pool running in development environment
 resque-pool-manager[$PID]: started manager
     EOF
@@ -99,7 +99,7 @@ resque-pool-manager[$PID]: started manager
 end
 
 Then /^the pool manager should (report|log) that the pool is empty$/ do |report_log|
-  Then "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
+  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
 resque-pool-manager[$PID]: Pool is empty
   EOF
 end
@@ -128,17 +128,17 @@ end
 
 Then "the pool manager should finish" do
   # assuming there will not be multiple processes running
-  processes.each { |cmd, p| p.stop }
+  stop_processes!
 end
 
 Then /^the pool manager should (report|log) that it is finished$/ do |report_log|
-  Then "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
+  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
 resque-pool-manager[$PID]: manager finished
   EOF
 end
 
 Then /^the pool manager should (report|log) that a "([^"]*)" worker has been reaped$/ do |report_log, worker_type|
-  And 'the '+ output_or_logfiles_string(report_log) +' should match /Reaped resque worker\[\d+\] \(status: 0\) queues: '+ worker_type + '/'
+  step 'the '+ output_or_logfiles_string(report_log) +' should match /Reaped resque worker\[\d+\] \(status: 0\) queues: '+ worker_type + '/'
 end
 
 Then /^the logfiles should match \/([^\/]*)\/$/ do |partial_output|

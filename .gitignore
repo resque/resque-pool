@@ -4,3 +4,4 @@ pkg/*
 *.log
 *.pid
 tmp/*
+vendor

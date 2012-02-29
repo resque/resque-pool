@@ -8,7 +8,7 @@ module Aruba
     # this is a horrible hack, to make sure that it's done what it needs to do
     # before we do our next step
     def keep_trying(timeout=10, tries=0)
-      announce "Try: #{tries}" if @announce_env
+      puts "Try: #{tries}" if @announce_env
       yield
     rescue RSpec::Expectations::ExpectationNotMetError
       if tries < timeout
@@ -33,6 +33,21 @@ module Aruba
       @pid_from_pidfile || @background.pid
     end
 
+    # like all_stdout, but doesn't stop processes first
+    def interactive_stdout
+      only_processes.inject("") { |out, ps| out << ps.stdout(@aruba_keep_ansi) }
+    end
+
+    # like all_stderr, but doesn't stop processes first
+    def interactive_stderr
+      only_processes.inject("") { |out, ps| out << ps.stderr(@aruba_keep_ansi) }
+    end
+
+    # like all_output, but doesn't stop processes first
+    def interactive_output
+      interactive_stdout << interactive_stderr
+    end
+
     def interpolate_background_pid(string)
       interpolated = string.gsub('$PID', background_pid.to_s)
       announce_or_puts interpolated if @announce_env
@@ -40,10 +55,10 @@ module Aruba
     end
 
     def kill_all_processes!
-      stop_processes!
-    rescue
-      processes.each {|cmd,process| send_signal(cmd, 'KILL') }
-      raise
+    #  stop_processes!
+    #rescue
+    #  processes.each {|cmd,process| send_signal(cmd, 'KILL') }
+    #  raise
     end
 
   end

@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
   s.add_dependency "resque",  "~> 1.13"
   s.add_dependency "trollop", "~> 1.16"
   s.add_dependency "rake"
-  s.add_development_dependency "rspec",    "~> 2.3.0"
-  s.add_development_dependency "cucumber", "~> 0.10.0"
-  s.add_development_dependency "aruba",    "~> 0.3.2"
+  s.add_development_dependency "rspec",    "~> 2.8.0"
+  s.add_development_dependency "cucumber", "~> 1.1.9"
+  s.add_development_dependency "aruba",    "~> 0.4.11"
   s.add_development_dependency "SystemTimer" # to silence redis gem's warning
   s.add_development_dependency "bundler", "~> 1.0"
 
