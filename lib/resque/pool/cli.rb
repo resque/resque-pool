@@ -1,5 +1,6 @@
 require 'trollop'
 require 'resque/pool'
+require 'fileutils'
 
 module Resque
   class Pool
@@ -62,6 +63,8 @@ where [options] are:
           else
             File.delete pidfile
           end
+        else
+          FileUtils.mkdir_p File.dirname(pidfile)
         end
         File.open pidfile, "w" do |f|
           f.write pid
