@@ -1,0 +1,41 @@
+resque-pool.yml(5) -- resque-pool pool configuration
+=====================================================
+
+## SYNOPSIS
+
+`resque-pool.yml`<br>
+`config/resque-pool.yml`
+
+## DESCRIPTION
+
+resque-pool(1) reads pool configuration data from `resque-pool.yml` (or
+the file specified with `-c` on the command line). The file contains queue-worker-count pairs, one per line. The configuration file supports both 
+using root level defaults as well as environment specific overrides 
+(`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV` environment variables can be used 
+to determine environment).
+
+An example configuration
+
+    foo: 1
+    bar: 2
+    "foo,bar,baz": 1
+
+    production:
+      "foo,bar,baz": 4
+
+will create 7 workers in production and 4 in other environment configurations.
+The simpler worker definition `foo: 1` will create 1 worker for the `foo` 
+queue, the more complicated `foo,bar,baz: 1` will create 1 worker for the
+queues `foo`, `bar` and `baz`.
+
+## AUTHOR
+
+Nicholas Evans
+
+## COPYRIGHT
+
+Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
+
+## SEE ALSO
+
+resque-pool(1)

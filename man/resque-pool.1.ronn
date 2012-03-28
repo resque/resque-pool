@@ -1,0 +1,68 @@
+resque-pool(1) -- resque worker pool management
+================================================
+
+## SYNOPSIS
+
+`resque-pool` [options]
+
+## DESCRIPTION
+
+**Resque-pool** is the best way to manage a group (pool) of resque workers.
+
+When resque-pool(1) is daemonized the `stdout` and `stderr` output streams
+are redirected to `resque-pool.stdxxx.log` log files in the `log` directory.
+Additionally the PID file defaults to `resque-pool.pid` in the `tmp/pids`
+directory.
+
+## OPTIONS
+
+  * `-c, --config` <file>:
+    Uses the configuration specified in the <file> provided instead of
+    searching in the current and `config` directories for `resque-pool.yml`.
+
+  * `-d, --daemon`:
+    Runs `resque-pool` in the background as a daemon process. This will
+    redirect `stdout` and `stderr` to log files and write a PID file.
+
+  * `-o, --stdout` <file>:
+    Writes the normal log output to <file> instead of printing to the
+    terminal. When running as a daemon this defaults to the path
+    `log/resque-pool.stdout.log`.
+
+  * `-e, --stderr` <file>:
+    Writes the standard error output to <file> instead of printing to the
+    terminal. When running as a daemon this defaults to the path
+    `log/resque-pool.stderr.log`.
+
+  * `--nosync`
+    Allows writes to `stdout` and `stderr` to be buffered by the OS.
+
+  * `-p, --pidfile` <file>:
+    Writes the PID to the <file>. When running as a daemon this defaults
+    to `tmp/pids/resque-pool.pid`.
+
+  * `-E, --environment` <name>:
+    Specifies the environment <name> to be set for `RAILS_ENV`, `RACK_ENV`
+    and `RESQUE_ENV` which will be passed on to the pooled resque workers.
+
+## HISTORY
+
+  * `v0.2.0`:
+    Support for reloading logs and workers with `HUP` signal<br>
+    Cleans up PID file on startup<br>
+    Fixed `-c, --config` option.
+
+  * `v0.1.0`:
+    `resque-pool` command line interface added
+
+## AUTHOR
+
+Nicholas Evans
+
+## COPYRIGHT
+
+Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
+
+## SEE ALSO
+
+resque-pool.yml(5)
