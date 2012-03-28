@@ -128,8 +128,10 @@ is; just provide a `/data/#{app_name}/shared/config/resque-pool.yml` on your
 utility instances).  Even if you don't use chef you can use the example init.d
 and monitrc erb templates in `examples/chef_cookbook/templates/default`.
 
-You can also start a pool manager via `rake resque:pool` or from a plain old
-ruby script by calling `Resque::Pool.run`.
+You can also start a pool manager via `rake resque:pool:start` or from a plain
+old ruby script by calling `Resque::Pool.run`.
+
+You can stop a pool manager via `rake resque:pool:stop`.
 
 Workers will watch the pool manager, and gracefully shutdown (after completing
 their current job) if the manager process disappears before them.
