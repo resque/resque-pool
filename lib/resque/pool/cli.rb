@@ -84,7 +84,7 @@ where [options] are:
         false
       rescue Errno::EPERM
         true
-      rescue ::Exception
+      rescue ::Exception => e
         $stderr.puts "While checking if PID #{old_pid} is running, unexpected #{e.class}: #{e}"
         true
       end
