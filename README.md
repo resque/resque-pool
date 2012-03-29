@@ -1,6 +1,8 @@
 Resque Pool
 ===========
 
+[![Build Status](https://secure.travis-ci.org/nevans/resque-pool.png)](http://travis-ci.org/nevans/resque-pool)
+
 Resque pool is a simple library for managing a pool of
 [resque](http://github.com/defunkt/resque) workers.  Given a a config file, it
 manages your workers for you, starting up the appropriate number of workers for
