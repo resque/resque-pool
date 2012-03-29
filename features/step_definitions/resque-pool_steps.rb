@@ -38,6 +38,13 @@ def output_or_log(report_log)
   end
 end
 
+def worker_processes_for(queues)
+  children_of(background_pid).select do |pid, cmd|
+    retry if cmd =~ /Starting$/
+    cmd =~ /^resque-\d+.\d+.\d+: Waiting for #{queues}$/
+  end
+end
+
 def children_of(ppid)
   ps = `ps -eo ppid,pid,cmd | grep '^ *#{ppid} '`
   ps.split(/\s*\n/).map do |line|
@@ -92,7 +99,7 @@ end
 Then /^the pool manager should (report|log) that it has started up$/ do |report_log|
   keep_trying do
     step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[$PID]: Resque Pool running in development environment
+resque-pool-manager[$PID]: Resque Pool running in test environment
 resque-pool-manager[$PID]: started manager
     EOF
   end
@@ -121,9 +128,7 @@ Then "the pool manager should have no child processes" do
 end
 
 Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do |count, queues|
-  children_of(background_pid).select do |pid, cmd|
-    cmd =~ /^resque-\d+.\d+.\d+: Waiting for #{queues}$/
-  end.should have(Integer(count)).members
+  worker_processes_for(queues).should have(Integer(count)).members
 end
 
 Then "the pool manager should finish" do

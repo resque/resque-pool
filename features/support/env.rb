@@ -1,1 +1,1 @@
-require 'aruba/cucumber'
+ENV["RAILS_ENV"] = "test"

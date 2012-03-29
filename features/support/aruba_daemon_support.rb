@@ -1,3 +1,4 @@
+require 'aruba/cucumber'
 require 'aruba/api'
 require 'aruba/process'
 
