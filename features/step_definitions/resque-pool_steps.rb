@@ -38,11 +38,14 @@ def output_or_log(report_log)
   end
 end
 
+class NotFinishedStarting < StandardError; end
 def worker_processes_for(queues)
   children_of(background_pid).select do |pid, cmd|
-    retry if cmd =~ /Starting$/
+    raise NotFinishedStarting if cmd =~ /Starting$/
     cmd =~ /^resque-\d+.\d+.\d+: Waiting for #{queues}$/
   end
+rescue NotFinishedStarting
+  retry
 end
 
 def children_of(ppid)
