@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec",    "~> 2.9.0"
   s.add_development_dependency "cucumber", "~> 1.1.9"
   s.add_development_dependency "aruba",    "~> 0.4.11"
-  s.add_development_dependency "bundler", "~> 1.1.0"
+  s.add_development_dependency "bundler", "~> 1.0"
   s.add_development_dependency "ronn"
 
   # only in ruby 1.8
