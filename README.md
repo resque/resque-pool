@@ -2,6 +2,7 @@ Resque Pool
 ===========
 
 [![Build Status](https://secure.travis-ci.org/nevans/resque-pool.png)](http://travis-ci.org/nevans/resque-pool)
+[![Dependency Status](https://gemnasium.com/nevans/resque-pool.png)](https://gemnasium.com/nevans/resque-pool)
 
 Resque pool is a simple library for managing a pool of
 [resque](http://github.com/defunkt/resque) workers.  Given a a config file, it
