@@ -11,7 +11,7 @@ module Resque
   class Pool
     SIG_QUEUE_MAX_SIZE = 5
     DEFAULT_WORKER_INTERVAL = 5
-    QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
+    QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP ]
     CHUNK_SIZE = (16 * 1024)
 
     include Logging
@@ -161,10 +161,6 @@ module Resque
         log "HUP: gracefully shutdown old children (which have old logfiles open)"
         signal_all_workers(:QUIT)
         log "HUP: new children will inherit new logfiles"
-        maintain_worker_count
-      when :WINCH
-        log "WINCH: gracefully stopping all workers"
-        @config = {}
         maintain_worker_count
       when :QUIT
         log "QUIT: graceful shutdown, waiting for children"
