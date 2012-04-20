@@ -50,7 +50,7 @@ module Resque
     # Config: class methods to start up the pool using the default config {{{
 
     @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
-    class << self; attr_accessor :config_files; end
+    class << self; attr_accessor :config_files, :app_name; end
     def self.choose_config_file
       if ENV["RESQUE_POOL_CONFIG"]
         ENV["RESQUE_POOL_CONFIG"]
