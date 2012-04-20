@@ -55,7 +55,8 @@ module Resque
       
       # Include optional app name in procline
       def app
-        self.class.app_name ? "-#{self.class.app_name}" : ""
+        app_name = self.class.respond_to?(:app_name) ? self.class.app_name : nil
+        app_name ? "-#{app_name}" : ""
       end
 
     end
