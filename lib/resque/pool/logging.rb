@@ -38,19 +38,25 @@ module Resque
       # Procline is always in the format of:
       #   resque-pool-master: STRING
       def procline(string)
-        $0 = "resque-pool-master: #{string}"
+        $0 = "resque-pool-master#{app}: #{string}"
       end
 
       # TODO: make this use an actual logger
       def log(message)
-        puts "resque-pool-manager[#{Process.pid}]: #{message}"
+        puts "resque-pool-manager#{app}[#{Process.pid}]: #{message}"
         #$stdout.fsync
       end
 
       # TODO: make this use an actual logger
       def log_worker(message)
-        puts "resque-pool-worker[#{Process.pid}]: #{message}"
+        puts "resque-pool-worker#{app}[#{Process.pid}]: #{message}"
         #$stdout.fsync
+      end
+      
+      # Include optional app name in procline
+      def app
+        app_name = self.class.respond_to?(:app_name) ? self.class.app_name : nil
+        app_name ? "-#{app_name}" : ""
       end
 
     end
