@@ -41,7 +41,7 @@ case "$1" in
     start-stop-daemon --start --pidfile ${pidfile} \
       --chuid ${run_as_user} --chdir ${app_dir} \
       --startas ${bundler} -- exec \
-      resque-pool -d -p ${pidfile} -E ${environment} -o ${stdout_log} -e ${stderr_log}
+      resque-pool -d -a ${app_name} -p ${pidfile} -E ${environment} -o ${stdout_log} -e ${stderr_log}
     ;;
   reload)
     start-stop-daemon --stop --pidfile ${pidfile} --signal HUP
