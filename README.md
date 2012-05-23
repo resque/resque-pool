@@ -121,7 +121,8 @@ The pool manager responds to the following signals:
 * `USR1`/`USR2`/`CONT` - pass the signal on to all worker parents (see Resque docs).
 
 Use `HUP` to help logrotate run smoothly and to change the number of workers
-per worker type.
+per worker type.  Signals can be sent via the `kill` command, e.g.
+`kill -HUP $master-pid`
 
 Other Features
 --------------
