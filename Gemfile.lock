@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    resque-pool (0.3.0.dev)
+    resque-pool (0.3.0)
       rake
       resque (~> 1.20)
       trollop (~> 1.16)
