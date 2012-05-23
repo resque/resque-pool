@@ -1,4 +1,8 @@
-## 0.3.0 (2012-??-??)
+## 0.4.0.dev (unreleased)
+
+ * ???
+
+## 0.3.0 (2012-05-22)
 
 This is mostly just a long overdue maintenance release.  Many pull requests were
 merged.  A few non-pull-request branches were merged too.  This version supports
