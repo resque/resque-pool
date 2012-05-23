@@ -45,7 +45,16 @@ directory.
     Specifies the environment <name> to be set for `RAILS_ENV`, `RACK_ENV`
     and `RESQUE_ENV` which will be passed on to the pooled resque workers.
 
+  * `-a, --appname` <name>:
+    Specifies the app name to be used for logging and procline.  If not
+    specified, this defaults to the current working directory.
+
 ## HISTORY
+
+  * `v0.3.0`:
+    Support for ruby 1.9, resque 1.20.<br>
+    Added appname for logging.<br>
+    Minor bugfixes.
 
   * `v0.2.0`:
     Support for reloading logs and workers with `HUP` signal<br>

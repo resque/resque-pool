@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "RESQUE\-POOL" "1" "November 2011" "RESQUE-POOL 0.3.0.DEV" "RESQUE-POOL"
+.TH "RESQUE\-POOL" "1" "May 2012" "RESQUE-POOL 0.3.0.DEV" "RESQUE-POOL"
 .
 .SH "NAME"
 \fBresque\-pool\fR \- resque worker pool management
@@ -38,9 +38,22 @@ When resque\-pool(1) is daemonized the \fBstdout\fR and \fBstderr\fR output stre
 .IP "\(bu" 4
 \fB\-E, \-\-environment\fR \fIname\fR: Specifies the environment \fIname\fR to be set for \fBRAILS_ENV\fR, \fBRACK_ENV\fR and \fBRESQUE_ENV\fR which will be passed on to the pooled resque workers\.
 .
+.IP "\(bu" 4
+\fB\-a, \-\-appname\fR \fIname\fR: Specifies the app name to be used for logging and procline\. If not specified, this defaults to the current working directory\.
+.
 .IP "" 0
 .
 .SH "HISTORY"
+.
+.TP
+\fBv0\.3\.0\fR
+Support for ruby 1\.9, resque 1\.20\.
+.
+.br
+Added appname for logging\.
+.
+.br
+Minor bugfixes\.
 .
 .TP
 \fBv0\.2\.0\fR
