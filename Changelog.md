@@ -1,3 +1,27 @@
+## 0.3.0 (2012-??-??)
+
+This is mostly just a long overdue maintenance release.  Many pull requests were
+merged.  A few non-pull-request branches were merged too.  This version supports
+ruby 1.9.3, 1.8.7, and even ancient 1.8.6, and all are checked by
+[travis-ci](http://travis-ci.org/nevans/resque-pool).  It also explicitly
+supports resque ~> 1.20.  And (if you have `gem-man` installed), it now has man
+pages for bin and yml config.
+
+Many thanks to the contributers!
+
+ * [@agnellvj](https://github.com/agnellvj): ruby 1.9 compatibility
+ * [@geoffgarside](https://github.com/geoffgarside): man pages!
+ * [@imajes](https://github.com/imajes) - bugfix: Handle when a pid no longer
+   exists by the time you try and kill it.
+ * [@jeremy](https://github.com/jeremy) & [@jamis](https://github.com/jamis) -
+   tasks require `resque/pool` lazily
+ * [@jhsu](https://github.com/jhsu) - bugfix: undefined variable 'e' for errors
+ * [@gaffneyc](https://github.com/gaffneyc) - compatibility fix:
+   Resque::Pool::PooledWorker as a module rather than class
+ * [@kcrayon](https://github.com/kcrayon) - bugfix: fix worker shutdown
+ * [@alexkwolfe](https://github.com/alexkwolfe) - added `app_name` for logging
+   (and maybe more in the future?)
+
 ## 0.2.0 (2011-03-15)
 
 * new feature: sending `HUP` to pool manager will reload the logfiles and
