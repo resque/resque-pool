@@ -122,7 +122,7 @@ The pool manager responds to the following signals:
 
 Use `HUP` to help logrotate run smoothly and to change the number of workers
 per worker type.  Signals can be sent via the `kill` command, e.g.
-`kill -HUP $master-pid`
+`kill -HUP $master_pid`
 
 Other Features
 --------------
