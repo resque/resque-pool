@@ -9,7 +9,7 @@ end
 def grab_worker_pids(count, str)
   puts "TODO: check output_or_log for #{count} worker started messages"
   pid_regex = (1..count).map { '(\d+)' }.join ', '
-  full_regex = /resque-pool-manager\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
+  full_regex = /resque-pool-manager\[aruba\]\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
   str.should =~ full_regex
   @worker_pids = full_regex.match(str).captures.map {|pid| pid.to_i }
 end
@@ -67,7 +67,7 @@ When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
   when "QUIT"
     keep_trying do
       step "the #{output_logfiles} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[$PID]: QUIT: graceful shutdown, waiting for children
+resque-pool-manager[aruba][$PID]: QUIT: graceful shutdown, waiting for children
       EOF
     end
   else
@@ -102,15 +102,15 @@ end
 Then /^the pool manager should (report|log) that it has started up$/ do |report_log|
   keep_trying do
     step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[$PID]: Resque Pool running in test environment
-resque-pool-manager[$PID]: started manager
+resque-pool-manager[aruba][$PID]: Resque Pool running in test environment
+resque-pool-manager[aruba][$PID]: started manager
     EOF
   end
 end
 
 Then /^the pool manager should (report|log) that the pool is empty$/ do |report_log|
   step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[$PID]: Pool is empty
+resque-pool-manager[aruba][$PID]: Pool is empty
   EOF
 end
 
@@ -141,7 +141,7 @@ end
 
 Then /^the pool manager should (report|log) that it is finished$/ do |report_log|
   step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[$PID]: manager finished
+resque-pool-manager[aruba][$PID]: manager finished
   EOF
 end
 

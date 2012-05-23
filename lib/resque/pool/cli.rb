@@ -5,7 +5,6 @@ require 'fileutils'
 module Resque
   class Pool
     module CLI
-      extend Logging
       extend self
 
       def run
@@ -31,6 +30,7 @@ Usage:
 where [options] are:
           EOS
           opt :config, "Alternate path to config file", :type => String, :short => "-c"
+          opt :appname, "Alternate appname",         :type => String,    :short => "-a"
           opt :daemon, "Run as a background daemon", :default => false,  :short => "-d"
           opt :stdout, "Redirect stdout to logfile", :type => String,    :short => '-o'
           opt :stderr, "Redirect stderr to logfile", :type => String,    :short => '-e'
@@ -100,8 +100,9 @@ where [options] are:
       end
 
       def setup_environment(opts)
+        Resque::Pool.app_name = opts[:appname]    if opts[:appname]
         ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
-        log "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment"
+        Resque::Pool.log "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment"
         ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
       end
 

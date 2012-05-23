@@ -15,6 +15,7 @@ module Resque
     CHUNK_SIZE = (16 * 1024)
 
     include Logging
+    extend  Logging
     attr_reader :config
     attr_reader :workers
 
