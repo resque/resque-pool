@@ -9,7 +9,6 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    SystemTimer (1.2.3)
     aruba (0.4.11)
       childprocess (>= 0.2.3)
       cucumber (>= 1.1.1)
@@ -69,7 +68,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  SystemTimer
   aruba (~> 0.4.11)
   bundler (~> 1.0)
   cucumber (~> 1.2.0)
