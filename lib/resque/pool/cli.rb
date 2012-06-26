@@ -47,6 +47,7 @@ where [options] are:
       end
 
       def daemonize
+        Resque::Pool.handle_winch = true
         raise 'First fork failed' if (pid = fork) == -1
         exit unless pid.nil?
         Process.setsid

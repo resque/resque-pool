@@ -57,6 +57,13 @@ module Resque
       @app_name ||= File.basename(Dir.pwd)
     end
 
+    def self.handle_winch?
+      @handle_winch ||= false
+    end
+    def self.handle_winch=(bool)
+      @handle_winch = bool
+    end
+
     def self.choose_config_file
       if ENV["RESQUE_POOL_CONFIG"]
         ENV["RESQUE_POOL_CONFIG"]
@@ -169,9 +176,11 @@ module Resque
         log "HUP: new children will inherit new logfiles"
         maintain_worker_count
       when :WINCH
-        log "WINCH: gracefully stopping all workers"
-        @config = {}
-        maintain_worker_count
+        if self.class.handle_winch?
+          log "WINCH: gracefully stopping all workers"
+          @config = {}
+          maintain_worker_count
+        end
       when :QUIT
         log "QUIT: graceful shutdown, waiting for children"
         signal_all_workers(:QUIT)
