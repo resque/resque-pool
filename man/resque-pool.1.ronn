@@ -20,6 +20,10 @@ directory.
     Uses the configuration specified in the <file> provided instead of
     searching in the current and `config` directories for `resque-pool.yml`.
 
+  * `-a, --appname` <name>:
+    Specifies the app name to be used for logging and procline.  If not
+    specified, this defaults to the current working directory.
+
   * `-d, --daemon`:
     Runs `resque-pool` in the background as a daemon process. This will
     redirect `stdout` and `stderr` to log files and write a PID file.
@@ -35,7 +39,7 @@ directory.
     `log/resque-pool.stderr.log`.
 
   * `--nosync`
-    Allows writes to `stdout` and `stderr` to be buffered by the OS.
+    Allows writes to `stdout` and `stderr` to be buffered.
 
   * `-p, --pidfile` <file>:
     Writes the PID to the <file>. When running as a daemon this defaults
@@ -45,9 +49,20 @@ directory.
     Specifies the environment <name> to be set for `RAILS_ENV`, `RACK_ENV`
     and `RESQUE_ENV` which will be passed on to the pooled resque workers.
 
-  * `-a, --appname` <name>:
-    Specifies the app name to be used for logging and procline.  If not
-    specified, this defaults to the current working directory.
+  * `--term-graceful-wait`:
+    Configure TERM signal handling so the master will gracefully request worker
+    shut downs (via `QUIT`) and wait for the workers to quit before shutting
+    down itself.  This is the same behavior as the `QUIT` signal.
+
+  * `--term-graceful`:
+    Configure TERM signal handling so the master will gracefully request worker
+    shut downs (via `QUIT`) but shut itself down immediately.  This the same
+    behavior as the `INT` signal.
+
+  * `--term-immediate`:
+    Configure TERM signal handling so the master will request imediate worker
+    shut downs (via `INT`) and shut itself down immediately.  This is the
+    default `TERM` signal behavior.
 
 ## HISTORY
 

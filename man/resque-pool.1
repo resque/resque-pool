@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "RESQUE\-POOL" "1" "May 2012" "RESQUE-POOL 0.3.0.DEV" "RESQUE-POOL"
+.TH "RESQUE\-POOL" "1" "June 2012" "RESQUE-POOL 0.4.0.DEV" "RESQUE-POOL"
 .
 .SH "NAME"
 \fBresque\-pool\fR \- resque worker pool management
@@ -21,6 +21,9 @@ When resque\-pool(1) is daemonized the \fBstdout\fR and \fBstderr\fR output stre
 \fB\-c, \-\-config\fR \fIfile\fR: Uses the configuration specified in the \fIfile\fR provided instead of searching in the current and \fBconfig\fR directories for \fBresque\-pool\.yml\fR\.
 .
 .IP "\(bu" 4
+\fB\-a, \-\-appname\fR \fIname\fR: Specifies the app name to be used for logging and procline\. If not specified, this defaults to the current working directory\.
+.
+.IP "\(bu" 4
 \fB\-d, \-\-daemon\fR: Runs \fBresque\-pool\fR in the background as a daemon process\. This will redirect \fBstdout\fR and \fBstderr\fR to log files and write a PID file\.
 .
 .IP "\(bu" 4
@@ -30,7 +33,7 @@ When resque\-pool(1) is daemonized the \fBstdout\fR and \fBstderr\fR output stre
 \fB\-e, \-\-stderr\fR \fIfile\fR: Writes the standard error output to \fIfile\fR instead of printing to the terminal\. When running as a daemon this defaults to the path \fBlog/resque\-pool\.stderr\.log\fR\.
 .
 .IP "\(bu" 4
-\fB\-\-nosync\fR Allows writes to \fBstdout\fR and \fBstderr\fR to be buffered by the OS\.
+\fB\-\-nosync\fR Allows writes to \fBstdout\fR and \fBstderr\fR to be buffered\.
 .
 .IP "\(bu" 4
 \fB\-p, \-\-pidfile\fR \fIfile\fR: Writes the PID to the \fIfile\fR\. When running as a daemon this defaults to \fBtmp/pids/resque\-pool\.pid\fR\.
@@ -39,7 +42,13 @@ When resque\-pool(1) is daemonized the \fBstdout\fR and \fBstderr\fR output stre
 \fB\-E, \-\-environment\fR \fIname\fR: Specifies the environment \fIname\fR to be set for \fBRAILS_ENV\fR, \fBRACK_ENV\fR and \fBRESQUE_ENV\fR which will be passed on to the pooled resque workers\.
 .
 .IP "\(bu" 4
-\fB\-a, \-\-appname\fR \fIname\fR: Specifies the app name to be used for logging and procline\. If not specified, this defaults to the current working directory\.
+\fB\-\-term\-graceful\-wait\fR: Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) and wait for the workers to quit before shutting down itself\. This is the same behavior as the \fBQUIT\fR signal\.
+.
+.IP "\(bu" 4
+\fB\-\-term\-graceful\fR: Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) but shut itself down immediately\. This the same behavior as the \fBINT\fR signal\.
+.
+.IP "\(bu" 4
+\fB\-\-term\-immediate\fR: Configure TERM signal handling so the master will request imediate worker shut downs (via \fBINT\fR) and shut itself down immediately\. This is the default \fBTERM\fR signal behavior\.
 .
 .IP "" 0
 .
