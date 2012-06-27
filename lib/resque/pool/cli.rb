@@ -38,8 +38,9 @@ where [options] are:
           opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
-          opt :graceful,      "On TERM signal, shut down workers gracefully", :default => false
-          opt :graceful_wait, "On TERM signal, wait for workers to shut down gracefully", :default => false
+          opt :term_graceful_wait, "On TERM signal, wait for workers to shut down gracefully"
+          opt :term_graceful,      "On TERM signal, shut down workers gracefully"
+          opt :term_immediate,     "On TERM signal, shut down workers immediately (default)"
         end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
@@ -107,9 +108,9 @@ where [options] are:
         if opts[:daemon]
           Resque::Pool.handle_winch = true
         end
-        if opts[:graceful_wait]
+        if opts[:term_graceful_wait]
           Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
-        elsif opts[:graceful]
+        elsif opts[:term_graceful]
           Resque::Pool.term_behavior = "graceful_worker_shutdown"
         end
       end
