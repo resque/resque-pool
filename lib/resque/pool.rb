@@ -182,19 +182,42 @@ module Resque
           maintain_worker_count
         end
       when :QUIT
-        log "QUIT: graceful shutdown, waiting for children"
-        signal_all_workers(:QUIT)
-        reap_all_workers(0) # will hang until all workers are shutdown
-        :break
+        graceful_worker_shutdown_and_wait!(signal)
       when :INT
-        log "INT: immediate shutdown (graceful worker shutdown)"
-        signal_all_workers(:QUIT)
-        :break
+        graceful_worker_shutdown!(signal)
       when :TERM
-        log "TERM: immediate shutdown (and immediate worker shutdown)"
-        signal_all_workers(:TERM)
-        :break
+        case self.class.term_behavior
+        when "graceful_worker_shutdown_and_wait"
+          graceful_worker_shutdown_and_wait!(signal)
+        when "graceful_worker_shutdown"
+          graceful_worker_shutdown!(signal)
+        else
+          shutdown_everything_now!(signal)
+        end
       end
+    end
+
+    class << self
+      attr_accessor :term_behavior
+    end
+
+    def graceful_worker_shutdown_and_wait!(signal)
+      log "#{signal}: graceful shutdown, waiting for children"
+      signal_all_workers(:QUIT)
+      reap_all_workers(0) # will hang until all workers are shutdown
+      :break
+    end
+
+    def graceful_worker_shutdown!(signal)
+      log "#{signal}: immediate shutdown (graceful worker shutdown)"
+      signal_all_workers(:QUIT)
+      :break
+    end
+
+    def shutdown_everything_now!(signal)
+      log "#{signal}: immediate shutdown (and immediate worker shutdown)"
+      signal_all_workers(:TERM)
+      :break
     end
 
     # }}}

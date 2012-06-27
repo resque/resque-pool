@@ -13,6 +13,7 @@ module Resque
         manage_pidfile opts[:pidfile]
         redirect opts
         setup_environment opts
+        set_pool_options opts
         start_pool
       end
 
@@ -37,6 +38,8 @@ where [options] are:
           opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
+          opt :graceful,      "On TERM signal, shut down workers gracefully", :default => false
+          opt :graceful_wait, "On TERM signal, wait for workers to shut down gracefully", :default => false
         end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
@@ -47,7 +50,6 @@ where [options] are:
       end
 
       def daemonize
-        Resque::Pool.handle_winch = true
         raise 'First fork failed' if (pid = fork) == -1
         exit unless pid.nil?
         Process.setsid
@@ -98,6 +100,18 @@ where [options] are:
         $stdout.reopen out if out
         $stderr.reopen err if err
         $stdout.sync = $stderr.sync = true unless opts[:nosync]
+      end
+
+      # TODO: global variables are not the best way
+      def set_pool_options(opts)
+        if opts[:daemon]
+          Resque::Pool.handle_winch = true
+        end
+        if opts[:graceful_wait]
+          Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
+        elsif opts[:graceful]
+          Resque::Pool.term_behavior = "graceful_worker_shutdown"
+        end
       end
 
       def setup_environment(opts)
