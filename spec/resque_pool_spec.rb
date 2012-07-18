@@ -59,6 +59,30 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
 
   end
 
+  context "when Rails.env is set" do
+    before(:each) do
+      module Rails; end
+      Rails.stub(:env).and_return('test')
+    end
+
+    it "should load the default values from the Hash" do
+      subject.config["foo"].should == 8
+    end
+
+    it "should merge the values for the correct RAILS_ENV" do
+      subject.config["bar"].should == 10
+      subject.config["foo,bar"].should == 12
+    end
+
+    it "should not load the values for the other environments" do
+      subject.config["foo,bar"].should == 12
+      subject.config["baz"].should be_nil
+    end
+
+    after(:all) { Object.send(:remove_const, :Rails) }
+  end
+
+
   context "when ENV['RESQUE_ENV'] is set" do
     before { ENV['RESQUE_ENV'] = 'development' }
     it "should load the config for that environment" do
