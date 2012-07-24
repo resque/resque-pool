@@ -4,6 +4,7 @@ require 'resque/worker'
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
+require 'erb'
 require 'fcntl'
 require 'yaml'
 
@@ -98,7 +99,7 @@ module Resque
 
     def load_config
       if config_file
-        @config = YAML.load_file(config_file)
+        @config = YAML.load(ERB.new(IO.read(config_file)).result)
       else
         @config ||= {}
       end
