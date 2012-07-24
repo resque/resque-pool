@@ -109,6 +109,8 @@ module Resque
     def environment
       if defined? RAILS_ENV
         RAILS_ENV
+      elsif defined?(Rails) && Rails.respond_to?(:env)
+        Rails.env
       else
         ENV['RACK_ENV'] || ENV['RAILS_ENV'] || ENV['RESQUE_ENV']
       end
