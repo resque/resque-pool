@@ -155,4 +155,12 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
     end
   end
 
+  context "when a custom file is specified" do
+    before { ENV["RESQUE_POOL_CONFIG"] = 'spec/resque-pool-custom.yml.erb' }
+    subject { Resque::Pool.new(Resque::Pool.choose_config_file) }
+    it "should find the right file, and parse the ERB" do
+      subject.config["foo"].should == 2
+    end
+  end
+
 end
