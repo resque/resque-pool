@@ -1,4 +1,4 @@
 foo: 1
-bar: 2
-"foo,bar,baz": 4
+bar: 3
+"foo,bar,baz": 2
 
