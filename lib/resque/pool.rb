@@ -334,7 +334,10 @@ module Resque
 
     def signal_all_workers(signal)
       all_pids.each do |pid|
-        Process.kill signal, pid
+        begin
+          Process.kill signal, pid
+        rescue Errno::ESRCH
+        end
       end
     end
 
