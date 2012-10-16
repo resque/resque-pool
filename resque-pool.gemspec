@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   # hidden files are automatically ignored by Dir.glob
   ignore_patterns = %w[**/*.gem **/*.pid **/*.log pkg Gemfile.lock]
   ignore_files    = ignore_patterns.inject([]) {|a,p| a + Dir[p] }
-  s.files         = Dir["**/*"] - ignore_files
+  s.files         = `git ls-files`.split("\n") - ignore_files
   s.test_files    = Dir.glob("{spec,features}/**/*.{rb,yml,feature}")
   s.executables   = 'resque-pool'
   s.require_paths = ["lib"]
