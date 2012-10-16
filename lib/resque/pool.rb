@@ -108,12 +108,20 @@ module Resque
 
     def load_config
       if config_file
-        @config = YAML.load(ERB.new(IO.read(config_file)).result)
+        temp = YAML.load(ERB.new(IO.read(config_file)).result)
       else
         @config ||= {}
       end
-      environment and @config[environment] and config.merge!(@config[environment])
-      config.delete_if {|key, value| value.is_a? Hash }
+
+      #temp maybe false,when config_file empty(multi process write config file)
+      unless temp
+        return false
+      else
+        @config = temp
+        environment and @config[environment] and config.merge!(@config[environment])
+        config.delete_if {|key, value| value.is_a? Hash }
+        return true
+      end
     end
 
     def environment
@@ -205,12 +213,13 @@ module Resque
 
     def do_hup
       log "HUP: reload config file and reload logfiles"
-      load_config
-      Logging.reopen_logs!
-      log "HUP: gracefully shutdown old children (which have old logfiles open)"
-      signal_all_workers(:QUIT)
-      log "HUP: new children will inherit new logfiles"
-      maintain_worker_count
+      if load_config
+        Logging.reopen_logs!
+        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        signal_all_workers(:QUIT)
+        log "HUP: new children will inherit new logfiles"
+        maintain_worker_count
+      end
     end
 
     class << self
