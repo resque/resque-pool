@@ -41,6 +41,7 @@ where [options] are:
           opt :term_graceful_wait, "On TERM signal, wait for workers to shut down gracefully"
           opt :term_graceful,      "On TERM signal, shut down workers gracefully"
           opt :term_immediate,     "On TERM signal, shut down workers immediately (default)"
+          opt :dynamic_adjust_workers_count, "monitor resque pool config file, dynamic adjust woekers count", :default => false, :short => "-D"
         end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
@@ -112,6 +113,9 @@ where [options] are:
           Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
         elsif opts[:term_graceful]
           Resque::Pool.term_behavior = "graceful_worker_shutdown"
+        end
+        if opts[:dynamic_adjust_workers_count]
+          Resque::Pool.dynamic_adjust_workers_count = true
         end
       end
 

@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "resque",  "~> 1.20"
   s.add_dependency "trollop", "~> 1.16"
+  s.add_dependency "listen",  "~> 0.5.0"
   s.add_dependency "rake"
   s.add_development_dependency "rspec",    "~> 2.10.0"
   s.add_development_dependency "cucumber", "~> 1.2.0"

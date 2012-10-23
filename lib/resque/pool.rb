@@ -7,6 +7,7 @@ require 'resque/pool/pooled_worker'
 require 'erb'
 require 'fcntl'
 require 'yaml'
+require 'listen'
 
 module Resque
   class Pool
@@ -65,6 +66,14 @@ module Resque
       @handle_winch = bool
     end
 
+    def self.dynamic_adjust_workers_count?
+      @dynamic_adjust_workers_count ||= false
+    end
+
+    def self.dynamic_adjust_workers_count=(bool)
+      @dynamic_adjust_workers_count = bool
+    end
+
     def self.choose_config_file
       if ENV["RESQUE_POOL_CONFIG"]
         ENV["RESQUE_POOL_CONFIG"]
@@ -77,7 +86,7 @@ module Resque
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
-      Resque::Pool.new(choose_config_file).start.join
+      Resque::Pool.new(choose_config_file).start.try_to_dynamic_adjust_worker.join
     end
 
     # }}}
@@ -99,12 +108,20 @@ module Resque
 
     def load_config
       if config_file
-        @config = YAML.load(ERB.new(IO.read(config_file)).result)
+        temp = YAML.load(ERB.new(IO.read(config_file)).result)
       else
         @config ||= {}
       end
-      environment and @config[environment] and config.merge!(@config[environment])
-      config.delete_if {|key, value| value.is_a? Hash }
+
+      #temp maybe false,when config_file empty(multi process write config file)
+      unless temp
+        return false
+      else
+        @config = temp
+        environment and @config[environment] and config.merge!(@config[environment])
+        config.delete_if {|key, value| value.is_a? Hash }
+        return true
+      end
     end
 
     def environment
@@ -171,13 +188,7 @@ module Resque
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file and reload logfiles"
-        load_config
-        Logging.reopen_logs!
-        log "HUP: gracefully shutdown old children (which have old logfiles open)"
-        signal_all_workers(:QUIT)
-        log "HUP: new children will inherit new logfiles"
-        maintain_worker_count
+        do_hup
       when :WINCH
         if self.class.handle_winch?
           log "WINCH: gracefully stopping all workers"
@@ -197,6 +208,17 @@ module Resque
         else
           shutdown_everything_now!(signal)
         end
+      end
+    end
+
+    def do_hup
+      log "HUP: reload config file and reload logfiles"
+      if load_config
+        Logging.reopen_logs!
+        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        signal_all_workers(:QUIT)
+        log "HUP: new children will inherit new logfiles"
+        maintain_worker_count
       end
     end
 
@@ -234,6 +256,20 @@ module Resque
       procline("(started)")
       log "started manager"
       report_worker_pool_pids
+      self
+    end
+
+    def try_to_dynamic_adjust_worker
+      if File.exist?(config_file) && self.class.dynamic_adjust_workers_count?
+        file = File.expand_path(config_file)
+        path = File.dirname(file)
+        basename = File.basename(file)
+        callback = Proc.new do |modified, added, removed|
+          do_hup if modified.include?(basename)
+        end
+        listener = Listen.to( path, :relative_paths => true).change(&callback)
+        listener.start(false)
+      end
       self
     end
 
@@ -307,7 +343,10 @@ module Resque
 
     def signal_all_workers(signal)
       all_pids.each do |pid|
-        Process.kill signal, pid
+        begin
+          Process.kill signal, pid
+        rescue Errno::ESRCH
+        end
       end
     end
 
