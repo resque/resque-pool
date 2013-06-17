@@ -49,7 +49,11 @@ rescue NotFinishedStarting
 end
 
 def children_of(ppid)
-  ps = `ps -eo ppid,pid,cmd | grep '^ *#{ppid} '`
+  if RUBY_PLATFORM =~ /darwin/i
+    ps = `ps -eo ppid,pid,comm | grep '^ *#{ppid} '`
+  else
+    ps = `ps -eo ppid,pid,cmd | grep '^ *#{ppid} '`
+  end
   ps.split(/\s*\n/).map do |line|
     _, pid, cmd = line.strip.split(/\s+/, 3)
     [pid, cmd]
