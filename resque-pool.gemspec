@@ -27,10 +27,12 @@ Gem::Specification.new do |s|
   # only in ruby 1.8
   s.add_development_dependency "SystemTimer" if RUBY_VERSION =~ /^1\.8/
 
-  # hidden files are automatically ignored by Dir.glob
-  ignore_patterns = %w[**/*.gem **/*.pid **/*.log pkg Gemfile.lock]
-  ignore_files    = ignore_patterns.inject([]) {|a,p| a + Dir[p] }
-  s.files         = Dir["**/*"] - ignore_files
+  s.files         = %w( README.md Rakefile LICENSE.txt Changelog.md )
+  s.files         += Dir.glob("lib/**/*")
+  s.files         += Dir.glob("bin/**/*")
+  s.files         += Dir.glob("man/**/*")
+  s.files         += Dir.glob("features/**/*")
+  s.files         += Dir.glob("spec/**/*")
   s.test_files    = Dir.glob("{spec,features}/**/*.{rb,yml,feature}")
   s.executables   = 'resque-pool'
   s.require_paths = ["lib"]
