@@ -127,6 +127,11 @@ Use `HUP` to help logrotate run smoothly and to change the number of workers
 per worker type.  Signals can be sent via the `kill` command, e.g.
 `kill -HUP $master_pid`
 
+If the environment variable `TERM_CHILD` is set, `QUIT` and `TERM` will respond as
+defined by Resque 1.22 and above. See http://hone.heroku.com/resque/2012/08/21/resque-signals.html
+for details, overriding any command-line configuration for `TERM`. Setting `TERM_CHILD` tells
+us you know what you're doing.
+
 Other Features
 --------------
 
