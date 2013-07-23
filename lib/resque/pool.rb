@@ -123,6 +123,8 @@ module Resque
 
     def self_pipe; @self_pipe ||= [] end
     def sig_queue; @sig_queue ||= [] end
+    def term_child; @term_child ||= ENV['TERM_CHILD'] end
+
 
     def init_self_pipe!
       self_pipe.each { |io| io.close rescue nil }
@@ -175,7 +177,11 @@ module Resque
         load_config
         Logging.reopen_logs!
         log "HUP: gracefully shutdown old children (which have old logfiles open)"
-        signal_all_workers(:QUIT)
+        if term_child
+          signal_all_workers(:TERM)
+        else
+          signal_all_workers(:QUIT)
+        end
         log "HUP: new children will inherit new logfiles"
         maintain_worker_count
       when :WINCH
@@ -185,17 +191,25 @@ module Resque
           maintain_worker_count
         end
       when :QUIT
-        graceful_worker_shutdown_and_wait!(signal)
+        if term_child
+          shutdown_everything_now!(signal)
+        else
+          graceful_worker_shutdown_and_wait!(signal)
+        end
       when :INT
         graceful_worker_shutdown!(signal)
       when :TERM
-        case self.class.term_behavior
-        when "graceful_worker_shutdown_and_wait"
-          graceful_worker_shutdown_and_wait!(signal)
-        when "graceful_worker_shutdown"
+        if term_child
           graceful_worker_shutdown!(signal)
         else
-          shutdown_everything_now!(signal)
+          case self.class.term_behavior
+          when "graceful_worker_shutdown_and_wait"
+            graceful_worker_shutdown_and_wait!(signal)
+          when "graceful_worker_shutdown"
+            graceful_worker_shutdown!(signal)
+          else
+            shutdown_everything_now!(signal)
+          end
         end
       end
     end
@@ -206,20 +220,32 @@ module Resque
 
     def graceful_worker_shutdown_and_wait!(signal)
       log "#{signal}: graceful shutdown, waiting for children"
-      signal_all_workers(:QUIT)
+      if term_child
+        signal_all_workers(:TERM)
+      else
+        signal_all_workers(:QUIT)
+      end
       reap_all_workers(0) # will hang until all workers are shutdown
       :break
     end
 
     def graceful_worker_shutdown!(signal)
       log "#{signal}: immediate shutdown (graceful worker shutdown)"
-      signal_all_workers(:QUIT)
+      if term_child
+        signal_all_workers(:TERM)
+      else
+        signal_all_workers(:QUIT)
+      end
       :break
     end
 
     def shutdown_everything_now!(signal)
       log "#{signal}: immediate shutdown (and immediate worker shutdown)"
-      signal_all_workers(:TERM)
+      if term_child
+        signal_all_workers(:QUIT)
+      else
+        signal_all_workers(:TERM)
+      end
       :break
     end
 
