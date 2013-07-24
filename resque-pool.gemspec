@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.email       = ["nick@ekenosen.net"]
   s.homepage    = "http://github.com/nevans/resque-pool"
   s.summary     = "quickly and easily fork a pool of resque workers"
+  s.license     = 'MIT'
   s.description = <<-EOF
     quickly and easily fork a pool of resque workers,
     saving memory (w/REE) and monitoring their uptime
