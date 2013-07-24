@@ -6,3 +6,4 @@ pkg/*
 tmp/*
 vendor
 tags
+Gemfile.lock
