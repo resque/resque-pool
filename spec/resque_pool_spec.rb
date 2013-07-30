@@ -164,3 +164,38 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
   end
 
 end
+
+describe Resque::Pool, "given after_prefork hook" do
+  subject { Resque::Pool.new(nil) }
+
+  context "with a single hook" do
+    before { Resque::Pool.after_prefork { @called = true } }
+
+    it "should call prefork" do
+      subject.call_after_prefork!
+      @called.should == true
+    end
+  end
+
+  context "with a single hook by attribute writer" do
+    before { Resque::Pool.after_prefork = Proc.new { @called = true } }
+
+    it "should call prefork" do
+      subject.call_after_prefork!
+      @called.should == true
+    end
+  end
+
+  context "with multiple hooks" do
+    before {
+      Resque::Pool.after_prefork { @called_first = true }
+      Resque::Pool.after_prefork { @called_second = true }
+    }
+
+    it "should call both" do
+      subject.call_after_prefork!
+      @called_first.should == true
+      @called_second.should == true
+    end
+  end
+end
