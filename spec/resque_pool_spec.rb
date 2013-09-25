@@ -6,6 +6,7 @@ RSpec.configure do |config|
     ENV.delete 'RACK_ENV'
     ENV.delete 'RAILS_ENV'
     ENV.delete 'RESQUE_ENV'
+    ENV.delete 'RESQUE_POOL_CONFIG'
   }
 end
 
