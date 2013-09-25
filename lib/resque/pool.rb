@@ -35,14 +35,18 @@ module Resque
     #
     # Call with a block to set a hook.
     # Call with no arguments to return all registered hooks.
+    #
     def self.after_prefork(&block)
       @after_prefork ||= []
       block ? (@after_prefork << block) : @after_prefork
     end
 
-    # Set the after_prefork proc.
+    # Sets the after_prefork proc, clearing all pre-existing hooks.
+    # Warning: you probably don't want to clear out the other hooks.
+    # You can use `Resque::Pool.after_prefork << my_hook` instead.
+    #
     def self.after_prefork=(after_prefork)
-      @after_prefork << after_prefork
+      @after_prefork = [after_prefork]
     end
 
     def call_after_prefork!
