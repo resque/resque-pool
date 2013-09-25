@@ -47,6 +47,45 @@ environment variables can be used to determine environment).  For example in
     production:
       "foo,bar,baz": 4
 
+### Custom Configuration
+
+Sometimes, a static YAML file doesn't cut it. At high levels of stress, you
+may want to update Resque::Pool's configuration settings on the go, maybe via
+other YAML files on the server or a database-backed solution. This is
+accomplished by creating a custom configuration object.
+
+    class QueueConfigurator
+      def call(config)
+        config.merge { 'b' => 3 }
+      end
+    end
+
+    pool = Resque::Pool.new({ 'a' => 1 }, QueueConfigurator.new)
+    pool.config
+    # => { 'a' => 1, 'b' => 3 }
+
+The configuration object can be any sort of `call`-able object, and it must
+return a Resque::Pool compatible hash configuration.
+
+If you are running Resque pool from the command line, you will need to do two
+things:
+
+1.) Create a configuration file passing your config override.
+
+    # ./config/resque_pool_config.rb
+    Resque::Pool.config_override = lambda { |config| { "foo,bar,baz" => 100 } }
+
+2.) Run `resque-pool` and pass it the `--config-manager` option
+
+    $ resque-pool --config-manager ./config/resque_pool_config.rb
+
+Your pool's configuration will now pull from your override.
+
+**Warning**: *Using a custom configuration manager is risky. Only attempt to use
+this feature if you are absolutely sure that your configuration manager does
+not break your systems. You can completely override your pool configuration if
+you are not careful!*
+
 ### Rake task config
 
 Require the rake tasks (`resque/pool/tasks`) in your `Rakefile`, load your

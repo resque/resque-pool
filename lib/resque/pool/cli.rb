@@ -14,6 +14,7 @@ module Resque
         redirect opts
         setup_environment opts
         set_pool_options opts
+        set_pool_configuration_override opts
         start_pool
       end
 
@@ -38,6 +39,7 @@ where [options] are:
           opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
+          opt :config_manager,     "Path to configuration override definition", :type => String, :short => "-C"
           opt :term_graceful_wait, "On TERM signal, wait for workers to shut down gracefully"
           opt :term_graceful,      "On TERM signal, shut down workers gracefully"
           opt :term_immediate,     "On TERM signal, shut down workers immediately (default)"
@@ -113,6 +115,19 @@ where [options] are:
           Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
         elsif opts[:term_graceful]
           Resque::Pool.term_behavior = "graceful_worker_shutdown"
+        end
+      end
+
+      def set_pool_configuration_override(opts)
+        require 'pathname'
+        if opts[:config_manager]
+          file = Pathname.new(opts[:config_manager]).expand_path
+          if file.exist?
+            require file
+            Resque::Pool.log "Resque Pool configuration is overriden in #{opts[:config_manager]}"
+          else
+            Resque::Pool.log "--config-manager #{file} error: File does not exist"
+          end
         end
       end
 

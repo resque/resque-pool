@@ -10,6 +10,56 @@ RSpec.configure do |config|
   }
 end
 
+describe Resque::Pool, "when using a custom configuration manager" do
+  let(:config) do
+    { 'foo' => 1, 'bar' => 2, 'foo,bar' => 3, 'bar,foo' => 4, }
+  end
+  subject { Resque::Pool.new(config, manager) }
+  before { subject.all_known_queues }
+
+  context "when no errors are raised" do
+    let(:manager) do
+      lambda { |config| config.merge( "fooey" => 10 ) }
+    end
+    it "should merge the other values into the pool's config" do
+      subject.config["fooey"].should == 10
+      subject.config["foo"].should == 1
+      subject.config["bar"].should == 2
+      subject.config["foo,bar"].should == 3
+      subject.config["bar,foo"].should == 4
+    end
+  end
+
+  context "when an error is raised" do
+    let(:manager) do
+      lambda { |config| raise "config error was raised" }
+    end
+
+    it "should replace the config of the original on an error" do
+      subject.config["foo"].should == 1
+      subject.config["bar"].should == 2
+      subject.config["foo,bar"].should == 3
+      subject.config["bar,foo"].should == 4
+    end
+  end
+
+  context "when a config override is globally set" do
+    around do |e|
+      Resque::Pool.config_override = lambda { |config|
+        { "foo,bar,baz" => 100 }
+      }
+      e.run
+      Resque::Pool.config_override = nil
+    end
+    let(:manager) { nil }
+
+    it "should use the global configuration manager" do
+      subject.config.should == { "foo,bar,baz" => 100 }
+    end
+  end
+
+end
+
 describe Resque::Pool, "when loading a simple pool configuration" do
   let(:config) do
     { 'foo' => 1, 'bar' => 2, 'foo,bar' => 3, 'bar,foo' => 4, }

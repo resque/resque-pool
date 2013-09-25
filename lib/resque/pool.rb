@@ -10,7 +10,8 @@ require 'yaml'
 
 module Resque
   class Pool
-    SIG_QUEUE_MAX_SIZE = 5
+    DEFAULT_OVERRIDE_PROC   = lambda { |config| config }
+    SIG_QUEUE_MAX_SIZE      = 5
     DEFAULT_WORKER_INTERVAL = 5
     QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
     CHUNK_SIZE = (16 * 1024)
@@ -20,10 +21,25 @@ module Resque
     attr_reader :config
     attr_reader :workers
 
-    def initialize(config)
-      init_config(config)
+    def initialize(configuration, config_proc = nil)
+      init_config(configuration)
+      @config_proc = config_proc || self.class.config_override
       @workers = Hash.new { |workers, queues| workers[queues] = {} }
       procline "(initialized)"
+    end
+
+    # Config Override:
+    #
+    def self.config_override
+      @config_override || DEFAULT_OVERRIDE_PROC
+    end
+
+    def self.config_override=(override)
+      if override.respond_to? :call
+        @config_override = override
+      else
+        procline "Config override #{override.inspect} is not a callable object."
+      end
     end
 
     # Config: after_prefork {{{
@@ -93,7 +109,7 @@ module Resque
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
-      Resque::Pool.new(choose_config_file).start.join
+      Resque::Pool.new(choose_config_file, config_override).start.join
     end
 
     # }}}
@@ -119,8 +135,8 @@ module Resque
       else
         @config ||= {}
       end
-      environment and @config[environment] and config.merge!(@config[environment])
-      config.delete_if {|key, value| value.is_a? Hash }
+      environment and @config[environment] and @config.merge!(@config[environment])
+      @config.delete_if {|key, value| value.is_a? Hash }
     end
 
     def environment
@@ -356,6 +372,14 @@ module Resque
     # }}}
     # ???: maintain_worker_count, all_known_queues {{{
 
+    def refresh_config
+      cloned = @config.dup
+      @config = @config_proc.call(@config)
+    rescue => e
+      log "There was an issue updating the configuration: #{e.message} #{e.backtrace.join("\n")}"
+      cloned
+    end
+
     def maintain_worker_count
       all_known_queues.each do |queues|
         delta = worker_delta_for(queues)
@@ -365,6 +389,7 @@ module Resque
     end
 
     def all_known_queues
+      refresh_config
       config.keys | workers.keys
     end
 
