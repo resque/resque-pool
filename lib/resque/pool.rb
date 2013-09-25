@@ -10,7 +10,7 @@ require 'yaml'
 
 module Resque
   class Pool
-    DEFAULT_OVERRIDE_PROC   = ->(config) { config }
+    DEFAULT_OVERRIDE_PROC   = lambda { |config| config }
     SIG_QUEUE_MAX_SIZE      = 5
     DEFAULT_WORKER_INTERVAL = 5
     QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]

@@ -18,7 +18,7 @@ describe Resque::Pool, "when using a custom configuration manager" do
 
   context "when no errors are raised" do
     let(:manager) do
-      ->(config) { config.merge( "fooey" => 10 ) }
+      lambda { |config| config.merge( "fooey" => 10 ) }
     end
     it "should merge the other values into the pool's config" do
       subject.config["fooey"].should == 10
@@ -31,7 +31,7 @@ describe Resque::Pool, "when using a custom configuration manager" do
 
   context "when an error is raised" do
     let(:manager) do
-      ->(config) { raise "config error was raised" }
+      lambda { |config| raise "config error was raised" }
     end
 
     it "should replace the config of the original on an error" do
@@ -44,7 +44,7 @@ describe Resque::Pool, "when using a custom configuration manager" do
 
   context "when a config override is globally set" do
     around do |e|
-      Resque::Pool.config_override = ->(config) {
+      Resque::Pool.config_override = lambda { |config|
         { "foo,bar,baz" => 100 }
       }
       e.run

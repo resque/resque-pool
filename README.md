@@ -73,7 +73,7 @@ things:
 1.) Create a configuration file passing your config override.
 
     # ./config/resque_pool_config.rb
-    Resque::Pool.config_override = ->(config) { { "foo,bar,baz" => 100 } }
+    Resque::Pool.config_override = lambda { |config| { "foo,bar,baz" => 100 } }
 
 2.) Run `resque-pool` and pass it the `--config-manager` option
 
