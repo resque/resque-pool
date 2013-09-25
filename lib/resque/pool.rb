@@ -65,6 +65,15 @@ module Resque
       @handle_winch = bool
     end
 
+    def self.single_process_group=(bool)
+      ENV["RESQUE_SINGLE_PGRP"] = !!bool ? "YES" : "NO"
+    end
+    def self.single_process_group
+      %w[yes y true t 1 okay sure please].include?(
+        ENV["RESQUE_SINGLE_PGRP"].to_s.downcase
+      )
+    end
+
     def self.choose_config_file
       if ENV["RESQUE_POOL_CONFIG"]
         ENV["RESQUE_POOL_CONFIG"]
@@ -380,6 +389,7 @@ module Resque
     def spawn_worker!(queues)
       worker = create_worker(queues)
       pid = fork do
+        Process.setpgrp unless Resque::Pool.single_process_group
         log_worker "Starting worker #{worker}"
         call_after_prefork!
         reset_sig_handlers!

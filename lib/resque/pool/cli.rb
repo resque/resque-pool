@@ -41,6 +41,7 @@ where [options] are:
           opt :term_graceful_wait, "On TERM signal, wait for workers to shut down gracefully"
           opt :term_graceful,      "On TERM signal, shut down workers gracefully"
           opt :term_immediate,     "On TERM signal, shut down workers immediately (default)"
+          opt :single_process_group, "Workers remain in the same process group as the master", :default => false
         end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
@@ -120,6 +121,7 @@ where [options] are:
         ENV["RACK_ENV"] = ENV["RAILS_ENV"] = ENV["RESQUE_ENV"] = opts[:environment] if opts[:environment]
         Resque::Pool.log "Resque Pool running in #{ENV["RAILS_ENV"] || "development"} environment"
         ENV["RESQUE_POOL_CONFIG"] = opts[:config] if opts[:config]
+        Resque::Pool.single_process_group = opts[:single_process_group]
       end
 
       def start_pool
