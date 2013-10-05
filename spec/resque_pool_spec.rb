@@ -164,6 +164,45 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
     end
   end
 
+  context "when the file changes" do
+    require 'tempfile'
+
+    let(:config_file_path) {
+      config_file = Tempfile.new("resque-pool-test")
+      config_file.write "orig: 1"
+      config_file.close
+      config_file.path
+    }
+
+    subject {
+      Resque::Pool.new(config_file_path).tap{|p| p.stub(:spawn_worker!) {} }
+    }
+
+    it "should not automatically load the changes" do
+      subject.config.keys.should == ["orig"]
+
+      File.open(config_file_path, "w"){|f| f.write "changed: 1"}
+      subject.config.keys.should == ["orig"]
+    end
+
+    it "should reload the changes on HUP signal" do
+      subject.config.keys.should == ["orig"]
+
+      File.open(config_file_path, "w"){|f| f.write "changed: 1"}
+      subject.config.keys.should == ["orig"]
+
+      simulate_signal :HUP
+
+      subject.config.keys.should == ["changed"]
+    end
+
+    def simulate_signal(signal)
+      subject.sig_queue.clear
+      subject.sig_queue.push signal
+      subject.handle_sig_queue!
+    end
+  end
+
 end
 
 describe Resque::Pool, "given after_prefork hook" do
