@@ -143,6 +143,29 @@ defined by Resque 1.22 and above. See http://hone.heroku.com/resque/2012/08/21/r
 for details, overriding any command-line configuration for `TERM`. Setting `TERM_CHILD` tells
 us you know what you're doing.
 
+Custom Configuration Loader
+---------------------------
+
+If the static YAML file configuration approach does not meet you needs, you can
+specify a custom configuration loader.
+
+Set the `config_loader` class variable on Resque::Pool to an object that
+responds to `#call` (which can simply be a lambda/Proc). The class attribute
+needs to be set before starting the pool. This is usually accomplished by
+in the `resque:pool:setup` rake task, as described above.
+
+For example, if you wanted to vary the number of worker processes based on a
+value stored in Redis, you could do something like:
+
+```ruby
+task resque:pool:setup do
+Resque::Pool.config_loader = lambda {|env|
+  worker_count = Redis.current.get("pool_workers_#{env}").to_i
+  {"queueA,queueB" => worker_count }
+}
+end
+```
+
 Other Features
 --------------
 

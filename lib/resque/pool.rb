@@ -4,6 +4,7 @@ require 'resque/worker'
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
+require 'resque/pool/file_or_hash_loader'
 require 'erb'
 require 'fcntl'
 require 'yaml'
@@ -18,10 +19,11 @@ module Resque
     include Logging
     extend  Logging
     attr_reader :config
+    attr_reader :config_loader
     attr_reader :workers
 
-    def initialize(config)
-      init_config(config)
+    def initialize(config_loader=nil)
+      init_config(config_loader)
       @workers = Hash.new { |workers, queues| workers[queues] = {} }
       procline "(initialized)"
     end
@@ -56,10 +58,9 @@ module Resque
     end
 
     # }}}
-    # Config: class methods to start up the pool using the default config {{{
+    # Config: class methods to start up the pool using the config loader {{{
 
-    @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
-    class << self; attr_accessor :config_files, :app_name, :spawn_delay; end
+    class << self; attr_accessor :config_loader, :app_name, :spawn_delay; end
 
     def self.app_name
       @app_name ||= File.basename(Dir.pwd)
@@ -81,46 +82,32 @@ module Resque
       )
     end
 
-    def self.choose_config_file
-      if ENV["RESQUE_POOL_CONFIG"]
-        ENV["RESQUE_POOL_CONFIG"]
-      else
-        @config_files.detect { |f| File.exist?(f) }
-      end
-    end
-
     def self.run
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
-      Resque::Pool.new(choose_config_file).start.join
+      create_configured.start.join
+    end
+
+    def self.create_configured
+      Resque::Pool.new(config_loader)
     end
 
     # }}}
-    # Config: load config and config file {{{
+    # Config: store loader and load config {{{
 
-    def config_file
-      @config_file || (!@config && ::Resque::Pool.choose_config_file)
-    end
-
-    def init_config(config)
-      case config
-      when String, nil
-        @config_file = config
+    def init_config(loader)
+      case loader
+      when String, Hash, nil
+        @config_loader = FileOrHashLoader.new(loader)
       else
-        @config = config.dup
+        @config_loader = loader
       end
       load_config
     end
 
     def load_config
-      if config_file
-        @config = YAML.load(ERB.new(IO.read(config_file)).result)
-      else
-        @config ||= {}
-      end
-      environment and @config[environment] and config.merge!(@config[environment])
-      config.delete_if {|key, value| value.is_a? Hash }
+      @config = config_loader.call(environment)
     end
 
     def environment
