@@ -124,7 +124,7 @@ SIGNALS
 
 The pool manager responds to the following signals:
 
-* `HUP`   - reload the config file, reload logfiles, restart all workers.
+* `HUP`   - reset config loader (reload the config file), reload logfiles, restart all workers.
 * `QUIT`  - gracefully shut down workers (via `QUIT`) and shutdown the manager
   after all workers are done.
 * `INT`   - gracefully shut down workers (via `QUIT`) and immediately shutdown manager
@@ -165,6 +165,14 @@ Resque::Pool.config_loader = lambda {|env|
 }
 end
 ```
+
+The configuration loader's `#call` method will be invoked every time a worker
+completes a job. This allows the configuration to constantly change, for example,
+to scale the number of workers up/down based on different conditions.
+If the response is generally static, the loader may want to cache the value it
+returns. It can optionally implement a `#reset!` method, which will be invoked
+when the HUP signal is received, allowing the loader to flush its cache, or
+perform any other re-initialization.
 
 Other Features
 --------------

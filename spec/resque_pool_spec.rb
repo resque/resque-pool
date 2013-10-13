@@ -184,12 +184,16 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
 
       File.open(config_file_path, "w"){|f| f.write "changed: 1"}
       subject.config.keys.should == ["orig"]
+      subject.load_config
+      subject.config.keys.should == ["orig"]
     end
 
     it "should reload the changes on HUP signal" do
       subject.config.keys.should == ["orig"]
 
       File.open(config_file_path, "w"){|f| f.write "changed: 1"}
+      subject.config.keys.should == ["orig"]
+      subject.load_config
       subject.config.keys.should == ["orig"]
 
       simulate_signal subject, :HUP
@@ -212,22 +216,30 @@ describe Resque::Pool, "the pool configuration custom loader" do
   end
 
   it "should reset the config loader on HUP" do
-    custom_loader = double(call: Hash.new)
+    custom_loader = double(call: Hash.new, reset!: true)
 
     pool = no_spawn(Resque::Pool.new(custom_loader))
     custom_loader.should have_received(:call).once
 
     pool.sig_queue.push :HUP
     pool.handle_sig_queue!
+    custom_loader.should have_received(:reset!)
     custom_loader.should have_received(:call).twice
   end
 
   it "can be a lambda" do
     RAILS_ENV = "fake"
+    count = 1
     pool = no_spawn(Resque::Pool.new(lambda {|env|
-      {env.reverse => 1}
+      {env.reverse => count}
     }))
     pool.config.should == {"ekaf" => 1}
+
+    count = 3
+    pool.sig_queue.push :HUP
+    pool.handle_sig_queue!
+
+    pool.config.should == {"ekaf" => 3}
   end
 end
 

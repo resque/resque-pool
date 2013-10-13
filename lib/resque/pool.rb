@@ -110,6 +110,11 @@ module Resque
       @config = config_loader.call(environment)
     end
 
+    def reset_config
+      config_loader.reset! if config_loader.respond_to?(:reset!)
+      load_config
+    end
+
     def environment
       if defined? RAILS_ENV
         RAILS_ENV
@@ -176,8 +181,8 @@ module Resque
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file and reload logfiles"
-        load_config
+        log "HUP: reset configuration and reload logfiles"
+        reset_config
         Logging.reopen_logs!
         log "HUP: gracefully shutdown old children (which have old logfiles open)"
         if term_child
@@ -276,6 +281,7 @@ module Resque
         break if handle_sig_queue! == :break
         if sig_queue.empty?
           master_sleep
+          load_config
           maintain_worker_count
         end
         procline("managing #{all_pids.inspect}")
