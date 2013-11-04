@@ -28,6 +28,25 @@ module Resque
 
     # Config: after_prefork {{{
 
+    def self.hook(name)
+      class_eval <<-CODE
+        def self.#{name}(&block)
+          @#{name} ||= []
+          block ? (@#{name} << block) : @#{name}
+        end
+
+        def self.#{name}=(block)
+          @#{name} = [block]
+        end
+
+        def call_#{name}!(*args)
+          self.class.#{name}.each do |hook|
+            hook.call(*args)
+          end
+        end
+      CODE
+    end
+
     # The `after_prefork` hooks will be run in workers if you are using the
     # preforking master worker to save memory. Use these hooks to reload
     # database connections and so forth to ensure that they're not shared
@@ -36,24 +55,9 @@ module Resque
     # Call with a block to set a hook.
     # Call with no arguments to return all registered hooks.
     #
-    def self.after_prefork(&block)
-      @after_prefork ||= []
-      block ? (@after_prefork << block) : @after_prefork
-    end
+    hook :after_prefork
 
-    # Sets the after_prefork proc, clearing all pre-existing hooks.
-    # Warning: you probably don't want to clear out the other hooks.
-    # You can use `Resque::Pool.after_prefork << my_hook` instead.
-    #
-    def self.after_prefork=(after_prefork)
-      @after_prefork = [after_prefork]
-    end
-
-    def call_after_prefork!
-      self.class.after_prefork.each do |hook|
-        hook.call
-      end
-    end
+    hook :after_spawn
 
     # }}}
     # Config: class methods to start up the pool using the default config {{{
@@ -404,6 +408,7 @@ module Resque
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
       end
       workers[queues][pid] = worker
+      call_after_spawn!(worker, pid, workers)
     end
 
     def create_worker(queues)
