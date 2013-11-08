@@ -70,6 +70,17 @@ the following into `lib/tasks/resque.rake`:
       end
     end
 
+
+For normal work with fresh resque and resque-scheduler gems add next lines in lib/rake/resque.rake
+
+```ruby
+task 'resque:pool:setup' do
+  Resque::Pool.after_prefork do |job|
+    Resque.redis.client.reconnect
+  end
+end
+```
+
 ### Start the pool manager
 
 Then you can start the queues via:
