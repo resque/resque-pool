@@ -14,7 +14,13 @@ Cucumber::Rake::Task.new(:features) do |c|
   c.profile = "rake"
 end
 
-task :default => [:spec, :features]
+begin
+  require 'rubocop/rake_task'
+  Rubocop::RakeTask.new
+  task :default => [:spec, :features, :rubocop]
+rescue LoadError
+  task :default => [:spec, :features]
+end
 
 rule(/\.[1-9]$/ => [proc { |tn| "#{tn}.ronn" }]) do |t|
   name = Resque::Pool.name.sub('::','-').upcase

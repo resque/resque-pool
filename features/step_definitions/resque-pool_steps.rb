@@ -11,37 +11,37 @@ def grab_worker_pids(count, str)
   pid_regex = (1..count).map { '(\d+)' }.join ', '
   full_regex = /resque-pool-manager\[aruba\]\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
   str.should =~ full_regex
-  @worker_pids = full_regex.match(str).captures.map {|pid| pid.to_i }
+  @worker_pids = full_regex.match(str).captures.map(&:to_i)
 end
 
 def output_or_logfiles_string(report_log)
   case report_log
-  when "report", "output"
-    "output"
-  when "log", "logfiles"
-    "logfiles"
+  when 'report', 'output'
+    'output'
+  when 'log', 'logfiles'
+    'logfiles'
   else
-    raise ArgumentError
+    fail ArgumentError
   end
 end
 
 def output_or_log(report_log)
   case report_log
-  when "report", "output"
+  when 'report', 'output'
     interactive_output
-  when "log", "logfiles"
+  when 'log', 'logfiles'
     in_current_dir do
-      File.read("log/resque-pool.stdout.log") << File.read("log/resque-pool.stderr.log")
+      File.read('log/resque-pool.stdout.log') << File.read('log/resque-pool.stderr.log')
     end
   else
-    raise ArgumentError
+    fail ArgumentError
   end
 end
 
 class NotFinishedStarting < StandardError; end
 def worker_processes_for(queues)
   children_of(background_pid).select do |pid, cmd|
-    raise NotFinishedStarting if cmd =~ /Starting$/
+    fail NotFinishedStarting if cmd =~ /Starting$/
     cmd =~ /^resque-\d+.\d+.\d+: Waiting for #{queues}$/
   end
 rescue NotFinishedStarting
@@ -66,16 +66,14 @@ end
 
 When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
   Process.kill signal, background_pid
-  output_logfiles = @pid_from_pidfile ? "logfiles" : "output"
+  output_logfiles = @pid_from_pidfile ? 'logfiles' : 'output'
   case signal
-  when "QUIT"
+  when 'QUIT'
     keep_trying do
-      step "the #{output_logfiles} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[aruba][$PID]: QUIT: graceful shutdown, waiting for children
-      EOF
+      step "the #{output_logfiles} should contain the following lines (with interpolated $PID):", 'resque-pool-manager[aruba][$PID]: QUIT: graceful shutdown, waiting for children'
     end
   else
-    raise ArgumentError
+    fail ArgumentError
   end
 end
 
@@ -84,7 +82,7 @@ Then /^the pool manager should record its pid in "([^"]*)"$/ do |pidfile|
     keep_trying do
       File.should be_file(pidfile)
       @pid_from_pidfile = File.read(pidfile).to_i
-      @pid_from_pidfile.should_not == 0
+      @pid_from_pidfile.should_not be_zero
       process_should_exist(@pid_from_pidfile)
     end
   end
@@ -108,14 +106,12 @@ Then /^the pool manager should (report|log) that it has started up$/ do |report_
     step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
 resque-pool-manager[aruba][$PID]: Resque Pool running in test environment
 resque-pool-manager[aruba][$PID]: started manager
-    EOF
+EOF
   end
 end
 
 Then /^the pool manager should (report|log) that the pool is empty$/ do |report_log|
-  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[aruba][$PID]: Pool is empty
-  EOF
+  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", 'resque-pool-manager[aruba][$PID]: Pool is empty'
 end
 
 Then /^the pool manager should (report|log) that (\d+) workers are in the pool$/ do |report_log, count|
@@ -130,7 +126,7 @@ Then /^the resque workers should all shutdown$/ do
   end
 end
 
-Then "the pool manager should have no child processes" do
+Then 'the pool manager should have no child processes' do
   children_of(background_pid).should have(:no).keys
 end
 
@@ -138,22 +134,19 @@ Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do 
   worker_processes_for(queues).should have(Integer(count)).members
 end
 
-Then "the pool manager should finish" do
+Then 'the pool manager should finish' do
   # assuming there will not be multiple processes running
   stop_processes!
 end
 
 Then /^the pool manager should (report|log) that it is finished$/ do |report_log|
-  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", <<-EOF
-resque-pool-manager[aruba][$PID]: manager finished
-  EOF
+  step "the #{output_or_logfiles_string(report_log)} should contain the following lines (with interpolated $PID):", 'resque-pool-manager[aruba][$PID]: manager finished'
 end
 
 Then /^the pool manager should (report|log) that a "([^"]*)" worker has been reaped$/ do |report_log, worker_type|
-  step 'the '+ output_or_logfiles_string(report_log) +' should match /Reaped resque worker\[\d+\] \(status: 0\) queues: '+ worker_type + '/'
+  step 'the ' + output_or_logfiles_string(report_log) + ' should match /Reaped resque worker\[\d+\] \(status: 0\) queues: ' + worker_type + '/'
 end
 
-Then /^the logfiles should match \/([^\/]*)\/$/ do |partial_output|
-  output_or_log("log").should =~ /#{partial_output}/
+Then %r(^the logfiles should match /([^\/]*)/$) do |partial_output|
+  output_or_log('log').should =~ /#{partial_output}/
 end
-

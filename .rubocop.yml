@@ -1,0 +1,26 @@
+AllCops:
+  Excludes:
+    - tmp/* # aruba puts files in here
+
+ClassLength:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+Encoding:
+  Enabled: false
+
+HashSyntax:
+  EnforcedStyle: hash_rockets
+
+LineLength:
+  Enabled: false
+
+MethodLength:
+  Enabled: false
+
+SymbolName:
+  Enabled: false
+
+inherit_from: rubocop-todo.yml

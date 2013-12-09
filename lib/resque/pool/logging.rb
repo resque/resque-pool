@@ -1,12 +1,10 @@
 module Resque
   class Pool
     module Logging
-      extend self
-
       # more than a little bit complicated...
       # copied this from Unicorn.
-      def self.reopen_logs!
-        log "Flushing logs"
+      def reopen_logs!
+        log 'Flushing logs'
         [$stdout, $stderr].each do |fd|
           if fd.instance_of? File
             # skip if the file is the exact same inode and device
@@ -18,9 +16,13 @@ module Resque
             end
             # match up the encoding
             open_arg = 'a'
-            if fd.respond_to?(:external_encoding) && enc = fd.external_encoding
-              open_arg << ":#{enc.to_s}"
-              enc = fd.internal_encoding and open_arg << ":#{enc.to_s}"
+            if fd.respond_to?(:external_encoding)
+              enc = fd.external_encoding
+              if enc
+                open_arg << ":#{enc.to_s}"
+                enc = fd.internal_encoding
+                open_arg << ":#{enc.to_s}" if enc
+              end
             end
             # match up buffering (does reopen reset this?)
             sync = fd.sync
@@ -44,22 +46,21 @@ module Resque
       # TODO: make this use an actual logger
       def log(message)
         puts "resque-pool-manager#{app}[#{Process.pid}]: #{message}"
-        #$stdout.fsync
+        # $stdout.fsync
       end
 
       # TODO: make this use an actual logger
       def log_worker(message)
         puts "resque-pool-worker#{app}[#{Process.pid}]: #{message}"
-        #$stdout.fsync
+        # $stdout.fsync
       end
 
       # Include optional app name in procline
       def app
         app_name   = self.respond_to?(:app_name)       && self.app_name
         app_name ||= self.class.respond_to?(:app_name) && self.class.app_name
-        app_name ? "[#{app_name}]" : ""
+        app_name ? "[#{app_name}]" : ''
       end
-
     end
   end
 end
