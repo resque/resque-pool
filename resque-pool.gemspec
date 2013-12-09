@@ -17,12 +17,11 @@ Gem::Specification.new do |s|
   EOF
 
   s.add_dependency "resque",  "~> 1.22"
-  s.add_dependency "trollop", "~> 1.16"
+  s.add_dependency "trollop"
   s.add_dependency "rake"
-  s.add_development_dependency "rspec",    "~> 2.10"
-  s.add_development_dependency "cucumber", "~> 1.2"
-  s.add_development_dependency "aruba",    "~> 0.4.11"
-  s.add_development_dependency "bundler", "~> 1.0"
+  s.add_development_dependency "rspec"
+  s.add_development_dependency "cucumber"
+  s.add_development_dependency "aruba"
   s.add_development_dependency "ronn"
 
   # only in ruby 1.8
