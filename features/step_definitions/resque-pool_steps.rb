@@ -1,9 +1,9 @@
 def process_should_exist(pid)
-  lambda { Process.kill(0, pid) }.should_not raise_error(Errno::ESRCH)
+  expect { Process.kill(0, pid) }.to_not raise_error
 end
 
 def process_should_not_exist(pid)
-  lambda { Process.kill(0, pid) }.should raise_error(Errno::ESRCH)
+  expect { Process.kill(0, pid) }.to raise_error(Errno::ESRCH)
 end
 
 def grab_worker_pids(count, str)
@@ -156,4 +156,4 @@ end
 Then /^the logfiles should match \/([^\/]*)\/$/ do |partial_output|
   output_or_log("log").should =~ /#{partial_output}/
 end
- 
+
