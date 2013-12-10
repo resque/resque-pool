@@ -1,14 +1,10 @@
 require 'aruba/cucumber'
-require 'aruba/api'
-require 'aruba/process'
 
 module Aruba
-
   module Api
-
     # this is a horrible hack, to make sure that it's done what it needs to do
     # before we do our next step
-    def keep_trying(timeout=10, tries=0)
+    def keep_trying(timeout = 10, tries = 0)
       puts "Try: #{tries}" if @announce_env
       yield
     rescue RSpec::Expectations::ExpectationNotMetError
@@ -36,12 +32,12 @@ module Aruba
 
     # like all_stdout, but doesn't stop processes first
     def interactive_stdout
-      only_processes.inject("") { |out, ps| out << ps.stdout(@aruba_keep_ansi) }
+      only_processes.map(&:stdout).join
     end
 
     # like all_stderr, but doesn't stop processes first
     def interactive_stderr
-      only_processes.inject("") { |out, ps| out << ps.stderr(@aruba_keep_ansi) }
+      only_processes.map(&:stderr).join
     end
 
     # like all_output, but doesn't stop processes first
@@ -57,20 +53,19 @@ module Aruba
 
     def kill_all_processes!
     #  stop_processes!
-    #rescue
+    # rescue
     #  processes.each {|cmd,process| send_signal(cmd, 'KILL') }
     #  raise
     end
-
   end
 
-  class Process
+  class SpawnProcess
     def pid
-      @process.pid
+      @pid ||= @process.pid
     end
-    def send_signal signal
+
+    def send_signal(signal)
       @process.send :send_signal, signal
     end
   end
-
 end

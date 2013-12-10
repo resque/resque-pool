@@ -18,7 +18,7 @@ Then /^the "([^"]*)" process should finish$/ do |cmd|
   processes[cmd].stop
 end
 
-Before("@slow_exit") do
+Before('@slow_exit') do
   @aruba_timeout_seconds = 10
 end
 
@@ -29,5 +29,5 @@ After do
     Process.kill(9, @pid_from_pidfile) if @pid_from_pidfile
   rescue Errno::ESRCH
   end
-  #`pkill -9 resque-pool`
+  # `pkill -9 resque-pool`
 end

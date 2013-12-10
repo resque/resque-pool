@@ -1,16 +1,16 @@
 require 'spec_helper'
 
 RSpec.configure do |config|
-  config.after {
+  config.after do
     Object.send(:remove_const, :RAILS_ENV) if defined? RAILS_ENV
     ENV.delete 'RACK_ENV'
     ENV.delete 'RAILS_ENV'
     ENV.delete 'RESQUE_ENV'
     ENV.delete 'RESQUE_POOL_CONFIG'
-  }
+  end
 end
 
-describe Resque::Pool, "when loading a simple pool configuration" do
+describe Resque::Pool, 'when loading a simple pool configuration' do
   let(:config) do
     { 'foo' => 1, 'bar' => 2, 'foo,bar' => 3, 'bar,foo' => 4, }
   end
@@ -19,17 +19,17 @@ describe Resque::Pool, "when loading a simple pool configuration" do
   context "when ENV['RACK_ENV'] is set" do
     before { ENV['RACK_ENV'] = 'development' }
 
-    it "should load the values from the Hash" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should == 2
-      subject.config["foo,bar"].should == 3
-      subject.config["bar,foo"].should == 4
+    it 'should load the values from the Hash' do
+      subject.config['foo'].should eq(1)
+      subject.config['bar'].should eq(2)
+      subject.config['foo,bar'].should eq(3)
+      subject.config['bar,foo'].should eq(4)
     end
   end
 
 end
 
-describe Resque::Pool, "when loading the pool configuration from a Hash" do
+describe Resque::Pool, 'when loading the pool configuration from a Hash' do
 
   let(:config) do
     {
@@ -41,162 +41,161 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
 
   subject { Resque::Pool.new(config) }
 
-  context "when RAILS_ENV is set" do
-    before { RAILS_ENV = "test" }
+  context 'when RAILS_ENV is set' do
+    before { RAILS_ENV = 'test' }
 
-    it "should load the default values from the Hash" do
-      subject.config["foo"].should == 8
+    it 'should load the default values from the Hash' do
+      subject.config['foo'].should eq(8)
     end
 
-    it "should merge the values for the correct RAILS_ENV" do
-      subject.config["bar"].should == 10
-      subject.config["foo,bar"].should == 12
+    it 'should merge the values for the correct RAILS_ENV' do
+      subject.config['bar'].should eq(10)
+      subject.config['foo,bar'].should eq(12)
     end
 
-    it "should not load the values for the other environments" do
-      subject.config["foo,bar"].should == 12
-      subject.config["baz"].should be_nil
+    it 'should not load the values for the other environments' do
+      subject.config['foo,bar'].should eq(12)
+      subject.config['baz'].should be_nil
     end
 
   end
 
-  context "when Rails.env is set" do
+  context 'when Rails.env is set' do
     before(:each) do
       module Rails; end
       Rails.stub(:env).and_return('test')
     end
 
-    it "should load the default values from the Hash" do
-      subject.config["foo"].should == 8
+    it 'should load the default values from the Hash' do
+      subject.config['foo'].should eq(8)
     end
 
-    it "should merge the values for the correct RAILS_ENV" do
-      subject.config["bar"].should == 10
-      subject.config["foo,bar"].should == 12
+    it 'should merge the values for the correct RAILS_ENV' do
+      subject.config['bar'].should eq(10)
+      subject.config['foo,bar'].should eq(12)
     end
 
-    it "should not load the values for the other environments" do
-      subject.config["foo,bar"].should == 12
-      subject.config["baz"].should be_nil
+    it 'should not load the values for the other environments' do
+      subject.config['foo,bar'].should eq(12)
+      subject.config['baz'].should be_nil
     end
 
     after(:all) { Object.send(:remove_const, :Rails) }
   end
 
-
   context "when ENV['RESQUE_ENV'] is set" do
     before { ENV['RESQUE_ENV'] = 'development' }
-    it "should load the config for that environment" do
-      subject.config["foo"].should == 8
-      subject.config["foo,bar"].should == 16
-      subject.config["baz"].should == 14
-      subject.config["bar"].should be_nil
+    it 'should load the config for that environment' do
+      subject.config['foo'].should eq(8)
+      subject.config['foo,bar'].should eq(16)
+      subject.config['baz'].should eq(14)
+      subject.config['bar'].should be_nil
     end
   end
 
-  context "when there is no environment" do
-    it "should load the default values only" do
-      subject.config["foo"].should == 8
-      subject.config["bar"].should be_nil
-      subject.config["foo,bar"].should be_nil
-      subject.config["baz"].should be_nil
+  context 'when there is no environment' do
+    it 'should load the default values only' do
+      subject.config['foo'].should eq(8)
+      subject.config['bar'].should be_nil
+      subject.config['foo,bar'].should be_nil
+      subject.config['baz'].should be_nil
     end
   end
 
 end
 
-describe Resque::Pool, "given no configuration" do
+describe Resque::Pool, 'given no configuration' do
   subject { Resque::Pool.new(nil) }
-  it "should have no worker types" do
-    subject.config.should == {}
+  it 'should have no worker types' do
+    subject.config.should eq({})
   end
 end
 
-describe Resque::Pool, "when loading the pool configuration from a file" do
+describe Resque::Pool, 'when loading the pool configuration from a file' do
 
-  subject { Resque::Pool.new("spec/resque-pool.yml") }
+  subject { Resque::Pool.new('spec/resque-pool.yml') }
 
-  context "when RAILS_ENV is set" do
-    before { RAILS_ENV = "test" }
+  context 'when RAILS_ENV is set' do
+    before { RAILS_ENV = 'test' }
 
-    it "should load the default YAML" do
-      subject.config["foo"].should == 1
+    it 'should load the default YAML' do
+      subject.config['foo'].should eq(1)
     end
 
-    it "should merge the YAML for the correct RAILS_ENV" do
-      subject.config["bar"].should == 5
-      subject.config["foo,bar"].should == 3
+    it 'should merge the YAML for the correct RAILS_ENV' do
+      subject.config['bar'].should eq(5)
+      subject.config['foo,bar'].should eq(3)
     end
 
-    it "should not load the YAML for the other environments" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should == 5
-      subject.config["foo,bar"].should == 3
-      subject.config["baz"].should be_nil
+    it 'should not load the YAML for the other environments' do
+      subject.config['foo'].should eq(1)
+      subject.config['bar'].should eq(5)
+      subject.config['foo,bar'].should eq(3)
+      subject.config['baz'].should be_nil
     end
 
   end
 
   context "when ENV['RACK_ENV'] is set" do
     before { ENV['RACK_ENV'] = 'development' }
-    it "should load the config for that environment" do
-      subject.config["foo"].should == 1
-      subject.config["foo,bar"].should == 4
-      subject.config["baz"].should == 23
-      subject.config["bar"].should be_nil
+    it 'should load the config for that environment' do
+      subject.config['foo'].should eq(1)
+      subject.config['foo,bar'].should eq(4)
+      subject.config['baz'].should eq(23)
+      subject.config['bar'].should be_nil
     end
   end
 
-  context "when there is no environment" do
-    it "should load the default values only" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should be_nil
-      subject.config["foo,bar"].should be_nil
-      subject.config["baz"].should be_nil
+  context 'when there is no environment' do
+    it 'should load the default values only' do
+      subject.config['foo'].should eq(1)
+      subject.config['bar'].should be_nil
+      subject.config['foo,bar'].should be_nil
+      subject.config['baz'].should be_nil
     end
   end
 
-  context "when a custom file is specified" do
-    before { ENV["RESQUE_POOL_CONFIG"] = 'spec/resque-pool-custom.yml.erb' }
+  context 'when a custom file is specified' do
+    before { ENV['RESQUE_POOL_CONFIG'] = 'spec/resque-pool-custom.yml.erb' }
     subject { Resque::Pool.new(Resque::Pool.choose_config_file) }
-    it "should find the right file, and parse the ERB" do
-      subject.config["foo"].should == 2
+    it 'should find the right file, and parse the ERB' do
+      subject.config['foo'].should eq(2)
     end
   end
 
 end
 
-describe Resque::Pool, "given after_prefork hook" do
+describe Resque::Pool, 'given after_prefork hook' do
   subject { Resque::Pool.new(nil) }
 
-  context "with a single hook" do
+  context 'with a single hook' do
     before { Resque::Pool.after_prefork { @called = true } }
 
-    it "should call prefork" do
+    it 'should call prefork' do
       subject.call_after_prefork!
-      @called.should == true
+      @called.should be_true
     end
   end
 
-  context "with a single hook by attribute writer" do
-    before { Resque::Pool.after_prefork = Proc.new { @called = true } }
+  context 'with a single hook by attribute writer' do
+    before { Resque::Pool.after_prefork = proc { @called = true } }
 
-    it "should call prefork" do
+    it 'should call prefork' do
       subject.call_after_prefork!
-      @called.should == true
+      @called.should be_true
     end
   end
 
-  context "with multiple hooks" do
-    before {
+  context 'with multiple hooks' do
+    before do
       Resque::Pool.after_prefork { @called_first = true }
       Resque::Pool.after_prefork { @called_second = true }
-    }
+    end
 
-    it "should call both" do
+    it 'should call both' do
       subject.call_after_prefork!
-      @called_first.should == true
-      @called_second.should == true
+      @called_first.should be_true
+      @called_second.should be_true
     end
   end
 end

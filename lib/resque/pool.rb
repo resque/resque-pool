@@ -12,7 +12,7 @@ module Resque
   class Pool
     SIG_QUEUE_MAX_SIZE = 5
     DEFAULT_WORKER_INTERVAL = 5
-    QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
+    QUEUE_SIGS = [:QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH]
     CHUNK_SIZE = (16 * 1024)
 
     include Logging
@@ -23,7 +23,7 @@ module Resque
     def initialize(config)
       init_config(config)
       @workers = Hash.new { |workers, queues| workers[queues] = {} }
-      procline "(initialized)"
+      procline '(initialized)'
     end
 
     # Config: after_prefork {{{
@@ -58,7 +58,7 @@ module Resque
     # }}}
     # Config: class methods to start up the pool using the default config {{{
 
-    @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
+    @config_files = ['resque-pool.yml', 'config/resque-pool.yml']
     class << self; attr_accessor :config_files, :app_name; end
 
     def self.app_name
@@ -68,24 +68,25 @@ module Resque
     def self.handle_winch?
       @handle_winch ||= false
     end
+
     def self.handle_winch=(bool)
       @handle_winch = bool
     end
 
     def self.single_process_group=(bool)
-      ENV["RESQUE_SINGLE_PGRP"] = !!bool ? "YES" : "NO"
+      ENV['RESQUE_SINGLE_PGRP'] = !!bool ? 'YES' : 'NO'
     end
     def self.single_process_group
       %w[yes y true t 1 okay sure please].include?(
-        ENV["RESQUE_SINGLE_PGRP"].to_s.downcase
+        ENV['RESQUE_SINGLE_PGRP'].to_s.downcase
       )
     end
 
     def self.choose_config_file
-      if ENV["RESQUE_POOL_CONFIG"]
-        ENV["RESQUE_POOL_CONFIG"]
+      if ENV['RESQUE_POOL_CONFIG']
+        ENV['RESQUE_POOL_CONFIG']
       else
-        @config_files.detect { |f| File.exist?(f) }
+        @config_files.find { |f| File.exist?(f) }
       end
     end
 
@@ -119,8 +120,8 @@ module Resque
       else
         @config ||= {}
       end
-      environment and @config[environment] and config.merge!(@config[environment])
-      config.delete_if {|key, value| value.is_a? Hash }
+      environment && @config[environment] && config.merge!(@config[environment])
+      config.delete_if { |key, value| value.is_a? Hash }
     end
 
     def environment
@@ -137,10 +138,17 @@ module Resque
 
     # Sig handlers and self pipe management {{{
 
-    def self_pipe; @self_pipe ||= [] end
-    def sig_queue; @sig_queue ||= [] end
-    def term_child; @term_child ||= ENV['TERM_CHILD'] end
+    def self_pipe
+      @self_pipe ||= []
+    end
 
+    def sig_queue
+      @sig_queue ||= []
+    end
+
+    def term_child
+      @term_child ||= ENV['TERM_CHILD']
+    end
 
     def init_self_pipe!
       self_pipe.each { |io| io.close rescue nil }
@@ -154,12 +162,10 @@ module Resque
     end
 
     def awaken_master
-      begin
-        self_pipe.last.write_nonblock('.') # wakeup master process from select
-      rescue Errno::EAGAIN, Errno::EINTR
-        # pipe is full, master should wake up anyways
-        retry
-      end
+      self_pipe.last.write_nonblock('.') # wakeup master process from select
+    rescue Errno::EAGAIN, Errno::EINTR
+      # pipe is full, master should wake up anyways
+      retry
     end
 
     class QuitNowException < Exception; end
@@ -168,7 +174,7 @@ module Resque
       trap(signal) do |sig_nr|
         if @waiting_for_reaper && [:INT, :TERM].include?(signal)
           log "Recieved #{signal}: short circuiting QUIT waitpid"
-          raise QuitNowException
+          fail QuitNowException
         end
         if sig_queue.size < SIG_QUEUE_MAX_SIZE
           sig_queue << signal
@@ -180,7 +186,7 @@ module Resque
     end
 
     def reset_sig_handlers!
-      QUEUE_SIGS.each {|sig| trap(sig, "DEFAULT") }
+      QUEUE_SIGS.each { |sig| trap(sig, 'DEFAULT') }
     end
 
     def handle_sig_queue!
@@ -189,20 +195,20 @@ module Resque
         log "#{signal}: sending to all workers"
         signal_all_workers(signal)
       when :HUP
-        log "HUP: reload config file and reload logfiles"
+        log 'HUP: reload config file and reload logfiles'
         load_config
         Logging.reopen_logs!
-        log "HUP: gracefully shutdown old children (which have old logfiles open)"
+        log 'HUP: gracefully shutdown old children (which have old logfiles open)'
         if term_child
           signal_all_workers(:TERM)
         else
           signal_all_workers(:QUIT)
         end
-        log "HUP: new children will inherit new logfiles"
+        log 'HUP: new children will inherit new logfiles'
         maintain_worker_count
       when :WINCH
         if self.class.handle_winch?
-          log "WINCH: gracefully stopping all workers"
+          log 'WINCH: gracefully stopping all workers'
           @config = {}
           maintain_worker_count
         end
@@ -219,9 +225,9 @@ module Resque
           graceful_worker_shutdown!(signal)
         else
           case self.class.term_behavior
-          when "graceful_worker_shutdown_and_wait"
+          when 'graceful_worker_shutdown_and_wait'
             graceful_worker_shutdown_and_wait!(signal)
-          when "graceful_worker_shutdown"
+          when 'graceful_worker_shutdown'
             graceful_worker_shutdown!(signal)
           else
             shutdown_everything_now!(signal)
@@ -269,19 +275,19 @@ module Resque
     # start, join, and master sleep {{{
 
     def start
-      procline("(starting)")
+      procline('(starting)')
       init_self_pipe!
       init_sig_handlers!
       maintain_worker_count
-      procline("(started)")
-      log "started manager"
+      procline('(started)')
+      log 'started manager'
       report_worker_pool_pids
       self
     end
 
     def report_worker_pool_pids
       if workers.empty?
-        log "Pool is empty"
+        log 'Pool is empty'
       else
         log "Pool contains worker PIDs: #{all_pids.inspect}"
       end
@@ -297,25 +303,23 @@ module Resque
         end
         procline("managing #{all_pids.inspect}")
       end
-      procline("(shutting down)")
-      #stop # gracefully shutdown all workers on our way out
-      log "manager finished"
-      #unlink_pid_safe(pid) if pid
+      procline('(shutting down)')
+      # stop # gracefully shutdown all workers on our way out
+      log 'manager finished'
+      # unlink_pid_safe(pid) if pid
     end
 
     def master_sleep
-      begin
-        ready = IO.select([self_pipe.first], nil, nil, 1) or return
-        ready.first && ready.first.first or return
-        loop { self_pipe.first.read_nonblock(CHUNK_SIZE) }
-      rescue Errno::EAGAIN, Errno::EINTR
-      end
+      ready = IO.select([self_pipe.first], nil, nil, 1) || return
+      ready.first && ready.first.first || return
+      loop { self_pipe.first.read_nonblock(CHUNK_SIZE) }
+    rescue Errno::EAGAIN, Errno::EINTR
     end
 
     # }}}
     # worker process management {{{
 
-    def reap_all_workers(waitpid_flags=Process::WNOHANG)
+    def reap_all_workers(waitpid_flags = Process::WNOHANG)
       @waiting_for_reaper = waitpid_flags == 0
       begin
         loop do
@@ -323,7 +327,9 @@ module Resque
           wpid, status = Process.waitpid2(-1, waitpid_flags)
           break unless wpid
 
-          if worker = delete_worker(wpid)
+          worker = delete_worker(wpid)
+
+          if worker
             log "Reaped resque worker[#{status.pid}] (status: #{status.exitstatus}) queues: #{worker.queues.join(",")}"
           else
             # this died before it could be killed, so it's not going to have any extra info
@@ -337,14 +343,14 @@ module Resque
     # TODO: close any file descriptors connected to worker, if any
     def delete_worker(pid)
       worker = nil
-      workers.detect do |queues, pid_to_worker|
+      workers.find do |queues, pid_to_worker|
         worker = pid_to_worker.delete(pid)
       end
       worker
     end
 
     def all_pids
-      workers.map {|q,workers| workers.keys }.flatten
+      workers.map { |q, workers| workers.keys }.flatten
     end
 
     def signal_all_workers(signal)
@@ -381,7 +387,7 @@ module Resque
     def quit_excess_workers_for(queues)
       delta = -worker_delta_for(queues)
       pids_for(queues)[0...delta].each do |pid|
-        Process.kill("QUIT", pid)
+        Process.kill('QUIT', pid)
       end
     end
 
@@ -400,7 +406,7 @@ module Resque
         log_worker "Starting worker #{worker}"
         call_after_prefork!
         reset_sig_handlers!
-        #self_pipe.each {|io| io.close }
+        # self_pipe.each {|io| io.close }
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
       end
       workers[queues][pid] = worker
@@ -411,16 +417,14 @@ module Resque
       worker = ::Resque::Worker.new(*queues)
       worker.term_timeout = ENV['RESQUE_TERM_TIMEOUT'] || 4.0
       worker.term_child = ENV['TERM_CHILD']
-      if ENV['LOGGING'] || ENV['VERBOSE']
-        worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
-      end
-      if ENV['VVERBOSE']
-        worker.very_verbose = ENV['VVERBOSE']
-      end
+
+      verbose = ENV['LOGGING'] || ENV['VERBOSE']
+      worker.verbose = verbose if verbose
+
+      very_verbose = ENV['VVERBOSE']
+      worker.very_verbose = very_verbose if very_verbose
+
       worker
     end
-
-    # }}}
-
   end
 end

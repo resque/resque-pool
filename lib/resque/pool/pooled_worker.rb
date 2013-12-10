@@ -12,7 +12,6 @@ class Resque::Pool
         alias_method :shutdown?, :shutdown_with_pool
       end
     end
-
   end
 end
 
