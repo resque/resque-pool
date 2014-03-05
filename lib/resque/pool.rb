@@ -386,7 +386,7 @@ module Resque
     end
 
     def worker_delta_for(queues)
-      config.fetch(queues, 0) - workers.fetch(queues, []).size
+      (config.fetch(queues, 0) || 0) - workers.fetch(queues, []).size
     end
 
     def pids_for(queues)
