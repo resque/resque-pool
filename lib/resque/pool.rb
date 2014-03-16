@@ -59,7 +59,7 @@ module Resque
     # Config: class methods to start up the pool using the default config {{{
 
     @config_files = ["resque-pool.yml", "config/resque-pool.yml"]
-    class << self; attr_accessor :config_files, :app_name; end
+    class << self; attr_accessor :config_files, :app_name, :spawn_delay; end
 
     def self.app_name
       @app_name ||= File.basename(Dir.pwd)
@@ -375,6 +375,7 @@ module Resque
     def spawn_missing_workers_for(queues)
       worker_delta_for(queues).times do |nr|
         spawn_worker!(queues)
+        sleep Resque::Pool.spawn_delay if Resque::Pool.spawn_delay
       end
     end
 
