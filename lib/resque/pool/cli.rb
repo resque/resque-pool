@@ -41,6 +41,7 @@ module Resque
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
           opt.on("-p", '--pidfile FILE', "PID file location") { |c| opts[:pidfile] = c }
+          opt.on('--no-pidfile', "Force no pidfile, even if daemonized") { opts[:no_pidfile] = true }
           opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
           opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
           opt.on('--term-graceful-wait', "On TERM signal, wait for workers to shut down gracefully") { opts[:term_graceful_wait] = true }
@@ -55,6 +56,11 @@ module Resque
           opts[:stderr]  ||= "log/resque-pool.stderr.log"
           opts[:pidfile] ||= "tmp/pids/resque-pool.pid"
         end
+
+        if opts[:no_pidfile]
+          opts.delete(:pidfile)
+        end
+
         opts
       end
 
