@@ -1,10 +1,13 @@
 require 'trollop'
 require 'resque/pool'
+require 'resque/pool/logging'
 require 'fileutils'
 
 module Resque
   class Pool
     module CLI
+      include Logging
+      extend  Logging
       extend self
 
       def run
@@ -113,6 +116,12 @@ where [options] are:
           Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
         elsif opts[:term_graceful]
           Resque::Pool.term_behavior = "graceful_worker_shutdown"
+        elsif ENV["TERM_CHILD"]
+          log "TERM_CHILD enabled, so will user 'term-graceful-and-wait' behaviour"
+          Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
+        end
+        if ENV.include?("DYNO") && !ENV["TERM_CHILD"]
+          log "WARNING: Are you running on Heroku? You should probably set TERM_CHILD=1"
         end
       end
 

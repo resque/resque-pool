@@ -215,17 +215,13 @@ module Resque
       when :INT
         graceful_worker_shutdown!(signal)
       when :TERM
-        if term_child
+        case self.class.term_behavior
+        when "graceful_worker_shutdown_and_wait"
+          graceful_worker_shutdown_and_wait!(signal)
+        when "graceful_worker_shutdown"
           graceful_worker_shutdown!(signal)
         else
-          case self.class.term_behavior
-          when "graceful_worker_shutdown_and_wait"
-            graceful_worker_shutdown_and_wait!(signal)
-          when "graceful_worker_shutdown"
-            graceful_worker_shutdown!(signal)
-          else
-            shutdown_everything_now!(signal)
-          end
+          shutdown_everything_now!(signal)
         end
       end
     end
@@ -348,6 +344,7 @@ module Resque
     end
 
     def signal_all_workers(signal)
+      log "Sending #{signal} to all workers"
       all_pids.each do |pid|
         Process.kill signal, pid
       end
