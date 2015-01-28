@@ -41,6 +41,7 @@ where [options] are:
           opt :nosync, "Don't sync logfiles on every write"
           opt :pidfile, "PID file location",         :type => String,    :short => "-p"
           opt :environment, "Set RAILS_ENV/RACK_ENV/RESQUE_ENV", :type => String, :short => "-E"
+          opt :spawn_delay, "Delay in milliseconds between spawning missing workers", :type => Integer, :short => "-s"
           opt :term_graceful_wait, "On TERM signal, wait for workers to shut down gracefully"
           opt :term_graceful,      "On TERM signal, shut down workers gracefully"
           opt :term_immediate,     "On TERM signal, shut down workers immediately (default)"
@@ -122,6 +123,9 @@ where [options] are:
         end
         if ENV.include?("DYNO") && !ENV["TERM_CHILD"]
           log "WARNING: Are you running on Heroku? You should probably set TERM_CHILD=1"
+        end
+        if opts[:spawn_delay]
+          Resque::Pool.spawn_delay = opts[:spawn_delay] * 0.001
         end
       end
 
