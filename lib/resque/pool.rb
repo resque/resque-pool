@@ -31,7 +31,7 @@ module Resque
     # The `after_prefork` hooks will be run in workers if you are using the
     # preforking master worker to save memory. Use these hooks to reload
     # database connections and so forth to ensure that they're not shared
-    # among workers.
+    # among workers. The worker instance is passed as an argument to the block.
     #
     # Call with a block to set a hook.
     # Call with no arguments to return all registered hooks.
@@ -49,9 +49,9 @@ module Resque
       @after_prefork = [after_prefork]
     end
 
-    def call_after_prefork!
+    def call_after_prefork!(worker)
       self.class.after_prefork.each do |hook|
-        hook.call
+        hook.call(worker)
       end
     end
 
@@ -397,7 +397,7 @@ module Resque
         Process.setpgrp unless Resque::Pool.single_process_group
         worker.worker_parent_pid = Process.pid
         log_worker "Starting worker #{worker}"
-        call_after_prefork!
+        call_after_prefork!(worker)
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block

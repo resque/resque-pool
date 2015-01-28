@@ -169,11 +169,13 @@ end
 describe Resque::Pool, "given after_prefork hook" do
   subject { Resque::Pool.new(nil) }
 
+  let(:worker) { double }
+
   context "with a single hook" do
     before { Resque::Pool.after_prefork { @called = true } }
 
     it "should call prefork" do
-      subject.call_after_prefork!
+      subject.call_after_prefork!(worker)
       @called.should == true
     end
   end
@@ -182,7 +184,7 @@ describe Resque::Pool, "given after_prefork hook" do
     before { Resque::Pool.after_prefork = Proc.new { @called = true } }
 
     it "should call prefork" do
-      subject.call_after_prefork!
+      subject.call_after_prefork!(worker)
       @called.should == true
     end
   end
@@ -194,9 +196,16 @@ describe Resque::Pool, "given after_prefork hook" do
     }
 
     it "should call both" do
-      subject.call_after_prefork!
+      subject.call_after_prefork!(worker)
       @called_first.should == true
       @called_second.should == true
     end
+  end
+
+  it "passes the worker instance to the hook" do
+    val = nil
+    Resque::Pool.after_prefork { |w| val = w }
+    subject.call_after_prefork!(worker)
+    val.should == worker
   end
 end
