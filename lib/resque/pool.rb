@@ -411,7 +411,10 @@ module Resque
       worker = ::Resque::Worker.new(*queues)
       worker.term_timeout = ENV['RESQUE_TERM_TIMEOUT'] || 4.0
       worker.term_child = ENV['TERM_CHILD']
-      worker.run_at_exit_hooks = ENV['RUN_AT_EXIT_HOOKS'] || false
+      if worker.respond_to?(:run_at_exit_hooks=)
+        # resque doesn't support this until 1.24, but we support 1.22
+        worker.run_at_exit_hooks = ENV['RUN_AT_EXIT_HOOKS'] || false
+      end
       if ENV['LOGGING'] || ENV['VERBOSE']
         worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
       end
