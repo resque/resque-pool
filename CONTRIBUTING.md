@@ -13,5 +13,10 @@ Pull request guidelines
 4. Push your changes to your fork (`git push origin my_awesome_feature`)
 5. Open a [Pull Request](/nevans/resque-pool/pulls)
 
-Pull requests should have automated test coverage and new versions won't be
-released until they've been running in production for at least a week.
+Pull requests should have automated test coverage.
+
+New release policy
+------------------
+
+New versions won't be released until a release candidate has been running in a
+maintainer's production environment for at least a week.
