@@ -2,14 +2,20 @@ require 'resque/worker'
 
 class Resque::Pool
   module PooledWorker
+    attr_accessor :pool_master_pid
+    attr_accessor :worker_parent_pid
 
-    def initialize_with_pool(*args)
-      @pool_master_pid = Process.pid
-      initialize_without_pool(*args)
+    # We can't just check if we've been re-parented to PID 1 (init) because we
+    # want to support docker (which will make the pool master PID 1).
+    #
+    # We also check the worker_parent_pid, because resque-multi-jobs-fork calls
+    # Worker#shutdown? from inside the worker child process.
+    def pool_master_has_gone_away?
+      not potential_parent_pids.include?(Process.ppid)
     end
 
-    def pool_master_has_gone_away?
-      @pool_master_pid && @pool_master_pid != Process.ppid
+    def potential_parent_pids
+      [pool_master_pid, worker_parent_pid].compact
     end
 
     def shutdown_with_pool?
@@ -18,8 +24,6 @@ class Resque::Pool
 
     def self.included(base)
       base.instance_eval do
-        alias_method :initialize_without_pool, :initialize
-        alias_method :initialize, :initialize_with_pool
         alias_method :shutdown_without_pool?, :shutdown?
         alias_method :shutdown?, :shutdown_with_pool?
       end

@@ -395,6 +395,7 @@ module Resque
       worker = create_worker(queues)
       pid = fork do
         Process.setpgrp unless Resque::Pool.single_process_group
+        worker.worker_parent_pid = Process.pid
         log_worker "Starting worker #{worker}"
         call_after_prefork!
         reset_sig_handlers!
@@ -407,6 +408,7 @@ module Resque
     def create_worker(queues)
       queues = queues.to_s.split(',')
       worker = ::Resque::Worker.new(*queues)
+      worker.pool_master_pid = Process.pid
       worker.term_timeout = ENV['RESQUE_TERM_TIMEOUT'] || 4.0
       worker.term_child = ENV['TERM_CHILD']
       if worker.respond_to?(:run_at_exit_hooks=)
