@@ -1,6 +1,8 @@
 ## 0.6.0 _(unreleased)_
 
  * no longer hijacks shutdown for normal resque worker processes.
+ * [PatrickTulskie](https://github.com/PatrickTulskie) Reopening log files now
+   reopens *all* logs in memory (append write only; code copied from Unicorn)
  * [jonleighton](https://github.com/jonleighton) pass worker instance to
    `after_prefork` hook
 
