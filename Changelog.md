@@ -1,3 +1,9 @@
+## 0.6.0 _(unreleased)_
+
+ * no longer hijacks shutdown for normal resque worker processes.
+ * [jonleighton](https://github.com/jonleighton) pass worker instance to
+   `after_prefork` hook
+
 ## 0.5.0 (2015-03-24)
 
 Some more merges of long outstanding pull requests.
@@ -5,7 +11,6 @@ Some more merges of long outstanding pull requests.
  * _EVEN BETTER_ `TERM` support for Heroku than 0.4.0.  ;)
  * _DOCKER SUPPORT_ (don't go crazy when master pid is 1).
    _(example Dockerfile soon?)_
- * `resque-pool` no longer hijacks shutdown for normal resque worker processes.
  * `--spawn_delay` option in case workers respawn too quickly
  * Support `RUN_AT_EXIT_HOOKS`.
  * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0).
