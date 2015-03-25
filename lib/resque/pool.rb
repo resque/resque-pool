@@ -116,6 +116,8 @@ module Resque
     def load_config
       if config_file
         @config = YAML.load(ERB.new(IO.read(config_file)).result)
+
+        add_wildcard_configuration
       else
         @config ||= {}
       end
@@ -426,5 +428,33 @@ module Resque
 
     # }}}
 
+    private
+    def wildcard_keys
+      config_keys_with_wildcard.collect do |wildcard_key|
+        wildcard_key_name = wildcard_key.split('*').first
+        resque_queues_matching_wildcard_key = ::Resque.queues.select { |queue| queue.include?(wildcard_key_name) }
+      end.flatten
+    end
+
+    def config_keys_with_wildcard
+      config.keys.select { |key| key.include?('*') }
+    end
+
+    def config_hash_for_wildcard_keys
+      hash = {}
+
+      wildcard_keys.each do |wildcard_key|
+        hash[wildcard_key] = 1
+      end
+
+      hash
+    end
+
+    def add_wildcard_configuration
+      unless config_keys_with_wildcard.empty?
+        config.merge! config_hash_for_wildcard_keys
+        config_keys_with_wildcard.each { |key| config.except!(key) }
+      end
+    end
   end
 end
