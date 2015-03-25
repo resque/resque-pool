@@ -8,7 +8,7 @@ Some more merges of long outstanding pull requests.
  * `resque-pool` no longer hijacks shutdown for normal resque worker processes.
  * `--spawn_delay` option in case workers respawn too quickly
  * Support `RUN_AT_EXIT_HOOKS`.
- * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0.rc1).
+ * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0).
 
 Many thanks to the contributors! [JohnBat26](https://github.com/JohnBat26), Eric
 Chapweske, [werkshy](https://github.com/werkshy),
@@ -19,9 +19,12 @@ Chapweske, [werkshy](https://github.com/werkshy),
 ## 0.4.0 (2015-01-28)
 
 Another _long_ overdue maintenance release.  Many users had been running the
-various release candidates in production for over 16 months.  Better
-Heroku/`TERM_CHILD` support, better `upstart` process group control, ERB in the
-config file, not-insane package size, and more.
+various release candidates in production for over 16 months.  0.4.0 was based
+on 0.4.0.rc2 and 0.4.0.rc3 was rolled up into 0.5.0 instead.
+
+Better Heroku/`TERM_CHILD` support, better `upstart` process group control, ERB
+in the config file, not-insane package size, and
+[more](https://github.com/nevans/resque-pool/compare/v0.3.0...v0.4.0).
 
 Many thanks to the contributors!
 
