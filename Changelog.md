@@ -1,6 +1,52 @@
-## 0.4.0.dev (unreleased)
+## 0.5.0 (2015-03-24)
 
- * ???
+Some more merges of long outstanding pull requests.
+
+ * _EVEN BETTER_ `TERM` support for Heroku than 0.4.0.  ;)
+ * _DOCKER SUPPORT_ (don't go crazy when master pid is 1).
+   _(example Dockerfile soon?)_
+ * `resque-pool` no longer hijacks shutdown for normal resque worker processes.
+ * `--spawn_delay` option in case workers respawn too quickly
+ * Support `RUN_AT_EXIT_HOOKS`.
+ * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0.rc1).
+
+Many thanks to the contributors! [JohnBat26](https://github.com/JohnBat26), Eric
+Chapweske, [werkshy](https://github.com/werkshy),
+[spajus](https://github.com/spajus), [greysteil](https://github.com/greysteil),
+[tjsousa](https://github.com/tjsousa), [jkrall](https://github.com/jkrall),
+[zmillman](https://github.com/zmillman), [nevans](http://github.com/nevans).
+
+## 0.4.0 (2015-01-28)
+
+Another _long_ overdue maintenance release.  Many users had been running the
+various release candidates in production for over 16 months.  Better
+Heroku/`TERM_CHILD` support, better `upstart` process group control, ERB in the
+config file, not-insane package size, and more.
+
+Many thanks to the contributors!
+
+ * Better `TERM_CHILD` support (useful for Heroku or anywhere else that only
+   sends `TERM` to quit) [@rayh](https://github.com/rayh) and
+   [@jjulian](https://github.com/jjulian)
+ * [@jjulian](https://github.com/jjulian):
+   * 0.3.0 accidentally packaged up 13MB of extra files!  OOOPS... SORRY!
+   * better MacOS X compatibility
+   * missing LICENCE in gemspec
+ * [@jasonrclark](https://github.com/jasonrclark): `after_prefork` hook manages
+   an array of hooks, rather than one single hook
+ * [@mlanett](https://github.com/mlanett): Parse ERB in the config file (_very_
+   useful for hostname/environment switched configuration)
+ * [@xjlu](https://github.com/xjlu): Match the task deps in resque:work
+ * [@darbyfrey](https://github.com/darbyfrey): Fixing deprecation warnings in
+   newer versions of resque
+ * [@ewoodh20](https://github.com/ewoodh20): Use `Rails.env` if available
+   (`RAILS_ENV` is deprecated)
+ * [@dlackty](https://github.com/dlackty): example `god` config file
+ * [@mattdbridges](https://github.com/mattdbridges): fix order dependent specs
+ * [@nevans](https://github.com/nevans):
+   * Ignore `WINCH` signal when running non-daemonized (often in the terminal)
+   * Do not run children in the same process group (solves problems with `upstart`
+     sending `TERM` to all processes at once)
 
 ## 0.3.0 (2012-05-22)
 
