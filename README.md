@@ -146,12 +146,12 @@ us you know what you're doing.
 Custom Configuration Loader
 ---------------------------
 
-If the static YAML file configuration approach does not meet you needs, you can
+If the static YAML file configuration approach does not meet your needs, you can
 specify a custom configuration loader.
 
 Set the `config_loader` class variable on Resque::Pool to an object that
 responds to `#call` (which can simply be a lambda/Proc). The class attribute
-needs to be set before starting the pool. This is usually accomplished by
+needs to be set before starting the pool. This is usually accomplished
 in the `resque:pool:setup` rake task, as described above.
 
 For example, if you wanted to vary the number of worker processes based on a
@@ -166,9 +166,9 @@ Resque::Pool.config_loader = lambda {|env|
 end
 ```
 
-The configuration loader's `#call` method will be invoked every time a worker
-completes a job. This allows the configuration to constantly change, for example,
-to scale the number of workers up/down based on different conditions.
+The configuration loader's `#call` method will be invoked about once a second.
+This allows the configuration to constantly change, allowing you to scale the
+number of workers up or down based on different conditions.
 If the response is generally static, the loader may want to cache the value it
 returns. It can optionally implement a `#reset!` method, which will be invoked
 when the HUP signal is received, allowing the loader to flush its cache, or
