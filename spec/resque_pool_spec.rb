@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 RSpec.configure do |config|
+  config.include PoolSpecHelpers
   config.after {
     Object.send(:remove_const, :RAILS_ENV) if defined? RAILS_ENV
     ENV.delete 'RACK_ENV'
@@ -158,12 +159,111 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
 
   context "when a custom file is specified" do
     before { ENV["RESQUE_POOL_CONFIG"] = 'spec/resque-pool-custom.yml.erb' }
-    subject { Resque::Pool.new(Resque::Pool.choose_config_file) }
+    subject { Resque::Pool.new }
     it "should find the right file, and parse the ERB" do
       subject.config["foo"].should == 2
     end
   end
 
+  context "when the file changes" do
+    require 'tempfile'
+
+    let(:config_file_path) {
+      config_file = Tempfile.new("resque-pool-test")
+      config_file.write "orig: 1"
+      config_file.close
+      config_file.path
+    }
+
+    subject {
+      no_spawn(Resque::Pool.new(config_file_path))
+    }
+
+    it "should not automatically load the changes" do
+      subject.config.keys.should == ["orig"]
+
+      File.open(config_file_path, "w"){|f| f.write "changed: 1"}
+      subject.config.keys.should == ["orig"]
+      subject.load_config
+      subject.config.keys.should == ["orig"]
+    end
+
+    it "should reload the changes on HUP signal" do
+      subject.config.keys.should == ["orig"]
+
+      File.open(config_file_path, "w"){|f| f.write "changed: 1"}
+      subject.config.keys.should == ["orig"]
+      subject.load_config
+      subject.config.keys.should == ["orig"]
+
+      simulate_signal subject, :HUP
+
+      subject.config.keys.should == ["changed"]
+    end
+
+  end
+
+end
+
+describe Resque::Pool, "the pool configuration custom loader" do
+  it "should retrieve the config based on the environment" do
+    custom_loader = double(call: Hash.new)
+    RAILS_ENV = "env"
+
+    Resque::Pool.new(custom_loader)
+
+    custom_loader.should have_received(:call).with("env")
+  end
+
+  it "should reset the config loader on HUP" do
+    custom_loader = double(call: Hash.new, reset!: true)
+
+    pool = no_spawn(Resque::Pool.new(custom_loader))
+    custom_loader.should have_received(:call).once
+
+    pool.sig_queue.push :HUP
+    pool.handle_sig_queue!
+    custom_loader.should have_received(:reset!)
+    custom_loader.should have_received(:call).twice
+  end
+
+  it "can be a lambda" do
+    RAILS_ENV = "fake"
+    count = 1
+    pool = no_spawn(Resque::Pool.new(lambda {|env|
+      {env.reverse => count}
+    }))
+    pool.config.should == {"ekaf" => 1}
+
+    count = 3
+    pool.sig_queue.push :HUP
+    pool.handle_sig_queue!
+
+    pool.config.should == {"ekaf" => 3}
+  end
+end
+
+describe "the class-level .config_loader attribute" do
+  context "when not provided" do
+    subject { Resque::Pool.create_configured }
+
+    it "created pools use config file and hash loading logic" do
+      subject.config_loader.should be_instance_of FileOrHashLoader
+    end
+  end
+
+  context "when provided with a custom config loader" do
+    let(:custom_config_loader) {
+      double(call: Hash.new)
+    }
+    before(:each) { Resque::Pool.config_loader = custom_config_loader }
+    after(:each) { Resque::Pool.config_loader = nil }
+    subject { Resque::Pool.create_configured }
+
+    it "created pools use the specified config loader" do
+      subject.config_loader.should == custom_config_loader
+    end
+  end
 end
 
 describe Resque::Pool, "given after_prefork hook" do
