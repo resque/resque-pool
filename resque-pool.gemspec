@@ -13,6 +13,8 @@ Gem::Specification.new do |s|
     saving memory (w/REE) and monitoring their uptime
   EOF
 
+  s.required_ruby_version = '>= 1.9.3'
+
   s.add_dependency "resque",  "~> 1.22"
   s.add_dependency "rake"
   s.add_development_dependency "rspec",    "~> 2.10"
@@ -20,9 +22,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "aruba",    "~> 0.4.11"
   s.add_development_dependency "bundler", "~> 1.0"
   s.add_development_dependency "ronn"
-
-  # only in ruby 1.8
-  s.add_development_dependency "SystemTimer" if RUBY_VERSION =~ /^1\.8/
 
   s.files         = %w( README.md Rakefile LICENSE.txt Changelog.md )
   s.files         += Dir.glob("lib/**/*")
