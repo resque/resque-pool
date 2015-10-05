@@ -1,11 +1,8 @@
-# -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "resque/pool/version"
+require "./lib/resque/pool/version"
 
 Gem::Specification.new do |s|
   s.name        = "resque-pool"
   s.version     = Resque::Pool::VERSION
-  s.platform    = Gem::Platform::RUBY
   s.authors     = ["nicholas a. evans",]
   s.email       = ["nick@ekenosen.net"]
   s.homepage    = "http://github.com/nevans/resque-pool"
@@ -32,9 +29,5 @@ Gem::Specification.new do |s|
   s.files         += Dir.glob("lib/**/*")
   s.files         += Dir.glob("bin/**/*")
   s.files         += Dir.glob("man/**/*")
-  s.files         += Dir.glob("features/**/*")
-  s.files         += Dir.glob("spec/**/*")
-  s.test_files    = Dir.glob("{spec,features}/**/*.{rb,yml,feature}")
   s.executables   = 'resque-pool'
-  s.require_paths = ["lib"]
 end
