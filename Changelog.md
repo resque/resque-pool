@@ -8,7 +8,7 @@ thanks to [joshuaflanagan](https://github.com/joshuaflanagan)!
 Lots of cleanup in this release.  Thanks to the contributers:
 
  * [joshuaflanagan](https://github.com/joshuaflanagan) Custom config loader
- * [grosser](https://github/grosser)
+ * [grosser](https://github.com/grosser)
    * ship less files in the gem
    * remove trollop dependency
    * remove -n -t -r -n -i commandline options since they were added unintentionally
