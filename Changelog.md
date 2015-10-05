@@ -1,5 +1,8 @@
 ## 0.6.0 _(unreleased)_
 
+ * ship less files in the gem
+ * remove trollop dependency
+ * remove -n -t -r -n -i commandline options since they were added unintentionally
  * no longer hijacks shutdown for normal resque worker processes.
  * [PatrickTulskie](https://github.com/PatrickTulskie) Reopening log files now
    reopens *all* logs in memory (append write only; code copied from Unicorn)

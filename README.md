@@ -1,11 +1,11 @@
 Resque Pool
 ===========
 
-[![Build Status](https://secure.travis-ci.org/nevans/resque-pool.png)](http://travis-ci.org/nevans/resque-pool)
+[![Build Status](https://travis-ci.org/nevans/resque-pool.png)](https://travis-ci.org/nevans/resque-pool)
 [![Dependency Status](https://gemnasium.com/nevans/resque-pool.png)](https://gemnasium.com/nevans/resque-pool)
 
 Resque pool is a simple library for managing a pool of
-[resque](http://github.com/defunkt/resque) workers.  Given a a config file, it
+[resque](https://github.com/defunkt/resque) workers.  Given a a config file, it
 manages your workers for you, starting up the appropriate number of workers for
 each worker type.
 
@@ -40,12 +40,14 @@ environment specific overrides (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV`
 environment variables can be used to determine environment).  For example in
 `config/resque-pool.yml`:
 
-    foo: 1
-    bar: 2
-    "foo,bar,baz": 1
+```Yaml
+foo: 1
+bar: 2
+"foo,bar,baz": 1
 
-    production:
-      "foo,bar,baz": 4
+production:
+  "foo,bar,baz": 4
+```
 
 ### Rake task config
 
@@ -55,20 +57,24 @@ application environment, configure Resque as necessary, and configure
 manager and reconnect in the workers.  For example, with rails you should put
 the following into `lib/tasks/resque.rake`:
 
-    require 'resque/pool/tasks'
-    # this task will get called before resque:pool:setup
-    # and preload the rails environment in the pool manager
-    task "resque:setup" => :environment do
-      # generic worker setup, e.g. Hoptoad for failed jobs
-    end
-    task "resque:pool:setup" do
-      # close any sockets or files in pool manager
-      ActiveRecord::Base.connection.disconnect!
-      # and re-open them in the resque worker parent
-      Resque::Pool.after_prefork do |job|
-        ActiveRecord::Base.establish_connection
-      end
-    end
+```Ruby
+require 'resque/pool/tasks'
+
+# this task will get called before resque:pool:setup
+# and preload the rails environment in the pool manager
+task "resque:setup" => :environment do
+  # generic worker setup, e.g. Hoptoad for failed jobs
+end
+
+task "resque:pool:setup" do
+  # close any sockets or files in pool manager
+  ActiveRecord::Base.connection.disconnect!
+  # and re-open them in the resque worker parent
+  Resque::Pool.after_prefork do |job|
+    ActiveRecord::Base.establish_connection
+  end
+end
+```
 
 
 For normal work with fresh resque and resque-scheduler gems add next lines in lib/rake/resque.rake
@@ -159,10 +165,10 @@ value stored in Redis, you could do something like:
 
 ```ruby
 task resque:pool:setup do
-Resque::Pool.config_loader = lambda {|env|
-  worker_count = Redis.current.get("pool_workers_#{env}").to_i
-  {"queueA,queueB" => worker_count }
-}
+  Resque::Pool.config_loader = lambda do |env|
+    worker_count = Redis.current.get("pool_workers_#{env}").to_i
+    {"queueA,queueB" => worker_count }
+  end
 end
 ```
 
