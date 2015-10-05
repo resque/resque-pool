@@ -1,5 +1,4 @@
-require 'rspec'
-$LOAD_PATH << File.expand_path("../lib", File.dirname(__FILE__))
+require 'bundler/setup'
 require 'resque/pool'
 
 module PoolSpecHelpers
