@@ -19,4 +19,5 @@ New release policy
 ------------------
 
 New versions won't be released until a release candidate has been running in a
-maintainer's production environment for at least a week.
+maintainer's production environment for at least a week.  Exceptions only for
+security-related patches.
