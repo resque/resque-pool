@@ -1,13 +1,13 @@
 def process_should_exist(pid)
-  lambda { Process.kill(0, pid) }.should_not raise_error(Errno::ESRCH)
+  expect { Process.kill(0, pid) }.not_to raise_error
 end
 
 def process_should_not_exist(pid)
-  lambda { Process.kill(0, pid) }.should raise_error(Errno::ESRCH)
+  expect { Process.kill(0, pid) }.to raise_error(Errno::ESRCH)
 end
 
 def grab_worker_pids(count, str)
-  puts "TODO: check output_or_log for #{count} worker started messages"
+  # TODO: check output_or_log for #{count} worker started messages"
   pid_regex = (1..count).map { '(\d+)' }.join ', '
   full_regex = /resque-pool-manager\[aruba\]\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
   str.should =~ full_regex
@@ -131,11 +131,11 @@ Then /^the resque workers should all shutdown$/ do
 end
 
 Then "the pool manager should have no child processes" do
-  children_of(background_pid).should have(:no).keys
+  children_of(background_pid).size.should == 0
 end
 
 Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do |count, queues|
-  worker_processes_for(queues).should have(Integer(count)).members
+  worker_processes_for(queues).size.should == Integer(count)
 end
 
 Then "the pool manager should finish" do
@@ -156,4 +156,4 @@ end
 Then /^the logfiles should match \/([^\/]*)\/$/ do |partial_output|
   output_or_log("log").should =~ /#{partial_output}/
 end
- 
+
