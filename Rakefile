@@ -1,5 +1,5 @@
-require 'bundler'
-Bundler::GemHelper.install_tasks
+require 'bundler/setup'
+require 'bundler/gem_tasks'
 
 # for loading the example config file in config/resque-pool.yml
 require 'resque/pool/tasks'
