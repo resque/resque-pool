@@ -1,5 +1,5 @@
-source "http://rubygems.org"
+source "https://rubygems.org"
 
-# Specify your gem's dependencies in resque-pool.gemspec
 gemspec
-gem "json" # so 1.8 can have a halfway decent json gem
+
+gem 'mustache', '~> 0.99.8' # 1.0 needs ruby 2.0
