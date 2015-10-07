@@ -80,7 +80,7 @@ end
 For normal work with fresh resque and resque-scheduler gems add next lines in lib/rake/resque.rake
 
 ```ruby
-task 'resque:pool:setup' do
+task "resque:pool:setup" do
   Resque::Pool.after_prefork do |job|
     Resque.redis.client.reconnect
   end
@@ -164,7 +164,7 @@ For example, if you wanted to vary the number of worker processes based on a
 value stored in Redis, you could do something like:
 
 ```ruby
-task resque:pool:setup do
+task "resque:pool:setup" do
   Resque::Pool.config_loader = lambda do |env|
     worker_count = Redis.current.get("pool_workers_#{env}").to_i
     {"queueA,queueB" => worker_count }
@@ -205,8 +205,4 @@ See [the TODO list](https://github.com/nevans/resque-pool/issues) at github issu
 Contributors
 -------------
 
-* John Schult (config file can be split by environment)
-* Stephen Celis (increased gemspec sanity)
-* Vincent Agnello, Robert Kamunyori, Paul Kauders; for pairing with me at
-  B'more on Rails Open Source Hack Nights. :)
-
+See [list of contributors on github](https://github.com/nevans/resque-pool/graphs/contributors) or [in the changelog](https://github.com/nevans/resque-pool/blob/master/Changelog.md)
