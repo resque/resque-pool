@@ -28,34 +28,49 @@ module Resque
       procline "(initialized)"
     end
 
-    # Config: after_prefork {{{
+    # Config: hooks {{{
 
-    # The `after_prefork` hooks will be run in workers if you are using the
-    # preforking master worker to save memory. Use these hooks to reload
-    # database connections and so forth to ensure that they're not shared
-    # among workers. The worker instance is passed as an argument to the block.
-    #
-    # Call with a block to set a hook.
-    # Call with no arguments to return all registered hooks.
-    #
-    def self.after_prefork(&block)
-      @after_prefork ||= []
-      block ? (@after_prefork << block) : @after_prefork
+    def self.hook(name) # :nodoc:
+      class_eval <<-CODE
+        def self.#{name}(&block)
+          @#{name} ||= []
+          block ? (@#{name} << block) : @#{name}
+        end
+
+        def self.#{name}=(block)
+          @#{name} = [block]
+        end
+
+        def call_#{name}!(*args)
+          self.class.#{name}.each do |hook|
+            hook.call(*args)
+          end
+        end
+      CODE
     end
 
-    # Sets the after_prefork proc, clearing all pre-existing hooks.
-    # Warning: you probably don't want to clear out the other hooks.
-    # You can use `Resque::Pool.after_prefork << my_hook` instead.
+    ##
+    # :call-seq:
+    #   after_prefork do |worker| ... end   => add a hook
+    #   after_prefork << hook               => add a hook
     #
-    def self.after_prefork=(after_prefork)
-      @after_prefork = [after_prefork]
-    end
+    # +after_prefork+ will run in workers before any jobs.  Use these hooks e.g.
+    # to reload database connections to ensure that they're not shared among
+    # workers.
+    #
+    # :yields: worker
+    hook :after_prefork
 
-    def call_after_prefork!(worker)
-      self.class.after_prefork.each do |hook|
-        hook.call(worker)
-      end
-    end
+    ##
+    # :call-seq:
+    #   after_prefork do |worker, pid, workers| ... end  => add a hook
+    #   after_prefork << hook                            => add a hook
+    #
+    # The `after_spawn` hooks will run in the master after spawning a new
+    # worker.
+    #
+    # :yields: worker, pid, workers
+    hook :after_spawn
 
     # }}}
     # Config: class methods to start up the pool using the config loader {{{
@@ -396,6 +411,7 @@ module Resque
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
       end
       workers[queues][pid] = worker
+      call_after_spawn!(worker, pid, workers)
     end
 
     def create_worker(queues)
