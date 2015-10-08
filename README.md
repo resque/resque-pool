@@ -4,23 +4,23 @@ Resque Pool
 [![Build Status](https://travis-ci.org/nevans/resque-pool.png)](https://travis-ci.org/nevans/resque-pool)
 [![Dependency Status](https://gemnasium.com/nevans/resque-pool.png)](https://gemnasium.com/nevans/resque-pool)
 
-Resque pool is a simple library for managing a pool of
-[resque](https://github.com/defunkt/resque) workers.  Given a a config file, it
-manages your workers for you, starting up the appropriate number of workers for
-each worker type.
+Resque pool is a daemon for managing a pool of
+[resque](https://github.com/defunkt/resque) workers.  With a simple config file,
+it manages your workers for you, starting up the appropriate number of workers
+for each worker type.
 
 Benefits
 ---------
 
 * Less config - With a simple YAML file, you can start up a pool daemon, and it
-  will monitor your workers for you.  An example init.d script, monit config,
-  and chef cookbook are provided.
-* Less memory - If you are using Ruby Enterprise Edition, or any ruby with
-  copy-on-write safe garbage collection, this should save you a *lot* of memory
-  when you are managing many workers.
+  will monitor your workers for you.
+* Less memory - If you are using ruby 2.0+ (with copy-on-write safe garbage
+  collection), this should save you a *lot* of memory when you are managing many
+  workers.
 * Faster startup - when you start many workers at once, they would normally
-  compete for CPU as they load their environments.  Resque-pool can load the
-  environment once and fork all of the workers almost instantly.
+  compete for CPU as they load their environments.  Resque-pool can load your
+  application once, then rapidly fork the workers after setup.  If a worker
+  crashes or is killed, a new worker will start up and take its place right away.
 
 Upgrading?
 -----------
@@ -183,11 +183,6 @@ perform any other re-initialization.
 Other Features
 --------------
 
-An example chef cookbook is provided (and should Just Work at Engine Yard as
-is; just provide a `/data/#{app_name}/shared/config/resque-pool.yml` on your
-utility instances).  Even if you don't use chef you can use the example init.d
-and monitrc erb templates in `examples/chef_cookbook/templates/default`.
-
 You can also start a pool manager via `rake resque:pool` or from a plain old
 ruby script by calling `Resque::Pool.run`.
 
@@ -196,6 +191,10 @@ their current job) if the manager process disappears before them.
 
 You can specify an alternate config file by setting the `RESQUE_POOL_CONFIG` or
 with the `--config` command line option.
+
+See the `examples` directory for example `chef` cookbook and
+`god` config.  In the `chef` cookbook, you can also find example `init.d` and
+`muninrc` templates (all very out of date, pull requests welcome).
 
 TODO
 -----
