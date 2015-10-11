@@ -37,6 +37,7 @@ module Resque
           opt.on('-c', '--config PATH', "Alternate path to config file") { |c| opts[:config] = c }
           opt.on('-a', '--appname NAME', "Alternate appname") { |c| opts[:appname] = c }
           opt.on("-d", '--daemon', "Run as a background daemon") { opts[:daemon] = true }
+          opt.on("-k", '--kill-others', "Shutdown any other Resque Pools on startup") { opts[:killothers] = true }
           opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
@@ -130,6 +131,7 @@ module Resque
         if opts[:spawn_delay]
           Resque::Pool.spawn_delay = opts[:spawn_delay] * 0.001
         end
+        Resque::Pool.kill_other_pools = !!opts[:killothers]
       end
 
       def setup_environment(opts)

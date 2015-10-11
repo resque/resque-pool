@@ -88,6 +88,11 @@ module Resque
       @handle_winch = bool
     end
 
+    def self.kill_other_pools!
+      require 'resque/pool/killer'
+      Resque::Pool::Killer.run
+    end
+
     def self.single_process_group=(bool)
       ENV["RESQUE_SINGLE_PGRP"] = !!bool ? "YES" : "NO"
     end
@@ -98,6 +103,7 @@ module Resque
     end
 
     def self.run
+      kill_other_pools! if kill_other_pools
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
@@ -235,6 +241,7 @@ module Resque
 
     class << self
       attr_accessor :term_behavior
+      attr_accessor :kill_other_pools
     end
 
     def graceful_worker_shutdown_and_wait!(signal)
