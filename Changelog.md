@@ -1,6 +1,12 @@
 ## 0.7.0 _unreleased_
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.6.0...master).
 
+One big new feature: `--hot-swap` for [zero-downtime code
+deploys](https://github.com/nevans/resque-pool#zero-downtime-code-deploys).
+Thanks to [joshuaflanagan](https://github.com/joshuaflanagan),
+[brasic](https://github.com/brasic), and
+[ShippingEasy](https://github.com/ShippingEasy)!
+
 ## 0.6.0
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.5.0...v0.6.0).
 
