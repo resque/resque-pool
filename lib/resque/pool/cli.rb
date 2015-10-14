@@ -21,9 +21,9 @@ module Resque
         start_pool
       end
 
-      def parse_options
+      def parse_options(argv=nil)
         opts = {}
-        OptionParser.new do |opt|
+        parser = OptionParser.new do |opt|
           opt.banner = <<-EOS.gsub(/^            /, '')
             resque-pool is the best way to manage a group (pool) of resque workers
 
@@ -52,15 +52,17 @@ module Resque
           opt.on('--single-process-group', "Workers remain in the same process group as the master") { opts[:single_process_group] = true }
           opt.on("-h", "--help", "Show this.") { puts opt; exit }
           opt.on("-v", "--version", "Show Version"){ puts "resque-pool #{VERSION} (c) nicholas a. evans"; exit}
-        end.parse!
+        end
+        parser.parse!(argv || parser.default_argv)
+        if opts[:pidfile]
+          opts.delete(:no_pidfile)
+        end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
           opts[:stderr]  ||= "log/resque-pool.stderr.log"
-          opts[:pidfile] ||= "tmp/pids/resque-pool.pid"
-        end
-
-        if opts[:no_pidfile]
-          opts.delete(:pidfile)
+          unless opts[:no_pidfile]
+            opts[:pidfile] ||= "tmp/pids/resque-pool.pid"
+          end
         end
 
         opts
