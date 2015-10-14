@@ -180,6 +180,31 @@ returns. It can optionally implement a `#reset!` method, which will be invoked
 when the HUP signal is received, allowing the loader to flush its cache, or
 perform any other re-initialization.
 
+Zero-downtime code deploys
+--------------------------
+
+In a production environment you will likely want to manage the daemon using a
+process supervisor like `runit` or `god` or an init system like `systemd` or
+`upstart`.  Example configurations for some of these are included in the
+`examples` directory.  With these systems, `reload` typically sends a `HUP`
+signal, which will reload the configuration but not application code.  The
+simplest way to make workers pick up new code after a deploy is to stop and
+start the daemon.  This will result in a period where new jobs are not being
+processed.
+
+To avoid this downtime, leave the old pool running and start a new pool with
+`resque-pool --hot-swap`.
+
+The `--hot-swap` flag will turn off pidfiles (so multiple pools can run at
+once), enable a lock file (so your init system knows when the pool is running),
+and shut down other other pools _after_ the workers have started for this pool.
+These behaviors can also be configured separately (see `resque-pool --help`).
+The `upstart` configs in the `examples` directory demonstrate how to supervise a
+daemonized pool with hot swap.
+
+Please be aware that this approach uses more memory than a simple restart, since
+two copies of the application code are loaded at once. _TODO: #139_
+
 Other Features
 --------------
 
@@ -195,23 +220,6 @@ with the `--config` command line option.
 See the `examples` directory for example `chef` cookbook and
 `god` config.  In the `chef` cookbook, you can also find example `init.d` and
 `muninrc` templates (all very out of date, pull requests welcome).
-
-Zero-downtime code deploys
---------------------------
-
-In a production environment you will likely want to manage the daemon using a
-process supervisor like `runit` or `god` or an init system like `systemd` or
-`upstart`.  Example configurations for some of these are included in the
-`examples` directory.  With these systems, `reload` typically sends a `HUP`
-signal, which will reload the configuration but not application code.  The
-simplest way to make workers pick up new code after a deploy is to stop and
-start the daemon.  This will result in a period where new jobs are not being
-processed.  You can avoid this delay by using the `--no-pidfile` and
-`--kill-others` flags.  After new worker code is deployed, start a second
-instance of `resque-pool`.  The second daemon will detect and gracefully shut
-down the first when it is ready to process jobs.  This process uses more memory
-than a simple restart, since two copies of the application code are loaded at
-once.
 
 TODO
 -----

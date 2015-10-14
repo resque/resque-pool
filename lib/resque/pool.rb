@@ -88,6 +88,11 @@ module Resque
       @handle_winch = bool
     end
 
+    def self.kill_other_pools!
+      require 'resque/pool/killer'
+      Resque::Pool::Killer.run
+    end
+
     def self.single_process_group=(bool)
       ENV["RESQUE_SINGLE_PGRP"] = !!bool ? "YES" : "NO"
     end
@@ -235,6 +240,7 @@ module Resque
 
     class << self
       attr_accessor :term_behavior
+      attr_accessor :kill_other_pools
     end
 
     def graceful_worker_shutdown_and_wait!(signal)
@@ -279,6 +285,7 @@ module Resque
       procline("(started)")
       log "started manager"
       report_worker_pool_pids
+      self.class.kill_other_pools! if self.class.kill_other_pools
       self
     end
 

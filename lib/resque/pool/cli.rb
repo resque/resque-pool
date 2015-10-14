@@ -43,6 +43,7 @@ module Resque
             opts[:stderr]  ||= "log/resque-pool.stderr.log"
             opts[:pidfile] ||= "tmp/pids/resque-pool.pid" unless opts[:no_pidfile]
           }
+          opt.on("-k", '--kill-others', "Shutdown any other Resque Pools on startup") { opts[:killothers] = true }
           opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
@@ -55,6 +56,12 @@ module Resque
             opts[:no_pidfile] = true
           }
           opt.on('-l', '--lock FILE' "Open a shared lock on a file") { |c| opts[:lock_file] = c }
+          opt.on("-H", "--hot-swap", "Set appropriate defaults to hot-swap a new pool for a running pool") {|c|
+            opts[:pidfile] = nil
+            opts[:no_pidfile] = true
+            opts[:lock_file] ||= "tmp/resque-pool.lock"
+            opts[:killothers] = true
+          }
           opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
           opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
           opt.on('--term-graceful-wait', "On TERM signal, wait for workers to shut down gracefully") { opts[:term_graceful_wait] = true }
@@ -153,6 +160,7 @@ module Resque
         if opts[:spawn_delay]
           Resque::Pool.spawn_delay = opts[:spawn_delay] * 0.001
         end
+        Resque::Pool.kill_other_pools = !!opts[:killothers]
       end
 
       def setup_environment(opts)

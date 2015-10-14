@@ -54,5 +54,18 @@ describe Resque::Pool::CLI do
       options[:no_pidfile].should be_truthy
     end
 
+    it "`--hot-swap` enables `--no-pidfile --lock tmp/resque-pool.pid --kill-others`" do
+      options = cli.parse_options(%w[--pidfile foo.pid --hot-swap])
+      options[:pidfile].should be_nil
+      options[:no_pidfile].should be_truthy
+      options[:lock_file].should eq("tmp/resque-pool.lock")
+      options[:killothers].should be_truthy
+    end
+
+    it "`--hot-swap` does not override `--lock`" do
+      options = cli.parse_options(%w[--lock foo.lock --hot-swap])
+      options[:lock_file].should eq("foo.lock")
+    end
+
   end
 end
