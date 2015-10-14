@@ -3,6 +3,7 @@ pkg/*
 .bundle
 *.log
 *.pid
+examples/tmp/*
 tmp/*
 vendor
 tags
