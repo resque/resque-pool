@@ -17,7 +17,7 @@ describe Resque::Pool::CLI do
     end
 
     it "`--daemon` does not override provided stdout/stderr options" do
-      options = cli.parse_options(%w[--daemon --stdout my.stdout --stderr my.stderr])
+      options = cli.parse_options(%w[--stdout my.stdout --stderr my.stderr --daemon])
       options[:stdout].should == "my.stdout"
       options[:stderr].should == "my.stderr"
     end

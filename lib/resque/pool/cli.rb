@@ -37,7 +37,12 @@ module Resque
           EOS
           opt.on('-c', '--config PATH', "Alternate path to config file") { |c| opts[:config] = c }
           opt.on('-a', '--appname NAME', "Alternate appname") { |c| opts[:appname] = c }
-          opt.on("-d", '--daemon', "Run as a background daemon") { opts[:daemon] = true }
+          opt.on("-d", '--daemon', "Run as a background daemon") {
+            opts[:daemon] = true
+            opts[:stdout]  ||= "log/resque-pool.stdout.log"
+            opts[:stderr]  ||= "log/resque-pool.stderr.log"
+            opts[:pidfile] ||= "tmp/pids/resque-pool.pid" unless opts[:no_pidfile]
+          }
           opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
@@ -60,13 +65,6 @@ module Resque
           opt.on("-v", "--version", "Show Version"){ puts "resque-pool #{VERSION} (c) nicholas a. evans"; exit}
         end
         parser.parse!(argv || parser.default_argv)
-        if opts[:daemon]
-          opts[:stdout]  ||= "log/resque-pool.stdout.log"
-          opts[:stderr]  ||= "log/resque-pool.stderr.log"
-          unless opts[:no_pidfile]
-            opts[:pidfile] ||= "tmp/pids/resque-pool.pid"
-          end
-        end
 
         opts
       end
