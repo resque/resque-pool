@@ -43,6 +43,7 @@ module Resque
             opts[:stderr]  ||= "log/resque-pool.stderr.log"
             opts[:pidfile] ||= "tmp/pids/resque-pool.pid" unless opts[:no_pidfile]
           }
+          opt.on("-k", '--kill-others', "Shutdown any other Resque Pools on startup") { opts[:killothers] = true }
           opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
@@ -153,6 +154,7 @@ module Resque
         if opts[:spawn_delay]
           Resque::Pool.spawn_delay = opts[:spawn_delay] * 0.001
         end
+        Resque::Pool.kill_other_pools = !!opts[:killothers]
       end
 
       def setup_environment(opts)
