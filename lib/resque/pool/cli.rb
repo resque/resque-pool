@@ -56,6 +56,12 @@ module Resque
             opts[:no_pidfile] = true
           }
           opt.on('-l', '--lock FILE' "Open a shared lock on a file") { |c| opts[:lock_file] = c }
+          opt.on("-H", "--hot-swap", "Set appropriate defaults to hot-swap a new pool for a running pool") {|c|
+            opts[:pidfile] = nil
+            opts[:no_pidfile] = true
+            opts[:lock_file] ||= "tmp/resque-pool.lock"
+            opts[:killothers] = true
+          }
           opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
           opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
           opt.on('--term-graceful-wait', "On TERM signal, wait for workers to shut down gracefully") { opts[:term_graceful_wait] = true }
