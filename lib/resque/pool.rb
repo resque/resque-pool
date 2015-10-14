@@ -103,7 +103,6 @@ module Resque
     end
 
     def self.run
-      kill_other_pools! if kill_other_pools
       if GC.respond_to?(:copy_on_write_friendly=)
         GC.copy_on_write_friendly = true
       end
@@ -286,6 +285,7 @@ module Resque
       procline("(started)")
       log "started manager"
       report_worker_pool_pids
+      self.class.kill_other_pools! if self.class.kill_other_pools
       self
     end
 
