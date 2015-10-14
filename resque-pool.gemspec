@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
     saving memory (w/REE) and monitoring their uptime
   EOF
 
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0'
 
   s.add_dependency "resque", "~> 1.22"
   s.add_dependency "rake"
