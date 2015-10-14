@@ -75,11 +75,13 @@ module Resque
         reopened_count
       end
 
+      PROCLINE_PREFIX="resque-pool-master"
+
       # Given a string, sets the procline ($0)
       # Procline is always in the format of:
       #   resque-pool-master: STRING
       def procline(string)
-        $0 = "resque-pool-master#{app}: #{string}"
+        $0 = "#{PROCLINE_PREFIX}#{app}: #{string}"
       end
 
       # TODO: make this use an actual logger

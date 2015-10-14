@@ -23,18 +23,21 @@ module Resque
 
 
       def all_resque_pool_processes
-        out, err, status = Open3.capture3("ps ax")
+        out, err, status = Open3.capture3("ps -e -o pid= -o command=")
         unless status.success?
           raise "Unable to identify other pools: #{err}"
         end
         parse_pids_from_output out
       end
 
+      RESQUE_POOL_PIDS = /
+        ^\s*(\d+)                         # PID digits, optional leading spaces
+        \s+                               # column divider
+        #{Regexp.escape(PROCLINE_PREFIX)} # exact match at start of command
+      /x
+
       def parse_pids_from_output(output)
-        pool_lines = output.split("\n").grep(/resque-pool-master/)
-        pool_lines.map{|line|
-          line.split.first.to_i
-        }.select{|pid| pid > 0}
+        output.scan(RESQUE_POOL_PIDS).flatten.map(&:to_i)
       end
     end
   end
