@@ -87,7 +87,7 @@ describe Resque::Pool::Logging do
     end if STDIN.respond_to?(:external_encoding)
 
     # This spec can take a while to run through all of the encodings...
-    it "reopens logs renamed with internal encoding" do
+    it "reopens logs renamed with internal encoding", slow: true do
       Encoding.list.each do |ext|
         Encoding.list.each do |int|
           next if ext == int

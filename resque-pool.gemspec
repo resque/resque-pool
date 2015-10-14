@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "resque", "~> 1.22"
   s.add_dependency "rake"
-  s.add_development_dependency "rspec",    "~> 2.10"
+  s.add_development_dependency "rspec",    "~> 2.99"
   s.add_development_dependency "cucumber", "~> 1.2"
   s.add_development_dependency "aruba",    "~> 0.4.11"
   s.add_development_dependency "ronn"
