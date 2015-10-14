@@ -196,6 +196,23 @@ See the `examples` directory for example `chef` cookbook and
 `god` config.  In the `chef` cookbook, you can also find example `init.d` and
 `muninrc` templates (all very out of date, pull requests welcome).
 
+Zero-downtime code deploys
+--------------------------
+
+In a production environment you will likely want to manage the daemon using a
+process supervisor like `runit` or `god` or an init system like `systemd` or
+`upstart`.  Example configurations for some of these are included in the
+`examples` directory.  With these systems, `reload` typically sends a `HUP`
+signal, which will reload the configuration but not application code.  The
+simplest way to make workers pick up new code after a deploy is to stop and
+start the daemon.  This will result in a period where new jobs are not being
+processed.  You can avoid this delay by using the `--no-pidfile` and
+`--kill-others` flags.  After new worker code is deployed, start a second
+instance of `resque-pool`.  The second daemon will detect and gracefully shut
+down the first when it is ready to process jobs.  This process uses more memory
+than a simple restart, since two copies of the application code are loaded at
+once.
+
 TODO
 -----
 
