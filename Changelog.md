@@ -1,5 +1,5 @@
-## 0.6.0 _(unreleased)_
-[full changelog](https://github.com/nevans/resque-pool/compare/v0.5.0...master).
+## 0.6.0
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.5.0...v0.6.0).
 
 One big new feature: [Custom Config
 Loader](https://github.com/nevans/resque-pool#custom-configuration-loader)
