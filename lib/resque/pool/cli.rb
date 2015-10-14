@@ -41,8 +41,14 @@ module Resque
           opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
           opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
           opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
-          opt.on("-p", '--pidfile FILE', "PID file location") { |c| opts[:pidfile] = c }
-          opt.on('--no-pidfile', "Force no pidfile, even if daemonized") { opts[:no_pidfile] = true }
+          opt.on("-p", '--pidfile FILE', "PID file location") { |c|
+            opts[:pidfile] = c
+            opts[:no_pidfile] = false
+          }
+          opt.on('--no-pidfile', "Force no pidfile, even if daemonized") {
+            opts[:pidfile] = nil
+            opts[:no_pidfile] = true
+          }
           opt.on('-l', '--lock FILE' "Open a shared lock on a file") { |c| opts[:lock_file] = c }
           opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
           opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
@@ -54,9 +60,6 @@ module Resque
           opt.on("-v", "--version", "Show Version"){ puts "resque-pool #{VERSION} (c) nicholas a. evans"; exit}
         end
         parser.parse!(argv || parser.default_argv)
-        if opts[:pidfile]
-          opts.delete(:no_pidfile)
-        end
         if opts[:daemon]
           opts[:stdout]  ||= "log/resque-pool.stdout.log"
           opts[:stderr]  ||= "log/resque-pool.stderr.log"

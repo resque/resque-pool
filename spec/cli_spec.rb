@@ -42,10 +42,17 @@ describe Resque::Pool::CLI do
       options[:pidfile].should be_nil
     end
 
-    it "--no-pidfile does not prevent explicit --pidfile setting" do
+    it "`--no-pidfile` does not prevent explicit `--pidfile` setting" do
       options = cli.parse_options(%w[--no-pidfile --pidfile my.pid])
       options[:pidfile].should == "my.pid"
       options[:no_pidfile].should be_falsey
     end
+
+    it "`--no-pidfile` overrides `--pidfile`" do
+      options = cli.parse_options(%w[--pidfile my.pid --no-pidfile])
+      options[:pidfile].should be_nil
+      options[:no_pidfile].should be_truthy
+    end
+
   end
 end
