@@ -248,7 +248,7 @@ describe "the class-level .config_loader attribute" do
     subject { Resque::Pool.create_configured }
 
     it "created pools use config file and hash loading logic" do
-      subject.config_loader.should be_instance_of FileOrHashLoader
+      subject.config_loader.should be_instance_of Resque::Pool::FileOrHashLoader
     end
   end
 
