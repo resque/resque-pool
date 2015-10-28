@@ -4,10 +4,10 @@ module Resque
     module ConfigLoaders
 
       # Throttle the frequency of loading pool configuration
-      class ConfigThrottle
+      class Throttled < SimpleDelegator
         def initialize(period, config_loader, time_source: Time)
+          super(config_loader)
           @period = period
-          @config_loader = config_loader
           @resettable = config_loader.respond_to?(:reset!)
           @last_check = 0
           @time_source = time_source
@@ -17,7 +17,7 @@ module Resque
           # We do not need to cache per `env`, since the value of `env` will not
           # change during the life of the process.
           if (now > @last_check + @period)
-            @cache = @config_loader.call(env)
+            @cache = super
             @last_check = now
           end
           @cache
@@ -25,10 +25,10 @@ module Resque
 
         def reset!
           @last_check = 0
-          if @resettable
-            @config_loader.reset!
-          end
+          super if @resettable
         end
+
+        private
 
         def now
           @time_source.now.to_f
