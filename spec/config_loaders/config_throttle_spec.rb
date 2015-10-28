@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'resque/pool/config_throttle'
+require 'resque/pool/config_loaders/config_throttle'
 
-describe Resque::Pool::ConfigThrottle do
+describe Resque::Pool::ConfigLoaders::ConfigThrottle do
   let(:fake_time) { FakeTime.new 1445898807 }
 
   it "returns the config returned by the wrapped config loader for given env" do
@@ -10,7 +10,9 @@ describe Resque::Pool::ConfigThrottle do
       "prd" => {"qA,qB" => 4}
     }
     wrapped_loader = lambda {|env| wrapped_config[env] }
-    throttle = Resque::Pool::ConfigThrottle.new(10, wrapped_loader)
+    throttle = Resque::Pool::ConfigLoaders::ConfigThrottle.new(
+      10, wrapped_loader
+    )
 
     throttle.call("prd").should eq({"qA,qB" => 4})
   end
@@ -19,7 +21,9 @@ describe Resque::Pool::ConfigThrottle do
     wrapped_loader = TestConfigLoader.new
     wrapped_loader.configuration = {"qA,qB" => 1}
 
-    throttle = Resque::Pool::ConfigThrottle.new(10, wrapped_loader, time_source: fake_time)
+    throttle = Resque::Pool::ConfigLoaders::ConfigThrottle.new(
+      10, wrapped_loader, time_source: fake_time
+    )
     first_call = throttle.call("prd")
 
     new_config = {"qA,qB" => 22}
@@ -52,7 +56,9 @@ describe Resque::Pool::ConfigThrottle do
     wrapped_loader = TestConfigLoader.new
     wrapped_loader.configuration = {"qA,qB" => 1}
 
-    throttle = Resque::Pool::ConfigThrottle.new(10, wrapped_loader, time_source: fake_time)
+    throttle = Resque::Pool::ConfigLoaders::ConfigThrottle.new(
+      10, wrapped_loader, time_source: fake_time
+    )
     first_call = throttle.call("prd")
 
     new_config = {"qA,qB" => 22}
@@ -70,7 +76,9 @@ describe Resque::Pool::ConfigThrottle do
 
   it "delegates reset! to the wrapped_loader, when supported" do
     wrapped_loader = TestConfigLoader.new
-    throttle = Resque::Pool::ConfigThrottle.new(10, wrapped_loader)
+    throttle = Resque::Pool::ConfigLoaders::ConfigThrottle.new(
+      10, wrapped_loader
+    )
 
     wrapped_loader.times_reset.should == 0
     throttle.reset!
@@ -79,7 +87,9 @@ describe Resque::Pool::ConfigThrottle do
 
   it "does not delegate reset! to the wrapped_loader when it is not supported" do
     wrapped_loader = lambda {|env| Hash.new }
-    throttle = Resque::Pool::ConfigThrottle.new(10, wrapped_loader)
+    throttle = Resque::Pool::ConfigLoaders::ConfigThrottle.new(
+      10, wrapped_loader
+    )
 
     expect {
       throttle.reset!
