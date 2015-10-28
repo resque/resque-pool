@@ -4,8 +4,10 @@ module Resque
     module ConfigLoaders
 
       # Throttle the frequency of loading pool configuration
+      # Defaults to call only once per 10 seconds.
       class Throttled < SimpleDelegator
-        def initialize(period, config_loader, time_source: Time)
+
+        def initialize(config_loader, period: 10, time_source: Time)
           super(config_loader)
           @period = period
           @resettable = config_loader.respond_to?(:reset!)

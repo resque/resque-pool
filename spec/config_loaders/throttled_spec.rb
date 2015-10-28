@@ -12,16 +12,16 @@ module Resque::Pool::ConfigLoaders
         "prd" => {"qA,qB" => 4}
       }
       wrapped_loader = lambda {|env| wrapped_config[env] }
-      throttle = Throttled.new(10, wrapped_loader)
+      throttle = Throttled.new(wrapped_loader)
 
       throttle.call("prd").should eq({"qA,qB" => 4})
     end
 
-    it "does not call wrapped loader again until the specified period of time has elapsed" do
+    it "does not call wrapped loader again until the default period of time has elapsed" do
       wrapped_loader = TestConfigLoader.new
       wrapped_loader.configuration = {"qA,qB" => 1}
 
-      throttle = Throttled.new(10, wrapped_loader, time_source: fake_time)
+      throttle = Throttled.new(wrapped_loader, time_source: fake_time)
       first_call = throttle.call("prd")
 
       new_config = {"qA,qB" => 22}
@@ -50,12 +50,34 @@ module Resque::Pool::ConfigLoaders
       wrapped_loader.times_called.should == 2
     end
 
+    it "can specify an alternate cache period" do
+      config0 = {foo: 2, bar: 1}
+      config1 = {bar: 3, baz: 9}
+      config2 = {foo: 4, quux: 1}
+      wrapped_loader = TestConfigLoader.new
+      wrapped_loader.configuration = config0
+      throttle = Throttled.new(
+        wrapped_loader, period: 60, time_source: fake_time
+      )
+      throttle.call("prd").should eq(config0)
+      wrapped_loader.configuration = config1
+      fake_time.advance_time 59
+      throttle.call("prd").should eq(config0)
+      fake_time.advance_time 5
+      throttle.call("prd").should eq(config1)
+      wrapped_loader.configuration = config2
+      fake_time.advance_time 59
+      throttle.call("prd").should eq(config1)
+      fake_time.advance_time 2
+      throttle.call("prd").should eq(config2)
+    end
+
     it "forces a call to the wrapperd loader after reset! called, even if required time hasn't elapsed" do
       wrapped_loader = TestConfigLoader.new
       wrapped_loader.configuration = {"qA,qB" => 1}
 
-      throttle = Throttled.new(10, wrapped_loader, time_source: fake_time)
-      first_call = throttle.call("prd")
+      throttle = Throttled.new(wrapped_loader, time_source: fake_time)
+      throttle.call("prd")
 
       new_config = {"qA,qB" => 22}
       wrapped_loader.configuration = new_config
@@ -72,7 +94,7 @@ module Resque::Pool::ConfigLoaders
 
     it "delegates reset! to the wrapped_loader, when supported" do
       wrapped_loader = TestConfigLoader.new
-      throttle = Throttled.new(10, wrapped_loader)
+      throttle = Throttled.new(wrapped_loader)
 
       wrapped_loader.times_reset.should == 0
       throttle.reset!
@@ -81,13 +103,12 @@ module Resque::Pool::ConfigLoaders
 
     it "does not delegate reset! to the wrapped_loader when it is not supported" do
       wrapped_loader = lambda {|env| Hash.new }
-      throttle = Throttled.new(10, wrapped_loader)
+      throttle = Throttled.new(wrapped_loader)
 
       expect {
         throttle.reset!
       }.to_not raise_error
     end
-
 
     class TestConfigLoader
       attr_accessor :configuration
@@ -120,6 +141,7 @@ module Resque::Pool::ConfigLoaders
         @now += seconds
       end
     end
+
   end
 
 end
