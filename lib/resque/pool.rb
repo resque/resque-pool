@@ -1,16 +1,18 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
 require 'resque/worker'
-require 'resque/pool/version'
-require 'resque/pool/logging'
-require 'resque/pool/pooled_worker'
-require 'resque/pool/config_loaders/file_or_hash_loader'
-require 'erb'
 require 'fcntl'
-require 'yaml'
+require 'socket'
 
 module Resque
   class Pool
+    autoload :CLI,           "resque/pool/cli"
+    autoload :ConfigLoaders, "resque/pool/config_loaders"
+    autoload :Killer,        "resque/pool/killer"
+    autoload :Logging,       "resque/pool/logging"
+    autoload :PooledWorker,  "resque/pool/pooled_worker"
+    autoload :VERSION,       "resque/pool/version"
+
     SIG_QUEUE_MAX_SIZE = 5
     DEFAULT_WORKER_INTERVAL = 5
     QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
@@ -23,6 +25,7 @@ module Resque
     attr_reader :workers
 
     def initialize(config_loader=nil)
+      PooledWorker.monkey_patch_resque_worker!
       init_config(config_loader)
       @workers = Hash.new { |workers, queues| workers[queues] = {} }
       procline "(initialized)"
@@ -89,7 +92,6 @@ module Resque
     end
 
     def self.kill_other_pools!
-      require 'resque/pool/killer'
       Resque::Pool::Killer.run
     end
 

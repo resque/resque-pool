@@ -1,3 +1,6 @@
+require 'erb'
+require 'yaml'
+
 module Resque
   class Pool
     module ConfigLoaders

@@ -3,5 +3,5 @@
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 
-require 'resque/pool/cli'
+require 'resque/pool'
 Resque::Pool::CLI.run
