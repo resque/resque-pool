@@ -181,9 +181,9 @@ when the HUP signal is received, allowing the loader to flush its cache, or
 perform any other re-initialization.
 
 You can reduce the frequency that your configuration loader is called by
-wrapping it with `Resque::Pool::ConfigThrottle` and specifying a time (in seconds)
-to cache the previous value (see [the spec](spec/config_throttle_spec.rb) for
-more details):
+wrapping it with `Resque::Pool::ConfigLoaders::Throttled` and specifying a time
+(in seconds) to cache the previous value (see [the
+spec](spec/config_loaders/throttled_spec.rb) for more details):
 
 ```ruby
 task "resque:pool:setup" do
@@ -193,7 +193,9 @@ task "resque:pool:setup" do
   end
 
   # calls through to redis_loader at most once per 10 seconds
-  Resque::Pool.config_loader = Resque::Pool::ConfigThrottle(10, redis_loader)
+  Resque::Pool.config_loader = Resque::Pool::ConfigLoaders::Throttled(
+    redis_loader, period: 10
+  )
 end
 ```
 
