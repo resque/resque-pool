@@ -1,16 +1,5 @@
 require 'spec_helper'
 
-RSpec.configure do |config|
-  config.include PoolSpecHelpers
-  config.after {
-    Object.send(:remove_const, :RAILS_ENV) if defined? RAILS_ENV
-    ENV.delete 'RACK_ENV'
-    ENV.delete 'RAILS_ENV'
-    ENV.delete 'RESQUE_ENV'
-    ENV.delete 'RESQUE_POOL_CONFIG'
-  }
-end
-
 describe Resque::Pool, "when loading a simple pool configuration" do
   let(:config) do
     { 'foo' => 1, 'bar' => 2, 'foo,bar' => 3, 'bar,foo' => 4, }
