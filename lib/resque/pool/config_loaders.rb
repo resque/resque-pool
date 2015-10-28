@@ -5,6 +5,7 @@ module Resque
     module ConfigLoaders
 
       autoload :FileOrHashLoader, "resque/pool/config_loaders/file_or_hash_loader"
+      autoload :Redis,            "resque/pool/config_loaders/redis"
       autoload :Throttled,        "resque/pool/config_loaders/throttled"
 
     end
