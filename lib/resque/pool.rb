@@ -78,15 +78,27 @@ module Resque
     # }}}
     # Config: class methods to start up the pool using the config loader {{{
 
-    class << self; attr_accessor :config_loader, :app_name, :spawn_delay; end
+    class << self
+      attr_accessor :config_loader, :app_name, :pool_name, :spawn_delay
+    end
 
+    # Intended to represent the running application/codebase.  Should be shared
+    # from one deploy to the next and across hosts.
     def self.app_name
       @app_name ||= File.basename(Dir.pwd)
+    end
+
+    # Represents a single running pool.  Usually unique per host, so it defaults
+    # to hostname, but you can set it e.g. to something unique for running
+    # multiple pools per host.
+    def self.pool_name
+      @pool_name ||= Socket.gethostname
     end
 
     def self.handle_winch?
       @handle_winch ||= false
     end
+
     def self.handle_winch=(bool)
       @handle_winch = bool
     end
