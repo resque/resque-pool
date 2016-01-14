@@ -197,13 +197,13 @@ To avoid this downtime, leave the old pool running and start a new pool with
 
 The `--hot-swap` flag will turn off pidfiles (so multiple pools can run at
 once), enable a lock file (so your init system knows when the pool is running),
-and shut down other other pools _after_ the workers have started for this pool.
+and shut down other pools _after_ the workers have started for this pool.
 These behaviors can also be configured separately (see `resque-pool --help`).
 The `upstart` configs in the `examples` directory demonstrate how to supervise a
 daemonized pool with hot swap.
 
 Please be aware that this approach uses more memory than a simple restart, since
-two copies of the application code are loaded at once. _TODO: #139_
+two copies of the application code are loaded at once. _TODO: [#139](https://github.com/nevans/resque-pool/issues/139)_
 
 Other Features
 --------------
