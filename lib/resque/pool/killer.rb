@@ -1,5 +1,3 @@
-require 'open3'
-
 module Resque
   class Pool
     class Killer
@@ -23,10 +21,8 @@ module Resque
 
 
       def all_resque_pool_processes
-        out, err, status = Open3.capture3("ps -e -o pid= -o command=")
-        unless status.success?
-          raise "Unable to identify other pools: #{err}"
-        end
+        out = `ps -e -o pid= -o command= 2>&1`
+        raise "Unable to identify other pools: #{out}" unless $?.success?
         parse_pids_from_output out
       end
 
