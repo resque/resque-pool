@@ -120,8 +120,7 @@ module Resque
 
       def process_still_running?(pidfile)
         old_pid = open(pidfile).read.strip.to_i
-        Process.kill 0, old_pid
-        true
+        old_pid > 0 && Process.kill(0, old_pid)
       rescue Errno::ESRCH
         false
       rescue Errno::EPERM
