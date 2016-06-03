@@ -414,6 +414,7 @@ module Resque
         log_worker "Starting worker #{worker}"
         call_after_prefork!(worker)
         reset_sig_handlers!
+        Resque.redis.client.reconnect
         #self_pipe.each {|io| io.close }
         worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
       end

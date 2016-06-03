@@ -76,16 +76,9 @@ task "resque:pool:setup" do
 end
 ```
 
-
-For normal work with fresh resque and resque-scheduler gems add next lines in lib/rake/resque.rake
-
-```ruby
-task "resque:pool:setup" do
-  Resque::Pool.after_prefork do |job|
-    Resque.redis.client.reconnect
-  end
-end
-```
+Note that starting in v0.7.0, Resque pool will automatically reconnect
+`Resque.redis.client` in each master process, so there's no need to do that
+explicitly in the `after_prefork` hook.
 
 ### Start the pool manager
 
