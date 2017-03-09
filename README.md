@@ -172,6 +172,17 @@ task "resque:pool:setup" do
 end
 ```
 
+In order to query ActiveRecord, be sure establish the database connection:
+
+```ruby
+task "resque:pool:setup" do                                           
+  Resque::Pool.config_loader = lambda do |env|
+    ActiveRecord::Base.establish_connection
+    JobQueue.pluck(:name, :workers).to_h
+  end
+end
+```
+
 The configuration loader's `#call` method will be invoked about once a second.
 This allows the configuration to constantly change, allowing you to scale the
 number of workers up or down based on different conditions.
