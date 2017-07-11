@@ -425,7 +425,7 @@ module Resque
       queues = queues.to_s.split(',')
       worker = ::Resque::Worker.new(*queues)
       worker.pool_master_pid = Process.pid
-      worker.term_timeout = ENV['RESQUE_TERM_TIMEOUT'] || 4.0
+      worker.term_timeout = (ENV['RESQUE_TERM_TIMEOUT'] || 4.0).to_f
       worker.term_child = ENV['TERM_CHILD']
       if worker.respond_to?(:run_at_exit_hooks=)
         # resque doesn't support this until 1.24, but we support 1.22
