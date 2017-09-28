@@ -309,3 +309,27 @@ describe Resque::Pool, "given after_prefork hook" do
     val.should == worker
   end
 end
+
+describe Resque::Pool, "#create_worker" do
+
+  subject { Resque::Pool.new(nil) }
+
+  it "successfully creates a new worker" do
+    worker = subject.create_worker("default")
+
+    expect(worker).to be
+    expect(worker.term_timeout).to eq(4.0)
+  end
+
+  context "with a RESQUER_TERM_TIMEOUT set" do
+    before { ENV["RESQUE_TERM_TIMEOUT"] = "5" }
+
+    it "successfully creates a new worker" do
+
+      worker = subject.create_worker("default")
+
+      expect(worker).to be
+      expect(worker.term_timeout).to eq(5.0)
+    end
+  end
+end
