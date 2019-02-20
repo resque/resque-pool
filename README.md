@@ -191,6 +191,24 @@ returns. It can optionally implement a `#reset!` method, which will be invoked
 when the HUP signal is received, allowing the loader to flush its cache, or
 perform any other re-initialization.
 
+You can reduce the frequency that your configuration loader is called by
+wrapping it with `Resque::Pool::ConfigThrottle` and specifying a time (in seconds)
+to cache the previous value (see [the spec](spec/config_throttle_spec.rb) for
+more details):
+
+```ruby
+task "resque:pool:setup" do
+  redis_loader = lambda do |env|
+    worker_count = Redis.current.get("pool_workers_#{env}").to_i
+    {"queueA,queueB" => worker_count }
+  end
+
+  # calls through to redis_loader at most once per 10 seconds
+  Resque::Pool.config_loader = Resque::Pool::ConfigThrottle(10, redis_loader)
+end
+```
+
+
 Zero-downtime code deploys
 --------------------------
 

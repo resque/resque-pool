@@ -1,6 +1,5 @@
-require 'optparse'
 require 'resque/pool'
-require 'resque/pool/logging'
+require 'optparse'
 require 'fileutils'
 
 module Resque

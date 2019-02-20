@@ -33,9 +33,13 @@ class Resque::Pool
       end
     end
 
-  end
-end
+    def self.monkey_patch_resque_worker!
+      return if @patched_once
+      Resque::Worker.class_eval do
+        include Resque::Pool::PooledWorker
+      end
+      @patched_once = true
+    end
 
-Resque::Worker.class_eval do
-  include Resque::Pool::PooledWorker
+  end
 end

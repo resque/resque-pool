@@ -1,16 +1,18 @@
 # -*- encoding: utf-8 -*-
 require 'resque'
 require 'resque/worker'
-require 'resque/pool/version'
-require 'resque/pool/logging'
-require 'resque/pool/pooled_worker'
-require 'resque/pool/file_or_hash_loader'
-require 'erb'
 require 'fcntl'
-require 'yaml'
+require 'socket'
 
 module Resque
   class Pool
+    autoload :CLI,           "resque/pool/cli"
+    autoload :ConfigLoaders, "resque/pool/config_loaders"
+    autoload :Killer,        "resque/pool/killer"
+    autoload :Logging,       "resque/pool/logging"
+    autoload :PooledWorker,  "resque/pool/pooled_worker"
+    autoload :VERSION,       "resque/pool/version"
+
     SIG_QUEUE_MAX_SIZE = 5
     DEFAULT_WORKER_INTERVAL = 5
     QUEUE_SIGS = [ :QUIT, :INT, :TERM, :USR1, :USR2, :CONT, :HUP, :WINCH, ]
@@ -23,6 +25,7 @@ module Resque
     attr_reader :workers
 
     def initialize(config_loader=nil)
+      PooledWorker.monkey_patch_resque_worker!
       init_config(config_loader)
       @workers = Hash.new { |workers, queues| workers[queues] = {} }
       procline "(initialized)"
@@ -75,21 +78,32 @@ module Resque
     # }}}
     # Config: class methods to start up the pool using the config loader {{{
 
-    class << self; attr_accessor :config_loader, :app_name, :spawn_delay; end
+    class << self
+      attr_accessor :config_loader, :app_name, :pool_name, :spawn_delay
+    end
 
+    # Intended to represent the running application/codebase.  Should be shared
+    # from one deploy to the next and across hosts.
     def self.app_name
       @app_name ||= File.basename(Dir.pwd)
+    end
+
+    # Represents a single running pool.  Usually unique per host, so it defaults
+    # to hostname, but you can set it e.g. to something unique for running
+    # multiple pools per host.
+    def self.pool_name
+      @pool_name ||= Socket.gethostname
     end
 
     def self.handle_winch?
       @handle_winch ||= false
     end
+
     def self.handle_winch=(bool)
       @handle_winch = bool
     end
 
     def self.kill_other_pools!
-      require 'resque/pool/killer'
       Resque::Pool::Killer.run
     end
 
@@ -119,7 +133,7 @@ module Resque
     def init_config(loader)
       case loader
       when String, Hash, nil
-        @config_loader = FileOrHashLoader.new(loader)
+        @config_loader = ConfigLoaders::FileOrHashLoader.new(loader)
       else
         @config_loader = loader
       end
