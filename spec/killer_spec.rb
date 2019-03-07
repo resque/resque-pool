@@ -6,7 +6,7 @@ describe Resque::Pool::Killer do
   describe "parse pids from output" do
     it "returns the first column, as integer, for resque pool processes" do
       pids = killer.parse_pids_from_output(PS_OUTPUT)
-      pids.should match_array [6502, 16800]
+      expect(pids).to match_array [6502, 16800]
     end
   end
 

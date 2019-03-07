@@ -5,7 +5,7 @@ end
 
 Then /^the (output|logfiles) should contain the following lines \(with interpolated \$PID\):$/ do |output_logfiles, partial_output|
   interpolate_background_pid(partial_output).split("\n").each do |line|
-    output_or_log(output_logfiles).should include(line)
+    expect(output_or_log(output_logfiles)).to include(line)
   end
 end
 

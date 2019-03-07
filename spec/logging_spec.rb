@@ -26,30 +26,30 @@ describe Resque::Pool::Logging do
     end
 
     it "reopens logs noop" do
-      Resque::Pool::Logging.reopen_logs!.should == 0
+      expect(Resque::Pool::Logging.reopen_logs!).to eq(0)
 
-      @before.should == File.stat(@fp.path).inspect
-      @ext.should == (@fp.external_encoding rescue nil)
-      @int.should == (@fp.internal_encoding rescue nil)
-      expect_flags.should == (expect_flags & @fp.fcntl(Fcntl::F_GETFL))
+      expect(@before).to eq(File.stat(@fp.path).inspect)
+      expect(@ext).to eq((@fp.external_encoding rescue nil))
+      expect(@int).to eq((@fp.internal_encoding rescue nil))
+      expect(expect_flags).to eq((expect_flags & @fp.fcntl(Fcntl::F_GETFL)))
     end
 
     it "reopens renamed logs" do
       tmp_path = @tmp.path.freeze
       to = Tempfile.new('')
       File.rename(tmp_path, to.path)
-      File.exist?(tmp_path).should be_falsey
+      expect(File.exist?(tmp_path)).to be_falsey
 
-      Resque::Pool::Logging.reopen_logs!.should == 1
+      expect(Resque::Pool::Logging.reopen_logs!).to eq(1)
 
-      tmp_path.should == @tmp.path
-      File.exist?(tmp_path).should be_truthy
-      @before.should_not == File.stat(tmp_path).inspect
-      @fp.stat.inspect.should == File.stat(tmp_path).inspect
-      @ext.should == (@fp.external_encoding rescue nil)
-      @int.should == (@fp.internal_encoding rescue nil)
-      expect_flags.should == (expect_flags & @fp.fcntl(Fcntl::F_GETFL))
-      @fp.sync.should be_truthy
+      expect(tmp_path).to eq(@tmp.path)
+      expect(File.exist?(tmp_path)).to be_truthy
+      expect(@before).to_not eq(File.stat(tmp_path).inspect)
+      expect(@fp.stat.inspect).to eq(File.stat(tmp_path).inspect)
+      expect(@ext).to eq((@fp.external_encoding rescue nil))
+      expect(@int).to eq((@fp.internal_encoding rescue nil))
+      expect(expect_flags).to eq((expect_flags & @fp.fcntl(Fcntl::F_GETFL)))
+      expect(@fp.sync).to be_truthy
 
       to.close!
     end
@@ -69,19 +69,19 @@ describe Resque::Pool::Logging do
       Encoding.list.each do |encoding|
         File.open(@tmp_path, "a:#{encoding.to_s}") do |fp|
           fp.sync = true
-          encoding.should == fp.external_encoding
-          fp.internal_encoding.should be_nil
+          expect(encoding).to eq(fp.external_encoding)
+          expect(fp.internal_encoding).to be_nil
           File.unlink(@tmp_path)
-          File.exist?(@tmp_path).should be_falsey
+          expect(File.exist?(@tmp_path)).to be_falsey
           Resque::Pool::Logging.reopen_logs!
-          
-          @tmp_path.should == fp.path
-          File.exist?(@tmp_path).should be_truthy
-          fp.stat.inspect.should == File.stat(@tmp_path).inspect
-          encoding.should == fp.external_encoding
-          fp.internal_encoding.should be_nil
-          expect_flags.should == (expect_flags & fp.fcntl(Fcntl::F_GETFL))
-          fp.sync.should be_truthy
+
+          expect(@tmp_path).to eq(fp.path)
+          expect(File.exist?(@tmp_path)).to be_truthy
+          expect(fp.stat.inspect).to eq(File.stat(@tmp_path).inspect)
+          expect(encoding).to eq(fp.external_encoding)
+          expect(fp.internal_encoding).to be_nil
+          expect(expect_flags).to eq((expect_flags & fp.fcntl(Fcntl::F_GETFL)))
+          expect(fp.sync).to be_truthy
         end
       end
     end if STDIN.respond_to?(:external_encoding)
@@ -93,27 +93,27 @@ describe Resque::Pool::Logging do
           next if ext == int
           File.open(@tmp_path, "a:#{ext.to_s}:#{int.to_s}") do |fp|
             fp.sync = true
-            ext.should == fp.external_encoding
+            expect(ext).to eq(fp.external_encoding)
 
             if ext != Encoding::BINARY
-              int.should == fp.internal_encoding
+              expect(int).to eq(fp.internal_encoding)
             end
 
             File.unlink(@tmp_path)
-            File.exist?(@tmp_path).should be_falsey
+            expect(File.exist?(@tmp_path)).to be_falsey
             Resque::Pool::Logging.reopen_logs!
 
-            @tmp_path.should == fp.path
-            File.exist?(@tmp_path).should be_truthy
-            fp.stat.inspect.should == File.stat(@tmp_path).inspect
-            ext.should == fp.external_encoding
+            expect(@tmp_path).to eq(fp.path)
+            expect(File.exist?(@tmp_path)).to be_truthy
+            expect(fp.stat.inspect).to eq(File.stat(@tmp_path).inspect)
+            expect(ext).to eq(fp.external_encoding)
 
             if ext != Encoding::BINARY
-              int.should == fp.internal_encoding
+              expect(int).to eq(fp.internal_encoding)
             end
 
-            expect_flags.should == (expect_flags & fp.fcntl(Fcntl::F_GETFL))
-            fp.sync.should be_truthy
+            expect(expect_flags).to eq((expect_flags & fp.fcntl(Fcntl::F_GETFL)))
+            expect(fp.sync).to be_truthy
           end
         end
       end

@@ -10,7 +10,7 @@ def grab_worker_pids(count, str)
   # TODO: check output_or_log for #{count} worker started messages"
   pid_regex = (1..count).map { '(\d+)' }.join ', '
   full_regex = /resque-pool-manager\[aruba\]\[\d+\]: Pool contains worker PIDs: \[#{pid_regex}\]/m
-  str.should =~ full_regex
+  expect(str).to match(full_regex)
   @worker_pids = full_regex.match(str).captures.map {|pid| pid.to_i }
 end
 
@@ -82,9 +82,9 @@ end
 Then /^the pool manager should record its pid in "([^"]*)"$/ do |pidfile|
   in_current_dir do
     keep_trying do
-      File.should be_file(pidfile)
+      expect(File).to be_file(pidfile)
       @pid_from_pidfile = File.read(pidfile).to_i
-      @pid_from_pidfile.should_not == 0
+      expect(@pid_from_pidfile).not_to eq(0)
       process_should_exist(@pid_from_pidfile)
     end
   end
@@ -131,11 +131,11 @@ Then /^the resque workers should all shutdown$/ do
 end
 
 Then "the pool manager should have no child processes" do
-  children_of(background_pid).size.should == 0
+  expect(children_of(background_pid).size).to eq(0)
 end
 
 Then /^the pool manager should have (\d+) "([^"]*)" worker child processes$/ do |count, queues|
-  worker_processes_for(queues).size.should == Integer(count)
+  expect(worker_processes_for(queues).size).to eq(Integer(count))
 end
 
 Then "the pool manager should finish" do
@@ -154,6 +154,6 @@ Then /^the pool manager should (report|log) that a "([^"]*)" worker has been rea
 end
 
 Then /^the logfiles should match \/([^\/]*)\/$/ do |partial_output|
-  output_or_log("log").should =~ /#{partial_output}/
+  expect(output_or_log("log")).to match(/#{partial_output}/)
 end
 

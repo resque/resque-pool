@@ -10,10 +10,10 @@ describe Resque::Pool, "when loading a simple pool configuration" do
     before { ENV['RACK_ENV'] = 'development' }
 
     it "should load the values from the Hash" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should == 2
-      subject.config["foo,bar"].should == 3
-      subject.config["bar,foo"].should == 4
+      expect(subject.config["foo"]).to eq 1
+      expect(subject.config["bar"]).to eq 2
+      expect(subject.config["foo,bar"]).to eq 3
+      expect(subject.config["bar,foo"]).to eq 4
     end
   end
 
@@ -35,17 +35,17 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
     before { RAILS_ENV = "test" }
 
     it "should load the default values from the Hash" do
-      subject.config["foo"].should == 8
+      expect(subject.config["foo"]).to eq 8
     end
 
     it "should merge the values for the correct RAILS_ENV" do
-      subject.config["bar"].should == 10
-      subject.config["foo,bar"].should == 12
+      expect(subject.config["bar"]).to eq 10
+      expect(subject.config["foo,bar"]).to eq 12
     end
 
     it "should not load the values for the other environments" do
-      subject.config["foo,bar"].should == 12
-      subject.config["baz"].should be_nil
+      expect(subject.config["foo,bar"]).to eq 12
+      expect(subject.config["baz"]).to be nil
     end
 
   end
@@ -53,21 +53,21 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
   context "when Rails.env is set" do
     before(:each) do
       module Rails; end
-      Rails.stub(:env).and_return('test')
+      allow(Rails).to receive(:env).and_return('test')
     end
 
     it "should load the default values from the Hash" do
-      subject.config["foo"].should == 8
+      expect(subject.config["foo"]).to eq 8
     end
 
     it "should merge the values for the correct RAILS_ENV" do
-      subject.config["bar"].should == 10
-      subject.config["foo,bar"].should == 12
+      expect(subject.config["bar"]).to eq 10
+      expect(subject.config["foo,bar"]).to eq 12
     end
 
     it "should not load the values for the other environments" do
-      subject.config["foo,bar"].should == 12
-      subject.config["baz"].should be_nil
+      expect(subject.config["foo,bar"]).to eq 12
+      expect(subject.config["baz"]).to be nil
     end
 
     after(:all) { Object.send(:remove_const, :Rails) }
@@ -77,19 +77,19 @@ describe Resque::Pool, "when loading the pool configuration from a Hash" do
   context "when ENV['RESQUE_ENV'] is set" do
     before { ENV['RESQUE_ENV'] = 'development' }
     it "should load the config for that environment" do
-      subject.config["foo"].should == 8
-      subject.config["foo,bar"].should == 16
-      subject.config["baz"].should == 14
-      subject.config["bar"].should be_nil
+      expect(subject.config["foo"]).to eq 8
+      expect(subject.config["foo,bar"]).to eq 16
+      expect(subject.config["baz"]).to eq 14
+      expect(subject.config["bar"]).to be nil
     end
   end
 
   context "when there is no environment" do
     it "should load the default values only" do
-      subject.config["foo"].should == 8
-      subject.config["bar"].should be_nil
-      subject.config["foo,bar"].should be_nil
-      subject.config["baz"].should be_nil
+      expect(subject.config["foo"]).to eq 8
+      expect(subject.config["bar"]).to be nil
+      expect(subject.config["foo,bar"]).to be nil
+      expect(subject.config["baz"]).to be nil
     end
   end
 
@@ -98,7 +98,7 @@ end
 describe Resque::Pool, "given no configuration" do
   subject { Resque::Pool.new(nil) }
   it "should have no worker types" do
-    subject.config.should == {}
+    expect(subject.config).to eq({})
   end
 end
 
@@ -110,19 +110,19 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
     before { RAILS_ENV = "test" }
 
     it "should load the default YAML" do
-      subject.config["foo"].should == 1
+      expect(subject.config["foo"]).to eq(1)
     end
 
     it "should merge the YAML for the correct RAILS_ENV" do
-      subject.config["bar"].should == 5
-      subject.config["foo,bar"].should == 3
+      expect(subject.config["bar"]).to eq(5)
+      expect(subject.config["foo,bar"]).to eq(3)
     end
 
     it "should not load the YAML for the other environments" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should == 5
-      subject.config["foo,bar"].should == 3
-      subject.config["baz"].should be_nil
+      expect(subject.config["foo"]).to eq(1)
+      expect(subject.config["bar"]).to eq(5)
+      expect(subject.config["foo,bar"]).to eq(3)
+      expect(subject.config["baz"]).to be nil
     end
 
   end
@@ -130,19 +130,19 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
   context "when ENV['RACK_ENV'] is set" do
     before { ENV['RACK_ENV'] = 'development' }
     it "should load the config for that environment" do
-      subject.config["foo"].should == 1
-      subject.config["foo,bar"].should == 4
-      subject.config["baz"].should == 23
-      subject.config["bar"].should be_nil
+      expect(subject.config["foo"]).to eq(1)
+      expect(subject.config["foo,bar"]).to eq(4)
+      expect(subject.config["baz"]).to eq(23)
+      expect(subject.config["bar"]).to be nil
     end
   end
 
   context "when there is no environment" do
     it "should load the default values only" do
-      subject.config["foo"].should == 1
-      subject.config["bar"].should be_nil
-      subject.config["foo,bar"].should be_nil
-      subject.config["baz"].should be_nil
+      expect(subject.config["foo"]).to eq(1)
+      expect(subject.config["bar"]).to be nil
+      expect(subject.config["foo,bar"]).to be nil
+      expect(subject.config["baz"]).to be nil
     end
   end
 
@@ -150,7 +150,7 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
     before { ENV["RESQUE_POOL_CONFIG"] = 'spec/resque-pool-custom.yml.erb' }
     subject { Resque::Pool.new }
     it "should find the right file, and parse the ERB" do
-      subject.config["foo"].should == 2
+      expect(subject.config["foo"]).to eq(2)
     end
   end
 
@@ -169,25 +169,25 @@ describe Resque::Pool, "when loading the pool configuration from a file" do
     }
 
     it "should not automatically load the changes" do
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
 
       File.open(config_file_path, "w"){|f| f.write "changed: 1"}
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
       subject.load_config
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
     end
 
     it "should reload the changes on HUP signal" do
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
 
       File.open(config_file_path, "w"){|f| f.write "changed: 1"}
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
       subject.load_config
-      subject.config.keys.should == ["orig"]
+      expect(subject.config.keys).to eq(["orig"])
 
       simulate_signal subject, :HUP
 
-      subject.config.keys.should == ["changed"]
+      expect(subject.config.keys).to eq(["changed"])
     end
 
   end
@@ -201,19 +201,19 @@ describe Resque::Pool, "the pool configuration custom loader" do
 
     Resque::Pool.new(custom_loader)
 
-    custom_loader.should have_received(:call).with("env")
+    expect(custom_loader).to have_received(:call).with("env")
   end
 
   it "should reset the config loader on HUP" do
     custom_loader = double(call: Hash.new, reset!: true)
 
     pool = no_spawn(Resque::Pool.new(custom_loader))
-    custom_loader.should have_received(:call).once
+    expect(custom_loader).to have_received(:call).once
 
     pool.sig_queue.push :HUP
     pool.handle_sig_queue!
-    custom_loader.should have_received(:reset!)
-    custom_loader.should have_received(:call).twice
+    expect(custom_loader).to have_received(:reset!)
+    expect(custom_loader).to have_received(:call).twice
   end
 
   it "can be a lambda" do
@@ -222,13 +222,13 @@ describe Resque::Pool, "the pool configuration custom loader" do
     pool = no_spawn(Resque::Pool.new(lambda {|env|
       {env.reverse => count}
     }))
-    pool.config.should == {"ekaf" => 1}
+    expect(pool.config).to eq({"ekaf" => 1})
 
     count = 3
     pool.sig_queue.push :HUP
     pool.handle_sig_queue!
 
-    pool.config.should == {"ekaf" => 3}
+    expect(pool.config).to eq({"ekaf" => 3})
   end
 end
 
@@ -237,7 +237,7 @@ describe "the class-level .config_loader attribute" do
     subject { Resque::Pool.create_configured }
 
     it "created pools use config file and hash loading logic" do
-      subject.config_loader.should be_instance_of(
+      expect(subject.config_loader).to be_instance_of(
         Resque::Pool::ConfigLoaders::FileOrHashLoader
       )
     end
@@ -252,7 +252,7 @@ describe "the class-level .config_loader attribute" do
     subject { Resque::Pool.create_configured }
 
     it "created pools use the specified config loader" do
-      subject.config_loader.should == custom_config_loader
+      expect(subject.config_loader).to eq(custom_config_loader)
     end
   end
 end
@@ -267,7 +267,7 @@ describe Resque::Pool, "given after_prefork hook" do
 
     it "should call prefork" do
       subject.call_after_prefork!(worker)
-      @called.should == true
+      expect(@called).to be true
     end
   end
 
@@ -276,7 +276,7 @@ describe Resque::Pool, "given after_prefork hook" do
 
     it "should call prefork" do
       subject.call_after_prefork!(worker)
-      @called.should == true
+      expect(@called).to be true
     end
   end
 
@@ -288,8 +288,8 @@ describe Resque::Pool, "given after_prefork hook" do
 
     it "should call both" do
       subject.call_after_prefork!(worker)
-      @called_first.should == true
-      @called_second.should == true
+      expect(@called_first).to be true
+      expect(@called_second).to be true
     end
   end
 
@@ -297,7 +297,7 @@ describe Resque::Pool, "given after_prefork hook" do
     val = nil
     Resque::Pool.after_prefork { |w| val = w }
     subject.call_after_prefork!(worker)
-    val.should == worker
+    expect(val).to eq worker
   end
 end
 

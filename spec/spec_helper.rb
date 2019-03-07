@@ -3,7 +3,7 @@ require 'resque/pool'
 
 module PoolSpecHelpers
   def no_spawn(pool)
-    pool.stub(:spawn_worker!) {}
+    allow(pool).to receive(:spawn_worker!) {}
     pool
   end
 
