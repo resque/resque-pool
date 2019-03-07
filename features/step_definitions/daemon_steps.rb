@@ -1,6 +1,6 @@
 # syntactic sugar, and separate ivar.  daemons aren't interactive
 When /^I run "([^"]*)" in the background$/ do |cmd|
-  run_background(Aruba::Platform.unescape(cmd))
+  run_background(extract_text(unescape_text(cmd)))
 end
 
 Then /^the (output|logfiles) should contain the following lines \(with interpolated \$PID\):$/ do |output_logfiles, partial_output|

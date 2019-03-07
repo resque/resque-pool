@@ -36,12 +36,12 @@ module Aruba
 
     # like all_stdout, but doesn't stop processes first
     def interactive_stdout
-      only_processes.inject("") { |out, ps| out << ps.stdout }
+      all_commands.inject("") { |out, ps| out << ps.stdout }
     end
 
     # like all_stderr, but doesn't stop processes first
     def interactive_stderr
-      only_processes.inject("") { |out, ps| out << ps.stderr }
+      all_commands.inject("") { |out, ps| out << ps.stderr }
     end
 
     # like all_output, but doesn't stop processes first

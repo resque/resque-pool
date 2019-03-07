@@ -61,7 +61,7 @@ def children_of(ppid)
 end
 
 When /^I run the pool manager as "([^"]*)"$/ do |cmd|
-  @pool_manager_process = run_background(Aruba::Platform.unescape(cmd))
+  @pool_manager_process = run_background(extract_text(unescape_text(cmd)))
 end
 
 When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
@@ -91,7 +91,7 @@ Then /^the pool manager should record its pid in "([^"]*)"$/ do |pidfile|
 end
 
 Then /^the pool manager should daemonize$/ do
-  stop_processes!
+  stop_all_commands
 end
 
 Then /^the pool manager daemon should finish$/ do
@@ -140,7 +140,7 @@ end
 
 Then "the pool manager should finish" do
   # assuming there will not be multiple processes running
-  stop_processes!
+  stop_all_commands
 end
 
 Then /^the pool manager should (report|log) that it is finished$/ do |report_log|
