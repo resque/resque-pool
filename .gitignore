@@ -7,4 +7,3 @@ examples/tmp/*
 tmp/*
 vendor
 tags
-Gemfile.lock

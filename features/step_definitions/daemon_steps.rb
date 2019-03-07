@@ -1,11 +1,11 @@
 # syntactic sugar, and separate ivar.  daemons aren't interactive
 When /^I run "([^"]*)" in the background$/ do |cmd|
-  run_background(unescape(cmd))
+  run_background(extract_text(unescape_text(cmd)))
 end
 
 Then /^the (output|logfiles) should contain the following lines \(with interpolated \$PID\):$/ do |output_logfiles, partial_output|
   interpolate_background_pid(partial_output).split("\n").each do |line|
-    output_or_log(output_logfiles).should include(line)
+    expect(output_or_log(output_logfiles)).to include(line)
   end
 end
 

@@ -1,6 +1,6 @@
 require 'aruba/cucumber'
 require 'aruba/api'
-require 'aruba/process'
+require 'aruba/processes/spawn_process'
 
 module Aruba
 
@@ -22,7 +22,7 @@ module Aruba
     end
 
     def run_background(cmd)
-      @background = run(cmd)
+      @background = run_command(cmd)
     end
 
     def send_signal(cmd, signal)
@@ -36,12 +36,12 @@ module Aruba
 
     # like all_stdout, but doesn't stop processes first
     def interactive_stdout
-      only_processes.inject("") { |out, ps| out << ps.stdout(@aruba_keep_ansi) }
+      all_commands.inject("") { |out, ps| out << ps.stdout }
     end
 
     # like all_stderr, but doesn't stop processes first
     def interactive_stderr
-      only_processes.inject("") { |out, ps| out << ps.stderr(@aruba_keep_ansi) }
+      all_commands.inject("") { |out, ps| out << ps.stderr }
     end
 
     # like all_output, but doesn't stop processes first
@@ -64,12 +64,23 @@ module Aruba
 
   end
 
-  class Process
-    def pid
-      @process.pid
-    end
-    def send_signal signal
-      @process.send :send_signal, signal
+  module Processes
+    class SpawnProcess
+
+      attr_reader :pid
+
+      module CapturePid
+        def after_run
+          @pid = @process.pid
+          super
+        end
+      end
+      prepend CapturePid
+
+      def send_signal(signal)
+        @process.send(:send_signal, signal)
+      end
+
     end
   end
 
