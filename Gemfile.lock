@@ -8,7 +8,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    aruba (0.6.2)
+    aruba (0.7.4)
       childprocess (>= 0.3.6)
       cucumber (>= 1.1.1)
       rspec-expectations (>= 2.7.0)
@@ -72,7 +72,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aruba (~> 0.6.0)
+  aruba (~> 0.7.0)
   cucumber (~> 1.2)
   mustache (~> 0.99.8)
   resque-pool!

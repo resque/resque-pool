@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rake"
   s.add_development_dependency "rspec",    "~> 3.8"
   s.add_development_dependency "cucumber", "~> 1.2"
-  s.add_development_dependency "aruba",    "~> 0.6.0"
+  s.add_development_dependency "aruba",    "~> 0.7.0"
   s.add_development_dependency "ronn"
   s.add_development_dependency "mustache", "~> 0.99.8" # 1.0 needs ruby 2.0
 

@@ -1,6 +1,6 @@
 require 'aruba/cucumber'
 require 'aruba/api'
-require 'aruba/spawn_process'
+require 'aruba/processes/spawn_process'
 
 module Aruba
 
@@ -64,22 +64,23 @@ module Aruba
 
   end
 
-  class SpawnProcess
+  module Processes
+    class SpawnProcess
 
-    attr_reader :pid
+      attr_reader :pid
 
-    module CapturePid
-      def run!(&block)
-        super() do
+      module CapturePid
+        def after_run
           @pid = @process.pid
-          block.call self if block
+          super
         end
       end
-    end
-    prepend CapturePid
+      prepend CapturePid
 
-    def send_signal(signal)
-      @process.send(:send_signal, signal)
+      def send_signal(signal)
+        @process.send(:send_signal, signal)
+      end
+
     end
   end
 
