@@ -1,3 +1,2 @@
-default: --format pretty   --strict --require features --tags ~@wip --tags ~@pending
-rake:    --format progress --strict --require features --tags ~@wip --tags ~@pending
-
+default: --format pretty   --strict --require features --tags "not @wip and not @pending"
+rake:    --format progress --strict --require features --tags "not @wip and not @pending"
