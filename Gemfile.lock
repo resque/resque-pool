@@ -43,13 +43,13 @@ GEM
     mono_logger (1.1.0)
     multi_json (1.13.1)
     multi_test (0.1.2)
-    mustache (0.99.8)
+    mustache (1.1.0)
     mustermann (1.0.3)
     rack (2.0.6)
     rack-protection (2.0.5)
       rack
     rake (12.3.2)
-    rdiscount (2.1.8)
+    rdiscount (2.2.0.1)
     redis (4.1.0)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
@@ -92,7 +92,7 @@ PLATFORMS
 DEPENDENCIES
   aruba (~> 0.14.0)
   cucumber (~> 3.0)
-  mustache (~> 0.99.8)
+  mustache
   resque-pool!
   ronn
   rspec (~> 3.8)

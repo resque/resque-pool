@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "cucumber", "~> 3.0"
   s.add_development_dependency "aruba",    "~> 0.14.0"
   s.add_development_dependency "ronn"
-  s.add_development_dependency "mustache", "~> 0.99.8" # 1.0 needs ruby 2.0
+  s.add_development_dependency "mustache"
 
   s.files         = %w( README.md Rakefile LICENSE.txt Changelog.md )
   s.files         += Dir.glob("lib/**/*")
