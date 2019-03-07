@@ -8,7 +8,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    aruba (0.5.4)
+    aruba (0.6.2)
       childprocess (>= 0.3.6)
       cucumber (>= 1.1.1)
       rspec-expectations (>= 2.7.0)
@@ -32,7 +32,7 @@ GEM
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
-    rake (10.4.2)
+    rake (12.3.2)
     rdiscount (2.1.8)
     redis (3.2.1)
     redis-namespace (1.5.2)
@@ -72,7 +72,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aruba (~> 0.5.0)
+  aruba (~> 0.6.0)
   cucumber (~> 1.2)
   mustache (~> 0.99.8)
   resque-pool!
