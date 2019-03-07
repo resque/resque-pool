@@ -4,7 +4,7 @@ require 'resque/worker'
 require 'resque/pool/version'
 require 'resque/pool/logging'
 require 'resque/pool/pooled_worker'
-require 'resque/pool/file_or_hash_loader'
+require 'resque/pool/config_loaders/file_or_hash_loader'
 require 'erb'
 require 'fcntl'
 require 'yaml'
@@ -119,7 +119,7 @@ module Resque
     def init_config(loader)
       case loader
       when String, Hash, nil
-        @config_loader = FileOrHashLoader.new(loader)
+        @config_loader = ConfigLoaders::FileOrHashLoader.new(loader)
       else
         @config_loader = loader
       end
