@@ -30,7 +30,7 @@ def output_or_log(report_log)
   when "report", "output"
     interactive_output
   when "log", "logfiles"
-    in_current_dir do
+    cd(".") do
       File.read("log/resque-pool.stdout.log") << File.read("log/resque-pool.stderr.log")
     end
   else
@@ -61,7 +61,7 @@ def children_of(ppid)
 end
 
 When /^I run the pool manager as "([^"]*)"$/ do |cmd|
-  @pool_manager_process = run_background(unescape(cmd))
+  @pool_manager_process = run_background(Aruba::Platform.unescape(cmd))
 end
 
 When /^I send the pool manager the "([^"]*)" signal$/ do |signal|
@@ -80,7 +80,7 @@ resque-pool-manager[aruba][$PID]: QUIT: graceful shutdown, waiting for children
 end
 
 Then /^the pool manager should record its pid in "([^"]*)"$/ do |pidfile|
-  in_current_dir do
+  cd(".") do
     keep_trying do
       expect(File).to be_file(pidfile)
       @pid_from_pidfile = File.read(pidfile).to_i
