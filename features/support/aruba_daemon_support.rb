@@ -1,6 +1,6 @@
 require 'aruba/cucumber'
 require 'aruba/api'
-require 'aruba/process'
+require 'aruba/spawn_process'
 
 module Aruba
 
@@ -36,12 +36,12 @@ module Aruba
 
     # like all_stdout, but doesn't stop processes first
     def interactive_stdout
-      only_processes.inject("") { |out, ps| out << ps.stdout(@aruba_keep_ansi) }
+      only_processes.inject("") { |out, ps| out << ps.stdout }
     end
 
     # like all_stderr, but doesn't stop processes first
     def interactive_stderr
-      only_processes.inject("") { |out, ps| out << ps.stderr(@aruba_keep_ansi) }
+      only_processes.inject("") { |out, ps| out << ps.stderr }
     end
 
     # like all_output, but doesn't stop processes first
@@ -64,12 +64,22 @@ module Aruba
 
   end
 
-  class Process
-    def pid
-      @process.pid
+  class SpawnProcess
+
+    attr_reader :pid
+
+    module CapturePid
+      def run!(&block)
+        super() do
+          @pid = @process.pid
+          block.call self if block
+        end
+      end
     end
-    def send_signal signal
-      @process.send :send_signal, signal
+    prepend CapturePid
+
+    def send_signal(signal)
+      @process.send(:send_signal, signal)
     end
   end
 
