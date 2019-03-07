@@ -22,7 +22,7 @@ module Aruba
     end
 
     def run_background(cmd)
-      @background = run(cmd)
+      @background = run_command(cmd)
     end
 
     def send_signal(cmd, signal)
