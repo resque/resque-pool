@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    resque-pool (0.7.0.dev)
-      rake
+    resque-pool (0.7.0)
+      rake (>= 10.0, < 13.0)
       resque (>= 1.22, < 3)
 
 GEM
@@ -91,6 +91,7 @@ PLATFORMS
 
 DEPENDENCIES
   aruba (~> 0.14.0)
+  bundler (~> 2.0)
   cucumber (~> 3.0)
   mustache
   resque-pool!

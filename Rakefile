@@ -1,27 +1,17 @@
-require 'bundler/setup'
 require 'bundler/gem_tasks'
 
 # for loading the example config file in config/resque-pool.yml
 require 'resque/pool/tasks'
 
 require 'rspec/core/rake_task'
-
-desc "Run fast RSpec code examples"
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = ["-c", "-f progress", "--tag ~slow"]
-end
-
-desc "Run all RSpec code examples"
-RSpec::Core::RakeTask.new("spec:ci") do |t|
-  t.rspec_opts = ["-c", "-f progress"]
-end
+RSpec::Core::RakeTask.new(:spec)
 
 require 'cucumber/rake/task'
 Cucumber::Rake::Task.new(:features) do |c|
   c.profile = "rake"
 end
 
-task :default => ["spec:ci", :features]
+task :default => %i[spec features]
 
 rule(/\.[1-9]$/ => [proc { |tn| "#{tn}.ronn" }]) do |t|
   name = Resque::Pool.name.sub('::','-').upcase
@@ -29,7 +19,7 @@ rule(/\.[1-9]$/ => [proc { |tn| "#{tn}.ronn" }]) do |t|
 
   manual = '--manual "%s"' % name
   organization = '--organization "%s"' % version
-  sh "ronn #{manual} #{organization} <#{t.source} >#{t.name}"
+  sh "bundle exec ronn #{manual} #{organization} <#{t.source} >#{t.name}"
 end
 
 file 'man/resque-pool.1'
