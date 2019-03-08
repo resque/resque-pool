@@ -3,6 +3,7 @@ Resque Pool
 
 [![Build Status](https://travis-ci.org/nevans/resque-pool.png)](https://travis-ci.org/nevans/resque-pool)
 ![Depfu](https://img.shields.io/depfu/nevans/resque-pool.svg)
+![Gem](https://img.shields.io/gem/v/resque-pool.svg)
 
 Resque pool is a daemon for managing a pool of
 [resque](https://github.com/defunkt/resque) workers.  With a simple config file,
