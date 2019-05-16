@@ -312,7 +312,7 @@ describe Resque::Pool, "#create_worker" do
     expect(worker.term_timeout).to eq(4.0)
   end
 
-  context "with a RESQUER_TERM_TIMEOUT set" do
+  context "with a RESQUE_TERM_TIMEOUT set" do
     before { ENV["RESQUE_TERM_TIMEOUT"] = "5" }
 
     it "successfully creates a new worker" do
