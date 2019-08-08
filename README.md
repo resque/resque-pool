@@ -6,7 +6,7 @@ Resque Pool
 ![Gem](https://img.shields.io/gem/v/resque-pool.svg)
 
 Resque pool is a daemon for managing a pool of
-[resque](https://github.com/defunkt/resque) workers.  With a simple config file,
+[resque](https://github.com/resque/resque) workers.  With a simple config file,
 it manages your workers for you, starting up the appropriate number of workers
 for each worker type.
 
