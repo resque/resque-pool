@@ -6,7 +6,7 @@ Resque Pool
 ![Gem](https://img.shields.io/gem/v/resque-pool.svg)
 
 Resque pool is a daemon for managing a pool of
-[resque](https://github.com/defunkt/resque) workers.  With a simple config file,
+[resque](https://github.com/resque/resque) workers.  With a simple config file,
 it manages your workers for you, starting up the appropriate number of workers
 for each worker type.
 
@@ -146,7 +146,7 @@ per worker type.  Signals can be sent via the `kill` command, e.g.
 `kill -HUP $master_pid`
 
 If the environment variable `TERM_CHILD` is set, `QUIT` and `TERM` will respond as
-defined by Resque 1.22 and above. See http://hone.heroku.com/resque/2012/08/21/resque-signals.html
+defined by Resque 1.22 and above. See http://hone.herokuapp.com/resque/2012/08/21/resque-signals.html
 for details, overriding any command-line configuration for `TERM`. Setting `TERM_CHILD` tells
 us you know what you're doing.
 
