@@ -42,7 +42,7 @@ GEM
     mono_logger (1.1.0)
     multi_json (1.14.1)
     multi_test (0.1.2)
-    mustache (1.1.0)
+    mustache (1.1.1)
     mustermann (1.0.3)
     rack (2.0.7)
     rack-protection (2.0.7)
