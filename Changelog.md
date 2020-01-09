@@ -1,13 +1,58 @@
-## 0.7.0 _unreleased_
-[full changelog](https://github.com/nevans/resque-pool/compare/v0.6.0...master).
+## _unreleased_
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...master).
 
-One big new feature: `--hot-swap` for [zero-downtime code
-deploys](https://github.com/nevans/resque-pool#zero-downtime-code-deploys).
-Thanks to [joshuaflanagan](https://github.com/joshuaflanagan),
-[brasic](https://github.com/brasic), and
-[ShippingEasy](https://github.com/ShippingEasy)!
+* Removed CI testing for ruby 2.3 (EOL). Added for 2.7.
 
-## 0.6.0
+## 0.7.1 (2020-01-08)
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.0...v0.7.1).
+
+Marked as compatible with rake 13, documentation fixes, and depfu updated
+dependencies.
+
+ * PR #183 [jcoyne](https://github.com/jcoyne) Rake 13 compatibility.
+ * replace gemnasium badge with depfu, and use depfu for automated PRs
+ * documentation updates: [jcoyne](https://github.com/jcoyne),
+   [chaspy](https://github.com/chaspy), [budnik](https://github.com/budnik)
+
+## 0.7.0 (2019-03-08)
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.6.0...v0.7.0).
+
+The first new release in a _LONG_ time. Over three years! Sorry to everyone who
+used git forks or master (instead of a rubygems release) during that time! So,
+obviously the compatibility updates are important. But we also added
+`--hot-swap`, `Resque::Pool::ConfigLoaders::Throttled`, bugfixes, and _big_
+changes to the specs/CI to make it easier to push new releases.
+
+Compatibility:
+ * PR #160 [brucek](https://github.com/brucek) Rails 4 compatibility.
+ * PR #171 [jrochkind](https::/github.com/jrochkind) resque 2.0.
+ * PRs #174, #175:
+   * update test deps (rspec, aruba, cucumber)
+   * Only test/support rubies that aren't EOL (2.3, 2.4, 2.5, 2.6).
+
+New features:
+ * `--hot-swap` for [zero-downtime code
+   deploys](https://github.com/nevans/resque-pool#zero-downtime-code-deploys).
+   Thanks to [joshuaflanagan](https://github.com/joshuaflanagan),
+   [brasic](https://github.com/brasic), and
+   [ShippingEasy](https://github.com/ShippingEasy)!
+ * [joshuaflanagan](https://github.com/joshuaflanagan) Add a throttled config
+   loader, to wrap other config loaders (e.g. custom DB queries). See
+   `Resque::Pool::ConfigLoaders::Throttled`.
+
+Bugfixes:
+ * PR #146 [kcrayon](https://github.com/kcrayon) Fix edge cases when old_pid is
+   invalid.
+ * PR #153 [jeremy](https://github.com/jeremy) Fix occasional deadlock from
+   `Open3.capture3`.
+ * PR #165 [pjambet](https://github.com/pjambet) Cast `RESQUE_TERM_TIMEOUT`
+   to float.
+
+And more (see the full changelog). Thanks also to contributions from:
+[grosser](https://github.com/grosser), [msufa](https://github.com/msufa),
+[dchandekstark](https://github.com/dchandekstark),
+
+## 0.6.0 (2015-10-14)
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.5.0...v0.6.0).
 
 One big new feature: [Custom Config
