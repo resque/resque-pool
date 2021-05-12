@@ -150,7 +150,7 @@ module Resque
         elsif opts[:term_graceful]
           Resque::Pool.term_behavior = "graceful_worker_shutdown"
         elsif ENV["TERM_CHILD"]
-          log "TERM_CHILD enabled, so will user 'term-graceful-and-wait' behaviour"
+          log "TERM_CHILD enabled, so will use 'term-graceful-and-wait' behaviour"
           Resque::Pool.term_behavior = "graceful_worker_shutdown_and_wait"
         end
         if ENV.include?("DYNO") && !ENV["TERM_CHILD"]
