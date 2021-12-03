@@ -1,0 +1,30 @@
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    name: >-
+      ${{ matrix.os }} ${{ matrix.ruby-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-22.04, ubuntu-20.04 ]
+        ruby-version: [ "2.4", "2.5", "2.6", "2.7", "3.0", "3.1" ]
+
+    services:
+      redis:
+        image: redis
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+    - run: sudo apt-get install redis-server
+    - name: Run specs
+      run: bundle exec rake
