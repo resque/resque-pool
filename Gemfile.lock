@@ -18,6 +18,7 @@ GEM
     backports (3.17.2)
     builder (3.2.4)
     childprocess (3.0.0)
+    connection_pool (2.3.0)
     contracts (0.16.0)
     cucumber (3.2.0)
       builder (>= 2.1.2)
@@ -50,10 +51,13 @@ GEM
       rack
     rake (13.0.6)
     rdiscount (2.2.0.1)
-    redis (4.8.0)
+    redis (5.0.5)
+      redis-client (>= 0.9.0)
+    redis-client (0.9.0)
+      connection_pool
     redis-namespace (1.9.0)
       redis (>= 4)
-    resque (2.3.0)
+    resque (2.4.0)
       mono_logger (~> 1.0)
       multi_json (~> 1.0)
       redis-namespace (~> 1.6)
