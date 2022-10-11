@@ -19,7 +19,7 @@ GEM
     builder (3.2.4)
     childprocess (1.0.1)
       rake (< 13.0)
-    contracts (0.16.0)
+    contracts (0.16.1)
     cucumber (3.0.0)
       builder (>= 2.1.2)
       cucumber-core (~> 3.0.0)
