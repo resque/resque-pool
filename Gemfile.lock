@@ -42,7 +42,7 @@ GEM
     hpricot (0.8.6)
     mono_logger (1.1.1)
     multi_json (1.15.0)
-    multi_test (0.1.2)
+    multi_test (1.1.0)
     mustache (1.1.1)
     rack (1.6.13)
     rake (12.3.3)
