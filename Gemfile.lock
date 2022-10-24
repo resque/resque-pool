@@ -46,7 +46,7 @@ GEM
     mustache (1.1.1)
     rack (1.6.13)
     rake (12.3.3)
-    rdiscount (2.2.0.2)
+    rdiscount (2.2.7)
     redis (3.3.5)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
