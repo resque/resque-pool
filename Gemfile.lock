@@ -15,7 +15,7 @@ GEM
       ffi (~> 1.9)
       rspec-expectations (>= 2.99)
       thor (>= 0.19, < 2.0)
-    backports (3.17.2)
+    backports (3.23.0)
     builder (3.2.4)
     childprocess (1.0.1)
       rake (< 13.0)
