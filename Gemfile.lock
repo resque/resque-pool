@@ -48,7 +48,7 @@ GEM
     rack-protection (1.5.5)
       rack
     rake (12.3.3)
-    rdiscount (2.2.7)
+    rdiscount (2.2.7.1)
     redis (3.3.5)
     redis-namespace (1.6.0)
       redis (>= 3.0.4)
