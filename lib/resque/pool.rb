@@ -443,6 +443,10 @@ module Resque
       worker = ::Resque::Worker.new(*queues)
       worker.pool_master_pid = Process.pid
       worker.term_timeout = (ENV['RESQUE_TERM_TIMEOUT'] || 4.0).to_f
+      if worker.respond_to?(:pre_shutdown_timeout)
+        # resque doesn't support this until 1.27.3, but we support 1.22
+        worker.pre_shutdown_timeout = (ENV['RESQUE_PRE_SHUTDOWN_TIMEOUT'] || 0.0).to_f
+      end
       worker.term_child = ENV['TERM_CHILD']
       if worker.respond_to?(:run_at_exit_hooks=)
         # resque doesn't support this until 1.24, but we support 1.22
