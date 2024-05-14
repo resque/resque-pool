@@ -32,10 +32,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "resque", ">= 1.22", "< 3"
   spec.add_dependency "rake",   ">= 10.0", "< 14.0"
 
-  spec.add_development_dependency "bundler",  "~> 2.0"
-  spec.add_development_dependency "rspec",    "~> 3.8"
-  spec.add_development_dependency "cucumber", "~> 3.0"
-  spec.add_development_dependency "aruba",    "~> 0.14.0"
+  spec.add_development_dependency "bundler"
+  spec.add_development_dependency "rspec"
+  spec.add_development_dependency "cucumber"
+  spec.add_development_dependency "aruba"
   spec.add_development_dependency "ronn"
   spec.add_development_dependency "mustache"
 
