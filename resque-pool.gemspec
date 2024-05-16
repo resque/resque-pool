@@ -4,19 +4,20 @@ Gem::Specification.new do |spec|
   spec.name        = "resque-pool"
   spec.version     = Resque::Pool::VERSION
   spec.authors     = ["nicholas a. evans",]
-  spec.email       = ["nick@ekenosen.net"]
+  spec.email       = ["nick@rubinick.dev"]
 
   spec.summary     = "quickly and easily fork a pool of resque workers"
   spec.description = <<-EOF
     quickly and easily fork a pool of resque workers,
     saving memory (w/REE) and monitoring their uptime
   EOF
-  spec.homepage    = "http://github.com/nevans/resque-pool"
+  spec.homepage    = "http://github.com/resque/resque-pool"
   spec.license     = 'MIT'
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "http://github.com/nevans/resque-pool"
-  spec.metadata["changelog_uri"] = "https://github.com/resque/resque/blob/master/HISTORY.md"
+  spec.metadata["source_code_uri"] = "http://github.com/resque/resque-pool"
+  spec.metadata["changelog_uri"] = "https://github.com/resque/resque-pool/blob/main/Changelog.md"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -30,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.0'
 
   spec.add_dependency "resque", ">= 1.22", "< 3"
-  spec.add_dependency "rake",   ">= 10.0", "< 14.0"
+  spec.add_dependency "rake",   ">= 10.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rspec"
