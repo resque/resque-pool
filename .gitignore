@@ -1,9 +1,13 @@
 pkg/*
 *.gem
+*.gemfile.lock
+Gemfile.lock
 .bundle
+.ruby-version
 *.log
 *.pid
 examples/tmp/*
+spec/stdout
 tmp/*
 vendor
 tags
