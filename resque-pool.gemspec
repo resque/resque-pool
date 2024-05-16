@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.0'
 
   spec.add_dependency "resque", ">= 1.22", "< 3"
-  spec.add_dependency "rake",   ">= 10.0", "< 14.0"
+  spec.add_dependency "rake",   ">= 10.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rspec"
