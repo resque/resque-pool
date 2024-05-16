@@ -63,7 +63,7 @@ jobs:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/resque_${{ matrix.resque }}_redis_${{ matrix.redis }}.gemfile
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
