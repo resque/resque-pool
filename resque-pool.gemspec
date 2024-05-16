@@ -11,11 +11,11 @@ Gem::Specification.new do |spec|
     quickly and easily fork a pool of resque workers,
     saving memory (w/REE) and monitoring their uptime
   EOF
-  spec.homepage    = "http://github.com/nevans/resque-pool"
+  spec.homepage    = "http://github.com/resque/resque-pool"
   spec.license     = 'MIT'
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "http://github.com/nevans/resque-pool"
+  spec.metadata["source_code_uri"] = "http://github.com/resque/resque-pool"
   spec.metadata["changelog_uri"] = "https://github.com/resque/resque-pool/blob/main/Changelog.md"
 
   # Specify which files should be added to the gem when it is released.
