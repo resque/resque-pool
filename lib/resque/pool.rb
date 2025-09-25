@@ -432,7 +432,15 @@ module Resque
         call_after_prefork!(worker)
         reset_sig_handlers!
         #self_pipe.each {|io| io.close }
-        worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL) # interval, will block
+        # will block until a shutdown signal is received
+        if worker.method(:work).parameters.size > 2 # Backwards compat
+          worker.work(ENV["INTERVAL"],
+                      max_interval:     ENV['MAX_INTERVAL'],
+                      min_interval:     ENV['MIN_INTERVAL'],
+                      backoff_interval: ENV['BACKOFF_INTERVAL'])
+        else
+          worker.work(ENV['INTERVAL'] || DEFAULT_WORKER_INTERVAL)
+        end
       end
       workers[queues][pid] = worker
       call_after_spawn!(worker, pid, workers)
