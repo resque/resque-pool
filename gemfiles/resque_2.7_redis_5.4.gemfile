@@ -3,8 +3,8 @@
 source "https://rubygems.org"
 
 gem "appraisal"
-gem "resque", "1.23.1"
-gem "redis-namespace", "1.2.2"
-gem "redis", "3.0.7"
+gem "resque", "2.7.0"
+gem "redis-namespace", "1.11.0"
+gem "redis", "5.4.1"
 
 gemspec path: "../"

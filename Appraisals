@@ -1,10 +1,10 @@
-appraise "resque-1.22-redis-2.0" do
+appraise "resque-1.22-redis-2.2" do
   gem "resque",          "1.22.0" # 2012-08-21
   gem "redis-namespace", "1.0.3"  # 2011-05-17
   gem "redis",           "2.2.2"  # 2011-08-04
 end
 
-appraise "resque-1.23-redis-2.0" do
+appraise "resque-1.23-redis-2.2" do
   gem "resque",          "1.23.1" # 2013-03-07
   gem "redis-namespace", "1.1.0"  # 2011-08-15
   gem "redis",           "2.2.2"  # 2011-08-04
@@ -74,4 +74,10 @@ appraise "resque-2.6-redis-5.2" do
   gem "resque",          "2.6.0"  # 2023-08-19
   gem "redis-namespace", "1.11.0" # 2023-06-08
   gem "redis",           "5.2.0"  # 2024-04-15
+end
+
+appraise "resque-2.7-redis-5.4" do
+  gem "resque",          "2.7.0"  # 2024-12-30
+  gem "redis-namespace", "1.11.0" # 2023-06-08
+  gem "redis",           "5.4.1"  # 2025-07-17
 end
