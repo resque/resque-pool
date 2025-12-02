@@ -4,7 +4,6 @@ require 'tempfile'
 describe Resque::Pool::Logging do
 
   let(:expect_flags) { File::WRONLY | File::APPEND }
-  
 
   # Don't pollute the log output
   before(:all) { $skip_logging = true }
@@ -47,9 +46,8 @@ describe Resque::Pool::Logging do
       expect(File.exist?(tmp_path)).to be_truthy
       expect(@before).to_not eq(File.stat(tmp_path).inspect)
       expect(@fp.stat.inspect).to eq(File.stat(tmp_path).inspect)
-      pending("ruby 3.4 reopen resets the encoding to nil!") if "3.4.0" <= RUBY_VERSION
-      expect(@ext).to eq((@fp.external_encoding rescue nil))
-      expect(@int).to eq((@fp.internal_encoding rescue nil))
+      expect((@fp.external_encoding rescue nil)).to eq(@ext)
+      expect((@fp.internal_encoding rescue nil)).to eq(@int)
       expect(expect_flags).to eq((expect_flags & @fp.fcntl(Fcntl::F_GETFL)))
       expect(@fp.sync).to be_truthy
 
@@ -71,7 +69,7 @@ describe Resque::Pool::Logging do
       Encoding.list.each do |encoding|
         File.open(@tmp_path, "a:#{encoding.to_s}") do |fp|
           fp.sync = true
-          expect(encoding).to eq(fp.external_encoding)
+          expect(fp.external_encoding).to eq(encoding)
           expect(fp.internal_encoding).to be_nil
           File.unlink(@tmp_path)
           expect(File.exist?(@tmp_path)).to be_falsey
@@ -80,8 +78,7 @@ describe Resque::Pool::Logging do
           expect(@tmp_path).to eq(fp.path)
           expect(File.exist?(@tmp_path)).to be_truthy
           expect(fp.stat.inspect).to eq(File.stat(@tmp_path).inspect)
-          pending("ruby 3.4 reopen resets the encoding to nil!") if "3.4.0" <= RUBY_VERSION
-          expect(encoding).to eq(fp.external_encoding)
+          expect(fp.external_encoding).to eq(encoding)
           expect(fp.internal_encoding).to be_nil
           expect(expect_flags).to eq((expect_flags & fp.fcntl(Fcntl::F_GETFL)))
           expect(fp.sync).to be_truthy
@@ -96,7 +93,7 @@ describe Resque::Pool::Logging do
           next if ext == int
           File.open(@tmp_path, "a:#{ext.to_s}:#{int.to_s}") do |fp|
             fp.sync = true
-            expect(ext).to eq(fp.external_encoding)
+            expect(fp.external_encoding).to eq(ext)
 
             if ext != Encoding::BINARY
               expect(int).to eq(fp.internal_encoding)
@@ -109,11 +106,10 @@ describe Resque::Pool::Logging do
             expect(@tmp_path).to eq(fp.path)
             expect(File.exist?(@tmp_path)).to be_truthy
             expect(fp.stat.inspect).to eq(File.stat(@tmp_path).inspect)
-            pending("ruby 3.4 reopen resets the encoding to nil!") if "3.4.0" <= RUBY_VERSION
-            expect(ext).to eq(fp.external_encoding)
+            expect(fp.external_encoding).to eq(ext)
 
             if ext != Encoding::BINARY
-              expect(int).to eq(fp.internal_encoding)
+              expect(fp.internal_encoding).to eq(int)
             end
 
             expect(expect_flags).to eq((expect_flags & fp.fcntl(Fcntl::F_GETFL)))
