@@ -85,7 +85,7 @@ Nicholas Evans
 
 ## COPYRIGHT
 
-Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
+Copyright (C) 2010-2026 by Nicholas Evans <nick@rubinick.dev>, et al.
 
 ## SEE ALSO
 
