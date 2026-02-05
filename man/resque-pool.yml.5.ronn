@@ -9,7 +9,8 @@ resque-pool.yml(5) -- resque-pool pool configuration
 ## DESCRIPTION
 
 resque-pool(1) reads pool configuration data from `resque-pool.yml` (or
-the file specified with `-c` on the command line). The file contains queue-worker-count pairs, one per line. The configuration file supports both 
+the file specified with `-c` on the command line). The file contains
+queue-worker-count pairs, one per line. The configuration file supports both
 using root level defaults as well as environment specific overrides 
 (`RACK_ENV`, `RAILS_ENV`, and `RESQUE_ENV` environment variables can be used 
 to determine environment).
@@ -34,7 +35,7 @@ Nicholas Evans
 
 ## COPYRIGHT
 
-Copyright (C) 2010 by Nicholas Evans <nick@ekenosen.net>, et al.
+Copyright (C) 2010-2026 by Nicholas Evans <nick@rubinick.dev>, et al.
 
 ## SEE ALSO
 
