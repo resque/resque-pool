@@ -15,6 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-24.04
         ruby:
           - "2.4"
           - "2.5"
@@ -27,14 +29,6 @@ jobs:
           - "3.4"
           - "4.0"
         resque:
-          - "1.22"
-          - "1.23"
-          - "1.24"
-          - "1.25"
-          - "1.26"
-          - "1.27"
-          - "2.0"
-          - "2.1"
           - "2.2"
           - "2.3"
           - "2.4"
@@ -44,51 +38,15 @@ jobs:
           - "3.0"
 
         include:
-          - { resque: "1.22", redis: "2.2", os: ubuntu-22.04 }
-          - { resque: "1.23", redis: "2.2", os: ubuntu-22.04 }
-          - { resque: "1.24", redis: "3.0", os: ubuntu-22.04 }
-          - { resque: "1.25", redis: "3.0", os: ubuntu-22.04 }
-          - { resque: "1.26", redis: "3.2", os: ubuntu-22.04 }
-          - { resque: "1.27", redis: "3.3", os: ubuntu-22.04 }
-          - { resque: "2.0",  redis: "4.0", os: ubuntu-22.04 }
-          - { resque: "2.1",  redis: "4.4", os: ubuntu-24.04 }
-          - { resque: "2.2",  redis: "4.6", os: ubuntu-24.04 }
-          - { resque: "2.3",  redis: "4.7", os: ubuntu-24.04 }
-          - { resque: "2.4",  redis: "4.8", os: ubuntu-24.04 }
-          - { resque: "2.5",  redis: "5.0", os: ubuntu-24.04 }
-          - { resque: "2.6",  redis: "5.2", os: ubuntu-24.04 }
-          - { resque: "2.7",  redis: "5.4", os: ubuntu-24.04 }
-          - { resque: "3.0",  redis: "5.4", os: ubuntu-24.04 }
+          - { resque: "2.2",  redis: "4.6" }
+          - { resque: "2.3",  redis: "4.7" }
+          - { resque: "2.4",  redis: "4.8" }
+          - { resque: "2.5",  redis: "5.0" }
+          - { resque: "2.6",  redis: "5.2" }
+          - { resque: "2.7",  redis: "5.4" }
+          - { resque: "3.0",  redis: "5.4" }
 
         exclude:
-          # The resque 1.22 gemfile seems to be okay with ruby 3.2 and 3.3
-          - { resque: "1.23", ruby: "3.2" } # unknown incompatibility...
-          - { resque: "1.23", ruby: "3.3" } # unknown incompatibility...
-          - { resque: "1.23", ruby: "3.4" } # unknown incompatibility...
-          - { resque: "1.23", ruby: "4.0" } # unknown incompatibility...
-
-          - { resque: "1.24", ruby: "3.2" } # unknown incompatibility...
-          - { resque: "1.24", ruby: "3.3" } # unknown incompatibility...
-          - { resque: "1.24", ruby: "3.4" } # unknown incompatibility...
-          - { resque: "1.24", ruby: "4.0" } # unknown incompatibility...
-
-          - { resque: "1.25", ruby: "3.2" } # unknown incompatibility...
-          - { resque: "1.25", ruby: "3.3" } # unknown incompatibility...
-          - { resque: "1.25", ruby: "3.4" } # unknown incompatibility...
-          - { resque: "1.25", ruby: "4.0" } # unknown incompatibility...
-
-          - { resque: "1.26", ruby: "3.2" } # unknown incompatibility...
-          - { resque: "1.26", ruby: "3.3" } # unknown incompatibility...
-          - { resque: "1.26", ruby: "3.4" } # unknown incompatibility...
-          - { resque: "1.26", ruby: "4.0" } # unknown incompatibility...
-
-          - { resque: "2.1", ruby: "3.0" } # redis-namespace 1.7 requires ruby < 3
-          - { resque: "2.1", ruby: "3.1" } # redis-namespace 1.7 requires ruby < 3
-          - { resque: "2.1", ruby: "3.2" } # redis-namespace 1.7 requires ruby < 3
-          - { resque: "2.1", ruby: "3.3" } # redis-namespace 1.7 requires ruby < 3
-          - { resque: "2.1", ruby: "3.4" } # redis-namespace 1.7 requires ruby < 3
-          - { resque: "2.1", ruby: "4.0" } # redis-namespace 1.7 requires ruby < 3
-
           - { resque: "2.5", ruby: "2.4" } # redis 5.0 requires ruby 2.5
           - { resque: "2.6", ruby: "2.4" } # redis 5.2 requires ruby 2.6
           - { resque: "2.6", ruby: "2.5" } # redis 5.2 requires ruby 2.6
