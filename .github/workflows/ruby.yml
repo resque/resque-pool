@@ -31,6 +31,7 @@ jobs:
           - "2.5"
           - "2.6"
           - "2.7"
+          - "3.0"
 
         include:
           - { resque: "1.22", redis: "2.2", os: ubuntu-22.04 }
@@ -47,6 +48,7 @@ jobs:
           - { resque: "2.5",  redis: "5.0", os: ubuntu-24.04 }
           - { resque: "2.6",  redis: "5.2", os: ubuntu-24.04 }
           - { resque: "2.7",  redis: "5.4", os: ubuntu-24.04 }
+          - { resque: "3.0",  redis: "5.4", os: ubuntu-24.04 }
 
         exclude:
           # The resque 1.22 gemfile seems to be okay with ruby 3.2 and 3.3
@@ -77,6 +79,10 @@ jobs:
           - { resque: "2.6", ruby: "2.5" } # redis 5.2 requires ruby 2.6
           - { resque: "2.7", ruby: "2.4" } # redis 5.2 requires ruby 2.6
           - { resque: "2.7", ruby: "2.5" } # redis 5.2 requires ruby 2.6
+          - { resque: "3.0", ruby: "2.4" } # resque 3.0 requires ruby 3.0
+          - { resque: "3.0", ruby: "2.5" } # resque 3.0 requires ruby 3.0
+          - { resque: "3.0", ruby: "2.6" } # resque 3.0 requires ruby 3.0
+          - { resque: "3.0", ruby: "2.7" } # resque 3.0 requires ruby 3.0
 
     services:
       redis:
