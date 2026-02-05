@@ -1,0 +1,28 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: Breaking Changes
+      labels: ["breaking-change"]
+    - title: Added
+      labels: ["enhancement"]
+    - title: Deprecated
+      labels: ["deprecation"]
+    - title: Fixed
+      labels: ["bug"]
+    - title: Documentation
+      labels: ["documentation"]
+    - title: Other Changes
+      labels: ["*"]
+      exclude:
+        labels:
+          - "tests-only"
+          - "dependencies"
+          - "workflows"
+          - "github_actions"
+        authors:
+          - "dependabot"
+          - "depfu"
+    - title: Miscellaneous
+      labels: ["*"]
