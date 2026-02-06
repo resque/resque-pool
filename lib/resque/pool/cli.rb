@@ -31,7 +31,8 @@ module Resque
             the log directory and pidfile defaults to resque-pool.pid in the current dir.
 
             Usage:
-               resque-pool [options]
+               resque-pool [OPTION]...
+               resque-pool [OPTION]... -- [RAKE OPTION]...
           EOS
 
           opt.separator ""

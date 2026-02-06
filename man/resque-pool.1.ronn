@@ -4,6 +4,7 @@ resque-pool(1) -- resque worker pool management
 ## SYNOPSIS
 
 `resque-pool` [<OPTION...>]
+`resque-pool` [<OPTION...>] -- [<RAKE OPTION...>]
 
 ## DESCRIPTION
 
@@ -94,6 +95,32 @@ directory.
 
   * `-s, --spawn-delay` <milliseconds>:
     Delay in milliseconds between spawning missing workers.
+
+### Rake options
+
+Command line arguments after `--` will be used by rake(1).
+
+Internally, after initializing itself, `resque-pool` initializes a rake(1)
+application and invokes its own `resque:pool` task.  This allows application
+customization to be done via your application's own `Rakefile`, by adding
+dependencies or code blocks to the `resque:pool:setup`.  Additionally, any
+command line arguments after `--` will be processed by rake.  A few of rake's
+options can be useful:
+
+  * `--` <NAME>=<VALUE>:
+    Rake assigns arguments with `NAME=` to environment variables.
+  * `-- -C, -- --directory` <DIRECTORY>:
+    Change to <DIRECTORY> before invoking `resque:pool`.
+  * `-- -f, -- --rakefile` <FILENAME>:
+    Use <FILENAME> as the rakefile to search for.
+  * `-- -n, -- --dry-run`:
+    Do a dry run without executing any tasks.  The pool will not start.
+  * `-- -r, -- --require` <MODULE>:
+    Require <MODULE> before invoking `resque:pool` task.
+  * `-- -R, -- --rakelibdir` <RAKELIBDIR>:
+    Auto-import any `.rake` files in <RAKELIBDIR>.  Default is `rakelib`.
+  * `-- -t, -- --trace`:
+    Do a dry run without executing any tasks.  The pool will not start.
 
 ## ENVIRONMENT
 
