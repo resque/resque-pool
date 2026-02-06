@@ -1,7 +1,64 @@
 ## _unreleased_
-[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...master).
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.8.0...master).
 
-* Removed CI testing for ruby 2.3 (EOL). Added for 2.7.
+## 0.8.0 (2020-01-08)
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...v0.8.0).
+
+## What's Changed
+
+### Breaking Changes
+* **💥 Minimum resque version is now 2.2** _(1.22 is no longer supported)_ by [@nevans] in https://github.com/resque/resque-pool/pull/261
+* **💥 Minimum ruby version is now 3.0** _(2.0 is no longer supported)_ by [@nevans] in https://github.com/resque/resque-pool/pull/262
+
+### Added
+* Introduce siginfo-hook and SIGINFO 29 signal handling by [@Overbryd] in https://github.com/resque/resque-pool/pull/191
+* Support a dynamic sleep INTERVAL by [@mdkent] in https://github.com/resque/resque-pool/pull/251
+  Requires `resque` 3.0+.  See https://github.com/resque/resque/pull/1920.
+
+### Fixed
+* fix typo in log message by [@rilian] in https://github.com/resque/resque-pool/pull/193
+* 🐛 Fix `Logging.reopen_logs!` for ruby 3.4+ by [@nevans] in https://github.com/resque/resque-pool/pull/257
+* 🐛 Fix `--lock FILE` options parser setup by [@nevans] in https://github.com/resque/resque-pool/pull/265
+
+### Documentation
+* 📚 Update README for old redis gem by [@nevans] in https://github.com/resque/resque-pool/pull/266
+* 📚 Update CI badge in README by {@nevans} in https://github.com/resque/resque-pool/pull/267
+* 📚 Rearrange/improve CLI options help text by [@nevans] in https://github.com/resque/resque-pool/pull/270
+* 📚 Update resque-pool(1) manpage by [@nevans] in https://github.com/resque/resque-pool/pull/271
+
+### Miscellaneous
+* Convert to Github actions by [@nevans] in https://github.com/resque/resque-pool/pull/203
+* Adding code scanning action by [@nevans] in https://github.com/resque/resque-pool/pull/210
+* ⬆️ 💎 Add ruby 3.2 to the CI metrix by [@nevans] in https://github.com/resque/resque-pool/pull/244
+* ⬆️ 💎 Add ruby 3.3 to the CI metrix by [@nevans] in https://github.com/resque/resque-pool/pull/245
+* ✅ Test different versions of resque and redis by [@nevans] in https://github.com/resque/resque-pool/pull/246
+* Update gemspec metadata by @nevans in https://github.com/resque/resque-pool/pull/247
+* ⬆️ Bump actions/checkout from 3 to 4 by @dependabot[bot] in https://github.com/resque/resque-pool/pull/242
+* ⬆️ Bump github/codeql-action from 2 to 3 by @dependabot[bot] in https://github.com/resque/resque-pool/pull/249
+* ⬆️ Bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/resque/resque-pool/pull/250
+* ⬆️ Bump github/codeql-action from 3 to 4 by @dependabot[bot] in https://github.com/resque/resque-pool/pull/252
+* ⬆️ Update CI matrix with modern versions by [@nevans] in https://github.com/resque/resque-pool/pull/254
+* ⬆️ Bump actions/checkout from 5 to 6 by @dependabot[bot] in https://github.com/resque/resque-pool/pull/253
+* ✅ Trigger CI for every PR by [@nevans] in https://github.com/resque/resque-pool/pull/255
+* ⬆️(deps): Update resque requirement from `>= 1.22, < 3 to >= 1.22, < 4` by @dependabot[bot] in https://github.com/resque/resque-pool/pull/256
+* ✅ Cut CI matrix in half: only one OS per resque by [@nevans] in https://github.com/resque/resque-pool/pull/260
+* ✅⬆️ Add resque 3.0 to CI matrix by [@nevans] in https://github.com/resque/resque-pool/pull/258
+* 📦 Add releases.yml to assist with release notes by [@nevans] in https://github.com/resque/resque-pool/pull/264
+* ⬆️ Upgrade ronn to ronn-ng (dev dependency) by [@nevans] in https://github.com/resque/resque-pool/pull/263
+* ✅⬆️ Add ruby 4.0 to CI matrix by [@nevans] in https://github.com/resque/resque-pool/pull/259
+* 🔒 Configure Trusted Publisher by [@nevans] in https://github.com/resque/resque-pool/pull/269
+
+## New Contributors
+* [@rilian] made their first contribution in https://github.com/resque/resque-pool/pull/193
+* [@Overbryd] made their first contribution in https://github.com/resque/resque-pool/pull/191
+* [@mdkent] made their first contribution in https://github.com/resque/resque-pool/pull/251
+
+[@Overbryd]: https://github.com/Overbryd
+[@mdkent]:   https://github.com/mdkent
+[@nevans]:   https://github.com/nevans
+[@rilian]:   https://github.com/rilian
+
+**Full Changelog**: https://github.com/resque/resque-pool/compare/v0.7.1...v0.8.0
 
 ## 0.7.1 (2020-01-08)
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.7.0...v0.7.1).
@@ -78,7 +135,6 @@ Some more merges of long outstanding pull requests.
 
  * _EVEN BETTER_ `TERM` support for Heroku than 0.4.0.  ;)
  * _DOCKER SUPPORT_ (don't go crazy when master pid is 1).
-   _(example Dockerfile soon?)_
  * `--spawn_delay` option in case workers respawn too quickly
  * Support `RUN_AT_EXIT_HOOKS`.
  * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0).
