@@ -4,55 +4,96 @@
 .SH "NAME"
 \fBresque\-pool\fR \- resque worker pool management
 .SH "SYNOPSIS"
-\fBresque\-pool\fR \fIoptions\fR
+\fBresque\-pool\fR [
 .SH "DESCRIPTION"
 \fBResque\-pool\fR is the best way to manage a group (pool) of resque workers\.
 .P
 When resque\-pool(1) is daemonized the \fBstdout\fR and \fBstderr\fR output streams are redirected to \fBresque\-pool\.stdxxx\.log\fR log files in the \fBlog\fR directory\. Additionally the PID file defaults to \fBresque\-pool\.pid\fR in the \fBtmp/pids\fR directory\.
 .SH "OPTIONS"
-.IP "\(bu" 4
-\fB\-c, \-\-config\fR \fIfile\fR: Uses the configuration specified in the \fIfile\fR provided instead of searching in the current and \fBconfig\fR directories for \fBresque\-pool\.yml\fR\.
-.IP "\(bu" 4
-\fB\-a, \-\-appname\fR \fIname\fR: Specifies the app name to be used for logging and procline\. If not specified, this defaults to the current working directory\.
-.IP "\(bu" 4
-\fB\-d, \-\-daemon\fR: Runs \fBresque\-pool\fR in the background as a daemon process\. This will redirect \fBstdout\fR and \fBstderr\fR to log files and write a PID file\.
+.SS "Basic options"
+.TP
+\fB\-c, \-\-config\fR \fIfile\fR
+Uses the configuration specified in the \fIfile\fR provided instead of searching in the current and \fBconfig\fR directories for \fBresque\-pool\.yml\fR\.
+.TP
+\fB\-a, \-\-appname\fR \fIname\fR
+Specifies the app name to be used for logging and procline\. If not specified, this defaults to the name of the current working directory\.
+.TP
+\fB\-E, \-\-environment\fR \fIname\fR
+Specifies the environment \fIname\fR to be set for \fBRAILS_ENV\fR, \fBRACK_ENV\fR and \fBRESQUE_ENV\fR which will be passed on to the pooled resque workers\.
+.SS "Logging options"
 .IP "\(bu" 4
 \fB\-o, \-\-stdout\fR \fIfile\fR: Writes the normal log output to \fIfile\fR instead of printing to the terminal\. When running as a daemon this defaults to the path \fBlog/resque\-pool\.stdout\.log\fR\.
 .IP "\(bu" 4
 \fB\-e, \-\-stderr\fR \fIfile\fR: Writes the standard error output to \fIfile\fR instead of printing to the terminal\. When running as a daemon this defaults to the path \fBlog/resque\-pool\.stderr\.log\fR\.
 .IP "\(bu" 4
 \fB\-\-nosync\fR Allows writes to \fBstdout\fR and \fBstderr\fR to be buffered\.
-.IP "\(bu" 4
-\fB\-p, \-\-pidfile\fR \fIfile\fR: Writes the PID to the \fIfile\fR\. When running as a daemon this defaults to \fBtmp/pids/resque\-pool\.pid\fR\.
-.IP "\(bu" 4
-\fB\-E, \-\-environment\fR \fIname\fR: Specifies the environment \fIname\fR to be set for \fBRAILS_ENV\fR, \fBRACK_ENV\fR and \fBRESQUE_ENV\fR which will be passed on to the pooled resque workers\.
-.IP "\(bu" 4
-\fB\-\-term\-graceful\-wait\fR: Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) and wait for the workers to quit before shutting down itself\. This is the same behavior as the \fBQUIT\fR signal\.
-.IP "\(bu" 4
-\fB\-\-term\-graceful\fR: Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) but shut itself down immediately\. This the same behavior as the \fBINT\fR signal\.
-.IP "\(bu" 4
-\fB\-\-term\-immediate\fR: Configure TERM signal handling so the master will request imediate worker shut downs (via \fBINT\fR) and shut itself down immediately\. This is the default \fBTERM\fR signal behavior\.
 .IP "" 0
-.SH "HISTORY"
+.SS "Daemon options"
 .TP
-\fBv0\.3\.0\fR
-Support for ruby 1\.9, resque 1\.20\.
-.br
-Added appname for logging\.
-.br
-Minor bugfixes\.
+\fB\-d, \-\-daemon\fR
+Runs \fBresque\-pool\fR in the background as a daemon process\. This will redirect \fBstdout\fR and \fBstderr\fR to log files and write a PID file\.
 .TP
-\fBv0\.2\.0\fR
-Support for reloading logs and workers with \fBHUP\fR signal
-.br
-Cleans up PID file on startup
-.br
-Fixed \fB\-c, \-\-config\fR option\.
+\fB\-k, \-\-kill\-others\fR
+Shutdown any other Resque Pools on startup\.
 .TP
-\fBv0\.1\.0\fR
-\fBresque\-pool\fR command line interface added
+\fB\-p, \-\-pidfile\fR \fIfile\fR
+Writes the PID to the \fIfile\fR\. When running as a daemon this defaults to \fBtmp/pids/resque\-pool\.pid\fR\.
+.TP
+\fB\-\-no\-pidfile\fR \fIfile\fR
+Do not use a PID file, even when daemonized\.
+.TP
+\fB\-l, \-\-lock\fR \fIfile\fR
+Obtain a lock on a file that will be held for the lifetime of the process\. This aids in concurrent daemonized deployment with some process managers since multiple pools can share a lock, but not a pidfile\.
+.TP
+\fB\-H, \-\-hot\-swap\fR
+Set appropriate defaults to hot\-swap a new pool for a running pool\. This is an alias for \fB\-\-no\-pidfile \-\-lock tmp/resque\-pool\.lock \-\-kill\-others\fR\.
+.TP
+\fB\-\-single\-process\-group\fR
+Workers remain in the same process group as the master\.
+.SS "Signal handling options"
+.TP
+\fB\-\-term\-graceful\-wait\fR
+Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) and wait for the workers to quit before shutting down itself\. This is the same behavior as the \fBQUIT\fR signal\.
+.TP
+\fB\-\-term\-graceful\fR
+Configure TERM signal handling so the master will gracefully request worker shut downs (via \fBQUIT\fR) but shut itself down immediately\. This the same behavior as the \fBINT\fR signal\.
+.TP
+\fB\-\-term\-immediate\fR
+Configure TERM signal handling so the master will request imediate worker shut downs (via \fBINT\fR) and shut itself down immediately\. This is the default \fBTERM\fR signal behavior\.
+.SS "Worker options"
+.TP
+\fB\-s, \-\-spawn\-delay\fR \fImilliseconds\fR
+Delay in milliseconds between spawning missing workers\.
+.SH "ENVIRONMENT"
+Environment variables may be used for some configuration\.
+.TP
+\fBRESQUE_POOL_CONFIG\fR
+Sets the config file file\. Overridden by \fB\-\-config\fR\.
+.TP
+\fBRESQUE_SINGLE_PGRP\fR
+Enables \fB\-\-single\-process\-group\fR behavior\.
+.TP
+\fBTERM_CHILD\fR
+Enables \fB\-\-term\-graceful\-wait\fR behavior and uses \fBTERM\fR to stop workers\. Resque workers inherit \fBTERM_CHILD\fR so \fBresque\-pool\fR will use \fBTERM\fR to stop them\.
+.P
+The following environment variables are not \fIdirectly\fR used by \fBresque\-pool\fR, but are used to explicitly configure \fBresque\fR worker processes\. See the \fBresque\fR documentation for detailed description\.
+.TP
+\fBINTERVAL\fR, \fBMAX_INTERVAL\fR, \fBMIN_INTERVAL\fR, \fBBACKOFF_INTERVAL\fR
+The job polling interval for idle workers, in seconds\.
+.TP
+\fBRESQUE_TERM_TIMEOUT\fR
+Wait time, in seconds, after a worker parent sends a \fBTERM\fR signal to its child, before it sends a \fBKILL\fR signal\.
+.TP
+\fBRUN_AT_EXIT_HOOKS\fR
+Set this to run \fBat_exit\fR hooks in when worker child processes exit\.
+.TP
+\fBLOGGING\fR or \fBVERBOSE\fR
+Enable verbose logging\.
+.TP
+\fBVVERBOSE\fR
+Enable very verbose logging\.
 .SH "AUTHOR"
-Nicholas Evans
+Nicholas Evans, et al\.
 .SH "COPYRIGHT"
 Copyright (C) 2010\-2026 by Nicholas Evans \fInick@rubinick\.dev\fR, et al\.
 .SH "SEE ALSO"
