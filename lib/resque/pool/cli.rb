@@ -32,11 +32,22 @@ module Resque
 
             Usage:
                resque-pool [options]
-
-            where [options] are:
           EOS
+
+          opt.separator ""
+          opt.separator "Basic Options:"
           opt.on('-c', '--config PATH', "Alternate path to config file") { |c| opts[:config] = c }
-          opt.on('-a', '--appname NAME', "Alternate appname") { |c| opts[:appname] = c }
+          opt.on('-a', '--appname NAME', "Alternate appname (default is directory name)") { |c| opts[:appname] = c }
+          opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
+
+          opt.separator ""
+          opt.separator "Logging options:"
+          opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
+          opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
+          opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
+
+          opt.separator ""
+          opt.separator "Daemon options:"
           opt.on("-d", '--daemon', "Run as a background daemon") {
             opts[:daemon] = true
             opts[:stdout]  ||= "log/resque-pool.stdout.log"
@@ -44,9 +55,6 @@ module Resque
             opts[:pidfile] ||= "tmp/pids/resque-pool.pid" unless opts[:no_pidfile]
           }
           opt.on("-k", '--kill-others', "Shutdown any other Resque Pools on startup") { opts[:killothers] = true }
-          opt.on('-o', '--stdout FILE', "Redirect stdout to logfile") { |c| opts[:stdout] = c }
-          opt.on('-e', '--stderr FILE', "Redirect stderr to logfile") { |c| opts[:stderr] = c }
-          opt.on('--nosync', "Don't sync logfiles on every write") { opts[:nosync] = true }
           opt.on("-p", '--pidfile FILE', "PID file location") { |c|
             opts[:pidfile] = c
             opts[:no_pidfile] = false
@@ -55,20 +63,28 @@ module Resque
             opts[:pidfile] = nil
             opts[:no_pidfile] = true
           }
-          opt.on('-l', '--lock FILE', "Open a shared lock on a file") { |c| opts[:lock_file] = c }
+          opt.on('-l', '--lock FILE', "Open a shared lock on a file") {|c| opts[:lock_file] = c }
           opt.on("-H", "--hot-swap", "Set appropriate defaults to hot-swap a new pool for a running pool") {|c|
             opts[:pidfile] = nil
             opts[:no_pidfile] = true
             opts[:lock_file] ||= "tmp/resque-pool.lock"
             opts[:killothers] = true
           }
-          opt.on("-E", '--environment ENVIRONMENT', "Set RAILS_ENV/RACK_ENV/RESQUE_ENV") { |c| opts[:environment] = c }
-          opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
+          opt.on('--single-process-group', "Workers remain in the same process group as the master") { opts[:single_process_group] = true }
+
+          opt.separator ""
+          opt.separator "Signal handling options:"
           opt.on('--term-graceful-wait', "On TERM signal, wait for workers to shut down gracefully") { opts[:term_graceful_wait] = true }
           opt.on('--term-graceful',      "On TERM signal, shut down workers gracefully") { opts[:term_graceful] = true }
           opt.on('--term-immediate',     "On TERM signal, shut down workers immediately (default)") { opts[:term_immediate] = true }
-          opt.on('--single-process-group', "Workers remain in the same process group as the master") { opts[:single_process_group] = true }
-          opt.on("-h", "--help", "Show this.") { puts opt; exit }
+
+          opt.separator ""
+          opt.separator "Worker options:"
+          opt.on("-s", '--spawn-delay MS', Integer, "Delay in milliseconds between spawning missing workers") { |c| opts[:spawn_delay] = c }
+
+          opt.separator ""
+          opt.separator "Other options:"
+          opt.on("-h", "--help", "Show this help text.") { puts opt; exit }
           opt.on("-v", "--version", "Show Version"){ puts "resque-pool #{VERSION} (c) nicholas a. evans"; exit}
         end
         parser.parse!(argv || parser.default_argv)
