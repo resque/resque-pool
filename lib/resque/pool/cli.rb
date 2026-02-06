@@ -55,7 +55,7 @@ module Resque
             opts[:pidfile] = nil
             opts[:no_pidfile] = true
           }
-          opt.on('-l', '--lock FILE' "Open a shared lock on a file") { |c| opts[:lock_file] = c }
+          opt.on('-l', '--lock FILE', "Open a shared lock on a file") { |c| opts[:lock_file] = c }
           opt.on("-H", "--hot-swap", "Set appropriate defaults to hot-swap a new pool for a running pool") {|c|
             opts[:pidfile] = nil
             opts[:no_pidfile] = true
