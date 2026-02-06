@@ -1,8 +1,7 @@
 Resque Pool
 ===========
 
-[![Build Status](https://travis-ci.org/nevans/resque-pool.png)](https://travis-ci.org/nevans/resque-pool)
-![Depfu](https://img.shields.io/depfu/nevans/resque-pool.svg)
+[![CI status](https://github.com/resque/resque-pool/actions/workflows/ruby.yml/badge.svg)](https://github.com/resque/resque-pool/actions/workflows/ruby.yml)
 ![Gem](https://img.shields.io/gem/v/resque-pool.svg)
 
 Resque pool is a daemon for managing a pool of
@@ -176,7 +175,7 @@ end
 In order to query ActiveRecord, be sure establish the database connection:
 
 ```ruby
-task "resque:pool:setup" do                                           
+task "resque:pool:setup" do
   Resque::Pool.config_loader = lambda do |env|
     ActiveRecord::Base.establish_connection
     JobQueue.pluck(:name, :workers).to_h
