@@ -77,8 +77,11 @@ task "resque:pool:setup" do
 end
 ```
 
+### Old versions of the redis gem
 
-For normal work with fresh resque and resque-scheduler gems add next lines in lib/rake/resque.rake
+Very old versions of the redis gem (prior to v3.1.0, released 2014-06-06), did
+not automatically disconnect and reconnect after forking.  To safely use those
+old versions of the redis gem, add the following to lib/rake/resque.rake:
 
 ```ruby
 task "resque:pool:setup" do
@@ -87,6 +90,9 @@ task "resque:pool:setup" do
   end
 end
 ```
+
+Note that the above lines will not work with the redis gem, since v5.0.  But it
+isn't needed, either!
 
 ### Start the pool manager
 
