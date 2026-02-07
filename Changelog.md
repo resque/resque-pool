@@ -1,5 +1,8 @@
 ## _unreleased_
-[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...master).
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.8.0...master).
+
+## 0.8.0 (2020-01-08)
+[full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...v0.8.0).
 
 * Removed CI testing for ruby 2.3 (EOL). Added for 2.7.
 
@@ -78,7 +81,6 @@ Some more merges of long outstanding pull requests.
 
  * _EVEN BETTER_ `TERM` support for Heroku than 0.4.0.  ;)
  * _DOCKER SUPPORT_ (don't go crazy when master pid is 1).
-   _(example Dockerfile soon?)_
  * `--spawn_delay` option in case workers respawn too quickly
  * Support `RUN_AT_EXIT_HOOKS`.
  * And [more](https://github.com/nevans/resque-pool/compare/v0.4.0...v0.5.0).
