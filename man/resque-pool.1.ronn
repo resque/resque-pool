@@ -3,7 +3,7 @@ resque-pool(1) -- resque worker pool management
 
 ## SYNOPSIS
 
-`resque-pool` [options]
+`resque-pool` [<OPTION...>]
 
 ## DESCRIPTION
 
@@ -16,17 +16,21 @@ directory.
 
 ## OPTIONS
 
+### Basic options
+
   * `-c, --config` <file>:
     Uses the configuration specified in the <file> provided instead of
     searching in the current and `config` directories for `resque-pool.yml`.
 
   * `-a, --appname` <name>:
     Specifies the app name to be used for logging and procline.  If not
-    specified, this defaults to the current working directory.
+    specified, this defaults to the name of the current working directory.
 
-  * `-d, --daemon`:
-    Runs `resque-pool` in the background as a daemon process. This will
-    redirect `stdout` and `stderr` to log files and write a PID file.
+  * `-E, --environment` <name>:
+    Specifies the environment <name> to be set for `RAILS_ENV`, `RACK_ENV`
+    and `RESQUE_ENV` which will be passed on to the pooled resque workers.
+
+### Logging options
 
   * `-o, --stdout` <file>:
     Writes the normal log output to <file> instead of printing to the
@@ -41,13 +45,35 @@ directory.
   * `--nosync`
     Allows writes to `stdout` and `stderr` to be buffered.
 
+### Daemon options
+
+  * `-d, --daemon`:
+    Runs `resque-pool` in the background as a daemon process. This will
+    redirect `stdout` and `stderr` to log files and write a PID file.
+
+  * `-k, --kill-others`:
+    Shutdown any other Resque Pools on startup.
+
   * `-p, --pidfile` <file>:
     Writes the PID to the <file>. When running as a daemon this defaults
     to `tmp/pids/resque-pool.pid`.
 
-  * `-E, --environment` <name>:
-    Specifies the environment <name> to be set for `RAILS_ENV`, `RACK_ENV`
-    and `RESQUE_ENV` which will be passed on to the pooled resque workers.
+  * `--no-pidfile` <file>:
+    Do not use a PID file, even when daemonized.
+
+  * `-l, --lock` <file>:
+    Obtain a lock on a file that will be held for the lifetime of the process.
+    This aids in concurrent daemonized deployment with some process managers
+    since multiple pools can share a lock, but not a pidfile.
+
+  * `-H, --hot-swap`:
+    Set appropriate defaults to hot-swap a new pool for a running pool.  This is
+    an alias for `--no-pidfile --lock tmp/resque-pool.lock --kill-others`.
+
+  * `--single-process-group`:
+    Workers remain in the same process group as the master.
+
+### Signal handling options
 
   * `--term-graceful-wait`:
     Configure TERM signal handling so the master will gracefully request worker
@@ -64,24 +90,43 @@ directory.
     shut downs (via `INT`) and shut itself down immediately.  This is the
     default `TERM` signal behavior.
 
-## HISTORY
+### Worker options
 
-  * `v0.3.0`:
-    Support for ruby 1.9, resque 1.20.<br>
-    Added appname for logging.<br>
-    Minor bugfixes.
+  * `-s, --spawn-delay` <milliseconds>:
+    Delay in milliseconds between spawning missing workers.
 
-  * `v0.2.0`:
-    Support for reloading logs and workers with `HUP` signal<br>
-    Cleans up PID file on startup<br>
-    Fixed `-c, --config` option.
+## ENVIRONMENT
 
-  * `v0.1.0`:
-    `resque-pool` command line interface added
+Environment variables may be used for some configuration.
+
+  * `RESQUE_POOL_CONFIG`:
+    Sets the config file file.  Overridden by `--config`.
+  * `RESQUE_SINGLE_PGRP`:
+    Enables `--single-process-group` behavior.
+  * `TERM_CHILD`:
+    Enables `--term-graceful-wait` behavior and uses `TERM` to stop workers.
+    Resque workers inherit `TERM_CHILD` so `resque-pool` will use `TERM` to stop
+    them.
+
+The following environment variables are not _directly_ used by `resque-pool`,
+but are used to explicitly configure `resque` worker processes.  See the
+`resque` documentation for detailed description.
+
+  * `INTERVAL`, `MAX_INTERVAL`, `MIN_INTERVAL`, `BACKOFF_INTERVAL`:
+    The job polling interval for idle workers, in seconds.
+  * `RESQUE_TERM_TIMEOUT`:
+    Wait time, in seconds, after a worker parent sends a `TERM` signal to its
+    child, before it sends a `KILL` signal.
+  * `RUN_AT_EXIT_HOOKS`:
+    Set this to run `at_exit` hooks in when worker child processes exit.
+  * `LOGGING` or `VERBOSE`:
+    Enable verbose logging.
+  * `VVERBOSE`:
+    Enable very verbose logging.
 
 ## AUTHOR
 
-Nicholas Evans
+Nicholas Evans, et al.
 
 ## COPYRIGHT
 
