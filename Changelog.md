@@ -1,7 +1,7 @@
 ## _unreleased_
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.8.0...master).
 
-## 0.8.0 (2020-01-08)
+## 0.8.0 (2026-02-11)
 [full changelog](https://github.com/nevans/resque-pool/compare/v0.7.1...v0.8.0).
 
 ## What's Changed
